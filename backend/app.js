@@ -1,9 +1,17 @@
-const express = require("express");
+import dotenv from "dotenv";
+dotenv.config();
 
-const mongoose = require("mongoose");
+// const express = require("express");
 
-const bodyParser = require("body-parser");
-const usersRoutes = require("./routes/users-routes");
+// const mongoose = require("mongoose");
+
+// const bodyParser = require("body-parser");
+// const usersRoutes = require("./routes/users-routes");
+
+import express from "express";
+import mongoose from "mongoose";
+import bodyParser from "body-parser";
+import usersRoutes from "./routes/users-routes.js";
 
 const app = express();
 
@@ -22,14 +30,11 @@ app.use((req, res, next) => {
 app.use("/api/users", usersRoutes);
 
 mongoose
-  .connect(
-    "mongodb+srv://thelordshadow13:6YZfKhyEGtWgTuBa@cluster0.r5vq2sl.mongodb.net/food?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     app.listen(5001);
-    console.log("Connected");
+    console.log("Connected to MongoDB, server running on port 5001");
   })
   .catch((err) => {
-    console.log(err);
-    console.log("Not Connected");
+    console.error("MongoDB connection failed:", err);
   });
