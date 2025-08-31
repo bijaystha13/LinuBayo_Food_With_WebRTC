@@ -1,21 +1,20 @@
 import dotenv from "dotenv";
-dotenv.config();
-
-// const express = require("express");
-
-// const mongoose = require("mongoose");
-
-// const bodyParser = require("body-parser");
-// const usersRoutes = require("./routes/users-routes");
+import fs from "fs";
 
 import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import usersRoutes from "./routes/users-routes.js";
+import foodRoutes from "./routes/food-routes.js";
+import path from "path";
+import HttpError from "./models/HttpError.js";
 
+dotenv.config();
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -27,7 +26,31 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api/users", usersRoutes);
+app.use("/api/users/", usersRoutes);
+app.use("/api/foods/", foodRoutes);
+
+app.use((req, res, next) => {
+  const error = new HttpError("Could not find this route.", 404);
+  throw error;
+});
+
+app.use((error, req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
+
+  if (res.headerSent) {
+    return next(error);
+  }
+  // res.status(error.code || 500);
+  // res.json({ message: error.message || "An unknown error occured!" });
+  const code = error.code && typeof error.code === "number" ? error.code : 500;
+  res
+    .status(code)
+    .json({ message: error.message || "An unknown error occurred!" });
+});
 
 mongoose
   .connect(process.env.MONGODB_URI)
