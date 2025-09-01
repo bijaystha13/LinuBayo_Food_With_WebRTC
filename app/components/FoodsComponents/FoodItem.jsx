@@ -1,147 +1,143 @@
 "use client";
 
-import { useContext, useState } from "react";
-import { FaEye, FaEdit, FaTrashAlt, FaCartPlus } from "react-icons/fa";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Card from "@/app/shared/UIElements/Card";
+import styles from "./FoodItem.module.css";
+import { FaEye, FaEdit, FaTrashAlt, FaCartPlus, FaBox } from "react-icons/fa";
 
-import Card from "../../shared/UIElements/Card";
-import Modal from "../../shared/UIElements/Modal";
-import "./FoodItem.css";
-import { toast } from "react-toastify";
-import Button from "@/app/shared/FormElements/Button";
+export default function FoodItem(props) {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-export default function ProductItem(props) {
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const handleViewDetails = () => {
+    setIsLoading(true);
+    router.push(`/product/${props.id}`);
+  };
 
-  function showDeleteWarningHandler() {
-    setShowConfirmModal(true);
-  }
+  const handleUpdate = () => {
+    router.push(`/product/edit/${props.id}`);
+  };
 
-  function cancelDeleteHandler() {
-    setShowConfirmModal(false);
-  }
-
-  function confirmDeleteHandler() {
-    setShowConfirmModal(false);
-    props.onDeleteProduct(props.id); // Deletion is now handled by parent
-  }
-
-  function updateProductHandler() {
-    navigate(`/admin/updateProduct/${props.id}`);
-  }
-
-  function addItemToCartHandler() {
-    if (!auth.isLoggedIn) {
-      navigate("/auth");
-      return;
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      if (props.onDeleteProduct) {
+        props.onDeleteProduct(props.id); // Fix: Call the delete handler properly
+      }
     }
-    const selectedItem = {
-      id: props.id,
-      name: props.name,
-      image: props.image,
-      price: props.price,
-      quantity: 1,
-    };
+  };
 
-    cartCtx.addItem(selectedItem);
-    toast.success(`${props.name} added to cart!`, {
-      style: {
-        backgroundColor: "#0d1823",
-        color: "#fff",
-        fontWeight: "bold",
-        borderRadius: "10px",
-      },
-    });
-  }
+  const handleAddToCart = () => {
+    // Handle add to cart logic here
+    console.log("Add to cart:", props.id);
+  };
 
   return (
-    <>
-      <Modal
-        show={showConfirmModal}
-        onCancel={cancelDeleteHandler}
-        footerClass="place-item__modal-actions"
-        header="Are you sure?"
-        footer={
-          <>
-            <Button inverse onClick={cancelDeleteHandler}>
-              CANCEL
-            </Button>
-            <Button danger onClick={confirmDeleteHandler}>
-              DELETE
-            </Button>
-          </>
-        }
-      >
-        <p>
-          Do you want to proceed? Please note that it can't be undone
-          thereafter.
-        </p>
-      </Modal>
-      <li className="product-item">
-        <Card className="product-item__content">
-          <div className="product-item__image">
-            {/* <img src={props.image} alt={props.name} /> */}
-            <img
-              src={`http://localhost:5001/${props.image}`}
-              alt={props.name}
-            />
-          </div>
-          <div className="product-item__info">
-            <h2 className="product-item__title">{props.name}</h2>
+    <li
+      className={styles.productItem}
+      style={{
+        animationDelay: `${props.animationDelay}ms`, // Fix: Apply animation delay
+      }}
+    >
+      <div className={styles.productItemContent}>
+        {/* Special Badge (if item is featured/special) */}
+        {props.isSpecial && <div className={styles.specialBadge}>FEATURED</div>}
 
-            <div className="product-item__prices">
-              {props.originalPrice && (
-                <span className="product-item__original-price">
-                  Original: Rs {props.originalPrice}
-                </span>
-              )}
-              <span className="product-item__price">
-                Offer Price: Rs {props.price}
+        {/* Image Section */}
+        <div className={styles.productItemImage}>
+          <img
+            src={
+              props.image
+                ? `http://localhost:5001/${props.image}`
+                : "/placeholder-food.jpg"
+            }
+            alt={props.name || "Food Item"}
+            loading="lazy"
+            onError={(e) => {
+              // Fallback image if the original fails to load
+              e.target.src = "/placeholder-food.jpg";
+            }}
+          />
+        </div>
+
+        {/* Info Section */}
+        <div className={styles.productItemInfo}>
+          <h2 className={styles.productItemTitle}>
+            {props.name || "Unnamed Item"}
+          </h2>
+
+          {/* Prices Section */}
+          <div className={styles.productItemPrices}>
+            {props.originalPrice && (
+              <span className={styles.productItemOriginalPrice}>
+                ${props.originalPrice}
               </span>
-              {props.discount && (
-                <span className="product-item__discount">
-                  -{props.discount}% OFF
-                </span>
-              )}
-            </div>
-
-            <span className="product-item__quantity">
-              Quantity: {props.quantity}
-            </span>
-          </div>
-
-          <div className="product-item__buttons">
-            <button
-              className="btn-view"
-              onClick={() => navigate(`/product/${props.id}`)}
-            >
-              <FaEye className="btn-icon" />
-              VIEW DETAILS
-            </button>
-
-            {/* {auth.role === "admin" && (
-              <button className="btn-update" onClick={updateProductHandler}>
-                <FaEdit className="btn-icon" />
-                UPDATE
-              </button>
             )}
-            {auth.role === "admin" ? (
-              <button
-                className="btn-delete"
-                onClick={showDeleteWarningHandler}
-                disabled={props.isDeleting}
-              >
-                <FaTrashAlt className="btn-icon" />
-                DELETE
-              </button>
-            ) : (
-              <button className="btn-addtocart" onClick={addItemToCartHandler}>
-                <FaCartPlus className="btn-icon" />
-                ADD TO CART
-              </button>
-            )} */}
+
+            <span className={styles.productItemPrice}>
+              ${props.price || "0.00"}
+            </span>
+
+            {props.discount && (
+              <span className={styles.productItemDiscount}>
+                -{props.discount}%
+              </span>
+            )}
           </div>
-        </Card>
-      </li>
-    </>
+
+          {/* Quantity */}
+          <span className={styles.productItemQuantity}>
+            <FaBox style={{ fontSize: "1.1rem" }} />
+            Quantity: {props.quantity || 0}
+          </span>
+        </div>
+
+        {/* Buttons Section */}
+        <div className={styles.productItemButtons}>
+          <button
+            className={`${styles.btn} ${styles.btnView} ${
+              isLoading ? styles.btnLoading : ""
+            }`}
+            onClick={handleViewDetails}
+            disabled={isLoading}
+          >
+            <FaEye />
+            {isLoading ? "Loading..." : "VIEW DETAILS"}
+          </button>
+
+          {/* Update Button (only show if user has permission) */}
+          {props.canEdit && (
+            <button
+              className={`${styles.btn} ${styles.btnUpdate}`}
+              onClick={handleUpdate}
+            >
+              <FaEdit />
+              UPDATE
+            </button>
+          )}
+
+          {/* Delete Button (only show if user has permission) */}
+          {props.canDelete && (
+            <button
+              className={`${styles.btn} ${styles.btnDelete}`}
+              onClick={handleDelete}
+            >
+              <FaTrashAlt />
+              DELETE
+            </button>
+          )}
+
+          {/* Add to Cart Button */}
+          <button
+            className={`${styles.btn} ${styles.btnAddToCart}`}
+            onClick={handleAddToCart}
+            disabled={!props.quantity || props.quantity <= 0}
+          >
+            <FaCartPlus />
+            ADD TO CART
+          </button>
+        </div>
+      </div>
+    </li>
   );
 }

@@ -1,6 +1,16 @@
 import Food from "../models/FoodModel.js";
 import HttpError from "../models/HttpError.js";
 
+export async function getAllFoods(req, res, next) {
+  try {
+    const food = await Food.find(); // Assuming you're using MongoDB with Mongoose
+    res.json(food);
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
+}
+
 export const createFood = async (req, res, next) => {
   const { name, description, price, quantity, category } = req.body;
   const image = req.file?.path;
