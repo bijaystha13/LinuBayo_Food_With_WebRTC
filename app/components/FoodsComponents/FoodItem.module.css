@@ -1,239 +1,263 @@
-/* FoodItem.module.css - Updated with larger image size */
+/* FoodItem.module.css */
 
 .productItem {
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background: linear-gradient(145deg, #0a1624, #1a2f47),
-    radial-gradient(circle at top right, rgba(30, 144, 255, 0.1), transparent);
-  animation: fadeInUp 0.8s ease forwards;
-  opacity: 0;
-  transform: translateY(30px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   list-style: none;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
 }
 
-.productItem::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 50%,
-    rgba(0, 0, 0, 0.1) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-.productItem:hover {
-  transform: translateY(-12px) rotateX(2deg);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 0 100px rgba(30, 144, 255, 0.2);
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .productItemContent {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  position: relative;
-  z-index: 2;
-  background: transparent;
-  border: none;
-  box-shadow: none;
 }
 
-/* Enhanced Image Styling - INCREASED HEIGHT */
+.productItemContent:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.specialBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
 .productItemImage {
   position: relative;
   width: 100%;
-  height: 350px; /* Increased from 300px to 350px */
+  height: 350px; /* Increased from 320px to 350px */
   overflow: hidden;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  background: linear-gradient(135deg, #0d1823, #1a2a3a),
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.05), transparent);
-}
-
-.productItemImage::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-      circle at 20% 20%,
-      rgba(30, 144, 255, 0.15),
-      transparent 50%
-    ),
-    radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.1), transparent 50%);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.productItemImage::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 60%;
-  background: linear-gradient(
-    to top,
-    rgba(10, 22, 36, 0.95) 0%,
-    rgba(10, 22, 36, 0.6) 50%,
-    transparent 100%
-  );
-  z-index: 2;
+  border-radius: 20px 20px 0 0;
 }
 
 .productItemImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3)) brightness(1.1)
-    contrast(1.05);
-  position: relative;
-  z-index: 2;
+  transition: transform 0.5s ease;
 }
 
-.productItem:hover .productItemImage img {
+.productItemContent:hover .productItemImage img {
   transform: scale(1.08);
-  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.4)) brightness(1.15)
-    contrast(1.1);
 }
 
 .productItemInfo {
-  padding: 2rem;
+  padding: 24px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(5px);
+  gap: 16px;
 }
 
 .productItemTitle {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
   line-height: 1.3;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, #ffffff, #e2e8f0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.4rem;
 }
 
 .productItemPrices {
   display: flex;
   align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-  gap: 0.8rem;
-  margin-bottom: 1.5rem;
 }
 
 .productItemOriginalPrice {
-  color: #718096;
-  text-decoration: line-through;
   font-size: 1rem;
+  color: #a0aec0;
+  text-decoration: line-through;
   font-weight: 500;
-  opacity: 0.8;
 }
 
 .productItemPrice {
-  font-size: 1.6rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #ffd700, #ffed4a);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #2b6cb0;
+  background: linear-gradient(135deg, #2b6cb0, #3182ce);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
 }
 
 .productItemDiscount {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  background: linear-gradient(135deg, #48bb78, #38a169);
   color: white;
-  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 15px;
   font-size: 0.85rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 25px;
-  margin-left: auto;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  animation: pulse 2s infinite;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-.productItemQuantity {
-  display: inline-flex;
+.productItemCookTime {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(
-      135deg,
-      rgba(255, 215, 0, 0.2),
-      rgba(255, 215, 0, 0.1)
-    ),
-    rgba(255, 215, 0, 0.05);
-  color: #ffd700;
-  padding: 0.6rem 1.2rem;
-  border-radius: 25px;
+  gap: 10px;
+  background: linear-gradient(135deg, #fef5e7, #fed7aa);
+  padding: 12px 16px;
+  border-radius: 15px;
+  border: 1px solid #fbbf24;
+  margin: 4px 0;
+}
+
+.clockIcon {
+  color: #d97706;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.cookTimeText {
+  color: #92400e;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.servingCounter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  padding: 14px 18px;
+  border-radius: 15px;
+  border: 1px solid #0ea5e9;
+  margin: 8px 0;
+}
+
+.servingLabel {
+  color: #0c4a6e;
   font-weight: 700;
-  font-size: 0.95rem;
-  margin-top: auto;
-  animation: fadeInQuantity 1s ease-in forwards;
-  opacity: 0;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+}
+
+.counterControls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.counterBtn {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: white;
+  border: none;
+  width: 40px; /* Increased from 36px to 40px */
+  height: 40px; /* Increased from 36px to 40px */
+  border-radius: 12px; /* Increased from 10px to 12px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.1rem; /* Increased from 1rem */
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(74, 222, 128, 0.3);
+}
+
+.counterBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  transform: scale(1.08);
+  box-shadow: 0 6px 15px rgba(34, 197, 94, 0.4);
+}
+
+.counterBtn:disabled {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Specific style for minus button */
+.counterBtn:first-child {
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  box-shadow: 0 4px 8px rgba(248, 113, 113, 0.3);
+}
+
+.counterBtn:first-child:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Ensure icons are visible with proper color */
+.counterBtn svg {
+  color: white !important; /* Force white color for icons */
+  font-size: 1rem;
+  width: 16px;
+  height: 16px;
+}
+
+.servingCount {
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  font-size: 1.3rem; /* Increased from 1.2rem */
+  min-width: 32px; /* Increased from 28px */
+  text-align: center;
 }
 
 .productItemButtons {
+  padding: 24px;
+  border-top: 1px solid #f1f5f9;
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0 2rem 2rem;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  padding: 1rem 1.5rem;
+  gap: 10px;
+  padding: 14px 20px;
   border: none;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  flex: 1;
-  min-width: 130px;
+  border-radius: 15px;
+  font-size: 1rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  background: transparent;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
 }
 
 .btn::before {
@@ -246,10 +270,10 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.3),
     transparent
   );
-  transition: left 0.5s;
+  transition: left 0.7s;
 }
 
 .btn:hover::before {
@@ -257,224 +281,186 @@
 }
 
 .btnView {
-  background: linear-gradient(
-      135deg,
-      rgba(30, 144, 255, 0.2),
-      rgba(30, 144, 255, 0.1)
-    ),
-    rgba(30, 144, 255, 0.05);
-  color: #1e90ff;
-  border: 1px solid rgba(30, 144, 255, 0.3);
-  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
 }
 
-.btnView:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1e90ff, #4169e1);
-  color: white;
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(30, 144, 255, 0.5),
-    0 0 0 1px rgba(30, 144, 255, 0.5);
+.btnView:hover {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
 }
 
 .btnUpdate {
-  background: linear-gradient(
-      135deg,
-      rgba(40, 167, 69, 0.2),
-      rgba(40, 167, 69, 0.1)
-    ),
-    rgba(40, 167, 69, 0.05);
-  color: #28a745;
-  border: 1px solid rgba(40, 167, 69, 0.3);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
-.btnUpdate:hover:not(:disabled) {
-  background: linear-gradient(135deg, #28a745, #20c997);
-  color: white;
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(40, 167, 69, 0.5),
-    0 0 0 1px rgba(40, 167, 69, 0.5);
+.btnUpdate:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
 }
 
 .btnDelete {
-  background: linear-gradient(
-      135deg,
-      rgba(220, 53, 69, 0.2),
-      rgba(220, 53, 69, 0.1)
-    ),
-    rgba(220, 53, 69, 0.05);
-  color: #dc3545;
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
 }
 
-.btnDelete:hover:not(:disabled) {
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  color: white;
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(220, 53, 69, 0.5),
-    0 0 0 1px rgba(220, 53, 69, 0.5);
+.btnDelete:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(239, 68, 68, 0.5);
 }
 
 .btnAddToCart {
-  background: linear-gradient(
-      135deg,
-      rgba(255, 215, 0, 0.2),
-      rgba(255, 215, 0, 0.1)
-    ),
-    rgba(255, 215, 0, 0.05);
-  color: #ffd700;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.btnAddToCart:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ffd700, #ffed4a);
-  color: #1a1a1a;
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5),
-    0 0 0 1px rgba(255, 215, 0, 0.5);
-}
-
-/* Enhanced Badge for special items */
-.specialBadge {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: linear-gradient(135deg, #ff8a00, #e52e71, #9b59b6);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
-  font-weight: 800;
-  font-size: 0.8rem;
-  padding: 0.4rem 1rem;
-  border-radius: 25px;
-  z-index: 3;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  animation: specialBadgeGlow 2s ease-in-out infinite alternate;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+  margin-top: 8px;
+  position: relative;
 }
 
-/* Loading State */
+.btnAddToCart:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.5);
+}
+
 .btnLoading {
   opacity: 0.7;
+  cursor: not-allowed;
   pointer-events: none;
-  position: relative;
 }
 
 .btnLoading::after {
   content: "";
-  width: 18px;
-  height: 18px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
   border: 2px solid transparent;
   border-top: 2px solid currentColor;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-left: 0.5rem;
-}
-
-/* Enhanced Animations */
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) rotateX(-10deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotateX(0deg);
-  }
-}
-
-@keyframes fadeInQuantity {
-  0% {
-    opacity: 0;
-    transform: translateY(15px) scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-}
-
-@keyframes specialBadgeGlow {
-  0% {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 138, 0, 0.5);
-  }
-  100% {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 30px rgba(229, 46, 113, 0.6);
-  }
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
   0% {
-    transform: rotate(0deg);
+    transform: translate(-50%, -50%) rotate(0deg);
   }
   100% {
-    transform: rotate(360deg);
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 
+/* Category Badge */
+.categoryBadge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+/* Rating */
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ratingStars {
+  color: #fbbf24;
+  display: flex;
+  gap: 2px;
+}
+
+.ratingCount {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
 /* Responsive Design */
-@media (max-width: 768px) {
-  .productItemButtons {
-    flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
-    min-width: auto;
-  }
-
+@media (max-width: 1024px) {
   .productItemImage {
-    height: 310px; /* Increased from 260px */
+    height: 300px; /* Increased from 280px */
+  }
+}
+
+@media (max-width: 768px) {
+  .productItemInfo {
+    padding: 20px;
   }
 
   .productItemTitle {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
 
-  .productItemInfo {
-    padding: 1.5rem;
+  .productItemPrice {
+    font-size: 1.6rem;
   }
 
   .productItemButtons {
-    padding: 0 1.5rem 1.5rem;
+    padding: 20px;
+  }
+
+  .btn {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .servingCounter {
+    padding: 12px 16px;
+  }
+
+  .counterBtn {
+    width: 36px; /* Increased from 32px */
+    height: 36px; /* Increased from 32px */
+  }
+
+  .productItemImage {
+    height: 260px; /* Increased from 240px */
   }
 }
 
 @media (max-width: 480px) {
-  .productItem {
-    border-radius: 16px;
+  .productItemImage {
+    height: 240px; /* Increased from 220px */
   }
 
-  .productItemImage {
-    height: 270px; /* Increased from 220px */
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
+  .productItemPrices {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .servingCounter {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .counterControls {
+    align-self: stretch;
+    justify-content: center;
   }
 
   .productItemTitle {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
 
   .productItemPrice {

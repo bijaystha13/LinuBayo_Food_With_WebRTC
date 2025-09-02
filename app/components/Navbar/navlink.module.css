@@ -1,23 +1,60 @@
+/* navlink.module.css */
+
 .link {
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  color: #ddd6cb;
-  font-weight: bold;
+  font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
 }
 
-.link:hover,
-.link:active {
-  background: linear-gradient(90deg, #ff8a05, #f9b331);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 18px rgba(248, 190, 42, 0.8);
+.link::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(45deg, #ff6b35, #ffa500);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
 }
 
+.link:hover {
+  color: #fff;
+  background: rgba(255, 107, 53, 0.1);
+  transform: translateY(-1px);
+}
+
+.link:hover::before {
+  width: 80%;
+}
+
+/* Active state styling - Only underline, no background */
 .active {
-  background: linear-gradient(90deg, #ff8a05, #f9b331);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ff6b35;
+  font-weight: 600;
+}
+
+.active::before {
+  width: 80%;
+}
+
+.active:hover {
+  color: #ffa500;
+  background: rgba(255, 107, 53, 0.1);
+}
+
+/* Remove the glow effect since we only want underline */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .link {
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+  }
 }

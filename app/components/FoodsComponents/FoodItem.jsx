@@ -4,10 +4,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Card from "@/app/shared/UIElements/Card";
 import styles from "./FoodItem.module.css";
-import { FaEye, FaEdit, FaTrashAlt, FaCartPlus, FaBox } from "react-icons/fa";
+import {
+  FaEye,
+  FaEdit,
+  FaTrashAlt,
+  FaCartPlus,
+  FaClock,
+  FaPlus,
+  FaMinus,
+} from "react-icons/fa";
 
 export default function FoodItem(props) {
   const [isLoading, setIsLoading] = useState(false);
+  const [servingCount, setServingCount] = useState(1);
   const router = useRouter();
 
   const handleViewDetails = () => {
@@ -22,25 +31,35 @@ export default function FoodItem(props) {
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       if (props.onDeleteProduct) {
-        props.onDeleteProduct(props.id); // Fix: Call the delete handler properly
+        props.onDeleteProduct(props.id);
       }
     }
   };
 
   const handleAddToCart = () => {
-    // Handle add to cart logic here
-    console.log("Add to cart:", props.id);
+    console.log("Add to cart:", props.id, "Servings:", servingCount);
   };
+
+  const incrementServing = () => {
+    setServingCount((prev) => prev + 1);
+  };
+
+  const decrementServing = () => {
+    setServingCount((prev) => (prev > 1 ? prev - 1 : 1));
+  };
+
+  // Default cook time if not provided
+  const cookTime = props.cookTime || "15-20";
 
   return (
     <li
       className={styles.productItem}
       style={{
-        animationDelay: `${props.animationDelay}ms`, // Fix: Apply animation delay
+        animationDelay: `${props.animationDelay}ms`,
       }}
     >
       <div className={styles.productItemContent}>
-        {/* Special Badge (if item is featured/special) */}
+        {/* Special Badge */}
         {props.isSpecial && <div className={styles.specialBadge}>FEATURED</div>}
 
         {/* Image Section */}
@@ -54,7 +73,6 @@ export default function FoodItem(props) {
             alt={props.name || "Food Item"}
             loading="lazy"
             onError={(e) => {
-              // Fallback image if the original fails to load
               e.target.src = "/placeholder-food.jpg";
             }}
           />
@@ -85,11 +103,31 @@ export default function FoodItem(props) {
             )}
           </div>
 
-          {/* Quantity */}
-          <span className={styles.productItemQuantity}>
-            <FaBox style={{ fontSize: "1.1rem" }} />
-            Quantity: {props.quantity || 0}
-          </span>
+          {/* Cook Time */}
+          <div className={styles.productItemCookTime}>
+            <FaClock className={styles.clockIcon} />
+            <span className={styles.cookTimeText}>
+              Cook Time: <strong>{cookTime} mins</strong>
+            </span>
+          </div>
+
+          {/* Serving Counter */}
+          <div className={styles.servingCounter}>
+            <span className={styles.servingLabel}>Servings:</span>
+            <div className={styles.counterControls}>
+              <button
+                className={styles.counterBtn}
+                onClick={decrementServing}
+                disabled={servingCount <= 1}
+              >
+                {/* <FaMinus />  */} -
+              </button>
+              <span className={styles.servingCount}>{servingCount}</span>
+              <button className={styles.counterBtn} onClick={incrementServing}>
+                {/* <FaPlus /> */} +
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Buttons Section */}
@@ -105,7 +143,7 @@ export default function FoodItem(props) {
             {isLoading ? "Loading..." : "VIEW DETAILS"}
           </button>
 
-          {/* Update Button (only show if user has permission) */}
+          {/* Update Button */}
           {props.canEdit && (
             <button
               className={`${styles.btn} ${styles.btnUpdate}`}
@@ -116,7 +154,7 @@ export default function FoodItem(props) {
             </button>
           )}
 
-          {/* Delete Button (only show if user has permission) */}
+          {/* Delete Button */}
           {props.canDelete && (
             <button
               className={`${styles.btn} ${styles.btnDelete}`}
@@ -131,10 +169,9 @@ export default function FoodItem(props) {
           <button
             className={`${styles.btn} ${styles.btnAddToCart}`}
             onClick={handleAddToCart}
-            disabled={!props.quantity || props.quantity <= 0}
           >
             <FaCartPlus />
-            ADD TO CART
+            ADD TO CART ({servingCount})
           </button>
         </div>
       </div>

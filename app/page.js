@@ -197,7 +197,7 @@ const Homepage = () => {
       {/* Featured Dishes */}
       <section className={styles.featured}>
         <div className={styles.sectionHeader}>
-          <h2>Chef's Special</h2>
+          <h2>Chef&apos;s Special</h2>
           <p>Handpicked by our culinary experts</p>
         </div>
         <div className={styles.dishGrid}>
