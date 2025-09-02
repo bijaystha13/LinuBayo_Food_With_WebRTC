@@ -1,6 +1,8 @@
 /* Filter Bar Container */
 .filterBar {
-  background: white;
+  /* background: white; */
+  background: linear-gradient(135deg, #0d1823 0%, #234566 100%);
+
   border-radius: 20px;
   padding: 2rem;
   margin-bottom: 2rem;
@@ -76,7 +78,8 @@
 }
 
 .filterTitle {
-  color: #2c3e50;
+  /* color: #2c3e50; */
+  color: white;
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -139,9 +142,10 @@
 }
 
 .controlLabel {
-  font-weight: 500;
-  color: #2c3e50;
-  font-size: 0.9rem;
+  font-weight: 600;
+  /* color: #2c3e50; */
+  color: whitesmoke;
+  font-size: 1.4rem;
 }
 
 .sortSelect {

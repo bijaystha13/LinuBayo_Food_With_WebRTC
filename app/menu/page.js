@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import LoadingSpinner from "../shared/UIElements/LoadingSpinner";
 import { useHttpClient } from "@/app/shared/hooks/http-hook";
 import { toast } from "react-toastify";
@@ -47,206 +47,228 @@ export default function MenuPage() {
   const API_BASE = "http://localhost:5001";
 
   // Build query parameters for API calls
-  const buildQueryParams = (page = currentPage) => {
-    const params = new URLSearchParams();
+  const buildQueryParams = useCallback(
+    (page = currentPage) => {
+      const params = new URLSearchParams();
 
-    if (selectedCategory !== "all") {
-      params.append("category", selectedCategory);
-    }
+      if (selectedCategory !== "all") {
+        params.append("category", selectedCategory);
+      }
 
-    if (searchQuery.trim()) {
-      params.append("search", searchQuery.trim());
-    }
+      if (searchQuery.trim()) {
+        params.append("search", searchQuery.trim());
+      }
 
-    if (priceRange[0] > 0) {
-      params.append("minPrice", priceRange[0].toString());
-    }
+      if (priceRange[0] > 0) {
+        params.append("minPrice", priceRange[0].toString());
+      }
 
-    if (priceRange[1] < 1000) {
-      params.append("maxPrice", priceRange[1].toString());
-    }
+      if (priceRange[1] < 1000) {
+        params.append("maxPrice", priceRange[1].toString());
+      }
 
-    // Map sortBy values to backend format
-    let backendSortBy = "name";
-    let order = "asc";
+      // Map sortBy values to backend format
+      let backendSortBy = "name";
+      let order = "asc";
 
-    switch (sortBy) {
-      case "price-low":
-        backendSortBy = "price";
-        order = "asc";
-        break;
-      case "price-high":
-        backendSortBy = "price";
-        order = "desc";
-        break;
-      case "name":
-      default:
-        backendSortBy = "name";
-        order = "asc";
-        break;
-    }
+      switch (sortBy) {
+        case "price-low":
+          backendSortBy = "price";
+          order = "asc";
+          break;
+        case "price-high":
+          backendSortBy = "price";
+          order = "desc";
+          break;
+        case "name":
+        default:
+          backendSortBy = "name";
+          order = "asc";
+          break;
+      }
 
-    params.append("sortBy", backendSortBy);
-    params.append("order", order);
-    params.append("page", page.toString());
-    params.append("limit", itemsPerPage.toString());
+      params.append("sortBy", backendSortBy);
+      params.append("order", order);
+      params.append("page", page.toString());
+      params.append("limit", itemsPerPage.toString());
 
-    return params.toString();
-  };
+      return params.toString();
+    },
+    [
+      selectedCategory,
+      searchQuery,
+      priceRange,
+      sortBy,
+      currentPage,
+      itemsPerPage,
+    ]
+  );
 
   // Initialize empty state
-  const initializeEmptyState = (page = 1) => {
-    setLoadedFoods([]);
-    setPagination({
-      currentPage: page,
-      totalPages: 1,
-      totalItems: 0,
-      itemsPerPage: itemsPerPage,
-      hasNextPage: false,
-      hasPrevPage: false,
-    });
-    setCurrentPage(page);
-  };
+  const initializeEmptyState = useCallback(
+    (page = 1) => {
+      setLoadedFoods([]);
+      setPagination({
+        currentPage: page,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: itemsPerPage,
+        hasNextPage: false,
+        hasPrevPage: false,
+      });
+      setCurrentPage(page);
+    },
+    [itemsPerPage]
+  );
 
   // Unified fetch function for both "all" and category-specific requests
-  const fetchFoods = async (page = 1, resetPage = false) => {
-    try {
-      const targetPage = resetPage ? 1 : page;
-      let responseData;
+  const fetchFoods = useCallback(
+    async (page = 1, resetPage = false) => {
+      try {
+        const targetPage = resetPage ? 1 : page;
+        let responseData;
 
-      if (selectedCategory === "all") {
-        // Use the general foods endpoint with category filter
-        const queryParams = buildQueryParams(targetPage);
-        responseData = await sendRequest(
-          `${API_BASE}/api/foods?${queryParams}`
-        );
-      } else {
-        // Use category-specific endpoint
-        const params = new URLSearchParams();
-
-        if (searchQuery.trim()) {
-          params.append("search", searchQuery.trim());
-        }
-        if (priceRange[0] > 0) {
-          params.append("minPrice", priceRange[0].toString());
-        }
-        if (priceRange[1] < 1000) {
-          params.append("maxPrice", priceRange[1].toString());
-        }
-
-        let backendSortBy = "name";
-        let order = "asc";
-        switch (sortBy) {
-          case "price-low":
-            backendSortBy = "price";
-            order = "asc";
-            break;
-          case "price-high":
-            backendSortBy = "price";
-            order = "desc";
-            break;
-          case "name":
-          default:
-            backendSortBy = "name";
-            order = "asc";
-            break;
-        }
-        params.append("sortBy", backendSortBy);
-        params.append("order", order);
-        params.append("page", targetPage.toString());
-        params.append("limit", itemsPerPage.toString());
-
-        const queryString = params.toString();
-        const url = `${API_BASE}/api/foods/category/${selectedCategory}${
-          queryString ? `?${queryString}` : ""
-        }`;
-
-        console.log(`Fetching category ${selectedCategory} from:`, url);
-        responseData = await sendRequest(url);
-      }
-
-      // Handle response data consistently
-      if (responseData) {
-        // Check for paginated response structure
-        if (responseData.foods && responseData.pagination) {
-          // Response from /api/foods endpoint
-          setLoadedFoods(responseData.foods);
-          setPagination(responseData.pagination);
-          setCurrentPage(targetPage);
-        } else if (responseData.products && responseData.pagination) {
-          // Response from /api/foods/category endpoint with pagination
-          setLoadedFoods(responseData.products);
-          setPagination(responseData.pagination);
-          setCurrentPage(targetPage);
-        } else if (
-          responseData.products &&
-          Array.isArray(responseData.products)
-        ) {
-          // Response from /api/foods/category endpoint without pagination
-          // Apply frontend pagination
-          const totalItems = responseData.products.length;
-          const totalPages = Math.ceil(totalItems / itemsPerPage);
-          const startIndex = (targetPage - 1) * itemsPerPage;
-          const endIndex = startIndex + itemsPerPage;
-          const paginatedProducts = responseData.products.slice(
-            startIndex,
-            endIndex
+        if (selectedCategory === "all") {
+          // Use the general foods endpoint with category filter
+          const queryParams = buildQueryParams(targetPage);
+          responseData = await sendRequest(
+            `${API_BASE}/api/foods?${queryParams}`
           );
-
-          setLoadedFoods(paginatedProducts);
-          setPagination({
-            currentPage: targetPage,
-            totalPages,
-            totalItems,
-            itemsPerPage,
-            hasNextPage: targetPage < totalPages,
-            hasPrevPage: targetPage > 1,
-          });
-          setCurrentPage(targetPage);
-        } else if (Array.isArray(responseData)) {
-          // Direct array response (fallback)
-          const totalItems = responseData.length;
-          const totalPages = Math.ceil(totalItems / itemsPerPage);
-          const startIndex = (targetPage - 1) * itemsPerPage;
-          const endIndex = startIndex + itemsPerPage;
-          const paginatedData = responseData.slice(startIndex, endIndex);
-
-          setLoadedFoods(paginatedData);
-          setPagination({
-            currentPage: targetPage,
-            totalPages,
-            totalItems,
-            itemsPerPage,
-            hasNextPage: targetPage < totalPages,
-            hasPrevPage: targetPage > 1,
-          });
-          setCurrentPage(targetPage);
         } else {
-          // Empty or unexpected response
-          console.log("Empty or unexpected response:", responseData);
+          // Use category-specific endpoint
+          const params = new URLSearchParams();
+
+          if (searchQuery.trim()) {
+            params.append("search", searchQuery.trim());
+          }
+          if (priceRange[0] > 0) {
+            params.append("minPrice", priceRange[0].toString());
+          }
+          if (priceRange[1] < 1000) {
+            params.append("maxPrice", priceRange[1].toString());
+          }
+
+          let backendSortBy = "name";
+          let order = "asc";
+          switch (sortBy) {
+            case "price-low":
+              backendSortBy = "price";
+              order = "asc";
+              break;
+            case "price-high":
+              backendSortBy = "price";
+              order = "desc";
+              break;
+            case "name":
+            default:
+              backendSortBy = "name";
+              order = "asc";
+              break;
+          }
+          params.append("sortBy", backendSortBy);
+          params.append("order", order);
+          params.append("page", targetPage.toString());
+          params.append("limit", itemsPerPage.toString());
+
+          const queryString = params.toString();
+          const url = `${API_BASE}/api/foods/category/${selectedCategory}${
+            queryString ? `?${queryString}` : ""
+          }`;
+
+          console.log(`Fetching category ${selectedCategory} from:`, url);
+          responseData = await sendRequest(url);
+        }
+
+        // Handle response data consistently
+        if (responseData) {
+          // Check for paginated response structure
+          if (responseData.foods && responseData.pagination) {
+            // Response from /api/foods endpoint
+            setLoadedFoods(responseData.foods);
+            setPagination(responseData.pagination);
+            setCurrentPage(targetPage);
+          } else if (responseData.products && responseData.pagination) {
+            // Response from /api/foods/category endpoint with pagination
+            setLoadedFoods(responseData.products);
+            setPagination(responseData.pagination);
+            setCurrentPage(targetPage);
+          } else if (
+            responseData.products &&
+            Array.isArray(responseData.products)
+          ) {
+            // Response from /api/foods/category endpoint without pagination
+            // Apply frontend pagination
+            const totalItems = responseData.products.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startIndex = (targetPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedProducts = responseData.products.slice(
+              startIndex,
+              endIndex
+            );
+
+            setLoadedFoods(paginatedProducts);
+            setPagination({
+              currentPage: targetPage,
+              totalPages,
+              totalItems,
+              itemsPerPage,
+              hasNextPage: targetPage < totalPages,
+              hasPrevPage: targetPage > 1,
+            });
+            setCurrentPage(targetPage);
+          } else if (Array.isArray(responseData)) {
+            // Direct array response (fallback)
+            const totalItems = responseData.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const startIndex = (targetPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = responseData.slice(startIndex, endIndex);
+
+            setLoadedFoods(paginatedData);
+            setPagination({
+              currentPage: targetPage,
+              totalPages,
+              totalItems,
+              itemsPerPage,
+              hasNextPage: targetPage < totalPages,
+              hasPrevPage: targetPage > 1,
+            });
+            setCurrentPage(targetPage);
+          } else {
+            // Empty or unexpected response
+            console.log("Empty or unexpected response:", responseData);
+            initializeEmptyState(targetPage);
+          }
+        } else {
+          // No response data
+          console.log("No response data received");
           initializeEmptyState(targetPage);
         }
-      } else {
-        // No response data
-        console.log("No response data received");
+      } catch (err) {
+        console.error("Failed to fetch foods:", err);
+        toast.error("Failed to load menu items");
         initializeEmptyState(targetPage);
       }
-    } catch (err) {
-      console.error("Failed to fetch foods:", err);
-      toast.error("Failed to load menu items");
-      initializeEmptyState(targetPage);
-    }
-  };
+    },
+    [
+      selectedCategory,
+      searchQuery,
+      priceRange,
+      sortBy,
+      itemsPerPage,
+      buildQueryParams,
+      sendRequest,
+      initializeEmptyState,
+    ]
+  );
 
   // Combined effect to handle all filter changes
   useEffect(() => {
     fetchFoods(1, true);
-  }, [selectedCategory, searchQuery, priceRange, sortBy]);
+  }, [fetchFoods]);
 
-  // Initial load
-  useEffect(() => {
-    fetchFoods(1, true);
-  }, []);
+  // Initial load - removed duplicate useEffect
 
   const handleCategoryChange = (category) => {
     console.log(`Category changed to: ${category}`);
@@ -297,21 +319,24 @@ export default function MenuPage() {
     }
   };
 
-  async function foodDeletedHandler(deletedFoodId) {
-    setIsDeleting(true);
-    try {
-      await sendRequest(`${API_BASE}/api/foods/${deletedFoodId}`, "DELETE");
+  const foodDeletedHandler = useCallback(
+    async (deletedFoodId) => {
+      setIsDeleting(true);
+      try {
+        await sendRequest(`${API_BASE}/api/foods/${deletedFoodId}`, "DELETE");
 
-      // Refresh the current page after deletion
-      await fetchFoods(currentPage);
+        // Refresh the current page after deletion
+        await fetchFoods(currentPage);
 
-      toast.success("Food item deleted successfully!");
-    } catch {
-      toast.error("Failed to delete food item");
-    } finally {
-      setIsDeleting(false);
-    }
-  }
+        toast.success("Food item deleted successfully!");
+      } catch {
+        toast.error("Failed to delete food item");
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [sendRequest, fetchFoods, currentPage]
+  );
 
   // Get current category info for display
   const getCurrentCategory = () => {

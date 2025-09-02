@@ -63,8 +63,7 @@ const AboutPage = () => {
 
   return (
     <div className={styles.container}>
-      <CustomerChat />
-      {/* Hero Section */}
+      {/* <CustomerChat /> */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>About LinuBayo Food</h1>
