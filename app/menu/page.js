@@ -8,6 +8,7 @@ import styles from "./Menu.module.css";
 import FilterBar from "../components/FormElements/FilterBar";
 import FoodList from "@/app/components/FoodsComponents/FoodsList";
 import Pagination from "@/app/components/FormElements/Pagination";
+import CustomerChats from "../components/Customer/CustomerChats";
 
 const FOOD_CATEGORIES = [
   { value: "all", label: "All Items", icon: "🍽️" },
@@ -438,6 +439,9 @@ export default function MenuPage() {
             </div>
           )}
       </div>
+
+      {/* Floating Chat Widget - Add this at the end */}
+      <CustomerChats isFloating={true} />
     </div>
   );
 }

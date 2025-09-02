@@ -52,20 +52,38 @@
 .productItemImage {
   position: relative;
   width: 100%;
-  height: 350px; /* Increased from 320px to 350px */
+  height: 350px;
   overflow: hidden;
   border-radius: 20px 20px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .productItemImage img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* Changed from cover to contain */
   transition: transform 0.5s ease;
+  background: linear-gradient(
+    135deg,
+    #f3f4f6,
+    #e5e7eb
+  ); /* Added gradient background */
 }
 
 .productItemContent:hover .productItemImage img {
-  transform: scale(1.08);
+  transform: scale(1.05); /* Reduced from 1.08 to prevent overflow */
+}
+
+/* Container for proper image positioning */
+.imageContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
 }
 
 .productItemInfo {
@@ -177,15 +195,15 @@
   background: linear-gradient(135deg, #4ade80, #22c55e);
   color: white;
   border: none;
-  width: 40px; /* Increased from 36px to 40px */
-  height: 40px; /* Increased from 36px to 40px */
-  border-radius: 12px; /* Increased from 10px to 12px */
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.1rem; /* Increased from 1rem */
+  font-size: 1.1rem;
   font-weight: 600;
   box-shadow: 0 4px 8px rgba(74, 222, 128, 0.3);
 }
@@ -217,7 +235,7 @@
 
 /* Ensure icons are visible with proper color */
 .counterBtn svg {
-  color: white !important; /* Force white color for icons */
+  color: white !important;
   font-size: 1rem;
   width: 16px;
   height: 16px;
@@ -229,8 +247,8 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 800;
-  font-size: 1.3rem; /* Increased from 1.2rem */
-  min-width: 32px; /* Increased from 28px */
+  font-size: 1.3rem;
+  min-width: 32px;
   text-align: center;
 }
 
@@ -397,7 +415,7 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .productItemImage {
-    height: 300px; /* Increased from 280px */
+    height: 300px;
   }
 }
 
@@ -428,18 +446,18 @@
   }
 
   .counterBtn {
-    width: 36px; /* Increased from 32px */
-    height: 36px; /* Increased from 32px */
+    width: 36px;
+    height: 36px;
   }
 
   .productItemImage {
-    height: 260px; /* Increased from 240px */
+    height: 260px;
   }
 }
 
 @media (max-width: 480px) {
   .productItemImage {
-    height: 240px; /* Increased from 220px */
+    height: 240px;
   }
 
   .productItemPrices {

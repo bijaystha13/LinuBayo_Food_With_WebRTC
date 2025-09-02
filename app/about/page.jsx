@@ -11,6 +11,7 @@ import {
   Mail,
 } from "lucide-react";
 import styles from "./about.module.css";
+import CustomerChat from "../components/Customer/Customer";
 
 const AboutPage = () => {
   const stats = [
@@ -62,6 +63,7 @@ const AboutPage = () => {
 
   return (
     <div className={styles.container}>
+      <CustomerChat />
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>

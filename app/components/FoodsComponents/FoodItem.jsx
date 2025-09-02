@@ -64,18 +64,20 @@ export default function FoodItem(props) {
 
         {/* Image Section */}
         <div className={styles.productItemImage}>
-          <img
-            src={
-              props.image
-                ? `http://localhost:5001/${props.image}`
-                : "/placeholder-food.jpg"
-            }
-            alt={props.name || "Food Item"}
-            loading="lazy"
-            onError={(e) => {
-              e.target.src = "/placeholder-food.jpg";
-            }}
-          />
+          <div className={styles.imageContainer}>
+            <img
+              src={
+                props.image
+                  ? `http://localhost:5001/${props.image}`
+                  : "/placeholder-food.jpg"
+              }
+              alt={props.name || "Food Item"}
+              loading="lazy"
+              onError={(e) => {
+                e.target.src = "/placeholder-food.jpg";
+              }}
+            />
+          </div>
         </div>
 
         {/* Info Section */}
@@ -120,11 +122,11 @@ export default function FoodItem(props) {
                 onClick={decrementServing}
                 disabled={servingCount <= 1}
               >
-                {/* <FaMinus />  */} -
+                -{/* <FaMinus /> */}
               </button>
               <span className={styles.servingCount}>{servingCount}</span>
               <button className={styles.counterBtn} onClick={incrementServing}>
-                {/* <FaPlus /> */} +
+                {/* <FaPlus /> */}+
               </button>
             </div>
           </div>
