@@ -1,0 +1,442 @@
+/* WebRTC.module.css */
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 50%, #fefce8 100%);
+  padding: 1rem;
+}
+
+.header {
+  max-width: 72rem;
+  margin: 0 auto 1.5rem auto;
+}
+
+.headerCard {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  padding: 1rem;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoIcon {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.headerTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.participantsBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fed7aa;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.participantsText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #c2410c;
+}
+
+.settingsButton {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.settingsButton:hover {
+  background: #fed7aa;
+}
+
+.mainVideoArea {
+  max-width: 72rem;
+  margin: 0 auto 1.5rem auto;
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .videoGrid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.remoteVideoContainer {
+  position: relative;
+  background: #111827;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  aspect-ratio: 16/9;
+}
+
+.remoteVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.waitingOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.2) 0%,
+    rgba(220, 38, 38, 0.2) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+}
+
+.waitingTitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+}
+
+.waitingSubtitle {
+  font-size: 0.875rem;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.screenSharingBadge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.participantName {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  backdrop-filter: blur(4px);
+}
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.localVideoContainer {
+  position: relative;
+  background: #374151;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  aspect-ratio: 16/9;
+}
+
+.localVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.videoDisabledOverlay {
+  position: absolute;
+  inset: 0;
+  background: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+}
+
+.localVideoLabel {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  backdrop-filter: blur(4px);
+}
+
+.muteIndicator {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #dc2626;
+  padding: 0.375rem;
+  border-radius: 50%;
+  color: white;
+}
+
+.infoCard {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.infoTitle {
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.infoLabel {
+  color: #6b7280;
+}
+
+.infoValue {
+  font-weight: 500;
+}
+
+.infoValueAccent {
+  font-weight: 500;
+  color: #ea580c;
+}
+
+.controlPanel {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.controlCard {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  padding: 1.5rem;
+}
+
+.controlButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.controlButton {
+  padding: 1rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.controlButton:hover {
+  transform: scale(1.05);
+}
+
+.controlButtonDefault {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.controlButtonDefault:hover {
+  background: #e5e7eb;
+}
+
+.controlButtonActive {
+  background: #3b82f6;
+  color: white;
+}
+
+.controlButtonActive:hover {
+  background: #2563eb;
+}
+
+.controlButtonDisabled {
+  background: #dc2626;
+  color: white;
+}
+
+.controlButtonDisabled:hover {
+  background: #b91c1c;
+}
+
+.controlButtonCall {
+  background: #10b981;
+  color: white;
+}
+
+.controlButtonCall:hover {
+  background: #059669;
+}
+
+.controlButtonEndCall {
+  background: #dc2626;
+  color: white;
+}
+
+.controlButtonEndCall:hover {
+  background: #b91c1c;
+}
+
+.statusBar {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.statusContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.statusLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.floatingCard {
+  position: fixed;
+  bottom: 6rem;
+  right: 1.5rem;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 1rem;
+  max-width: 24rem;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  backdrop-filter: blur(16px);
+}
+
+.floatingCardTitle {
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.floatingCardContent {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.floatingCardContent p {
+  margin: 0 0 0.25rem 0;
+}
+
+.progressBar {
+  width: 100%;
+  background: #fed7aa;
+  border-radius: 9999px;
+  height: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.progressFill {
+  background: #f97316;
+  height: 0.5rem;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .controlButtons {
+    gap: 0.5rem;
+  }
+
+  .controlButton {
+    padding: 0.75rem;
+  }
+
+  .statusContent {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .floatingCard {
+    right: 0.5rem;
+    bottom: 5rem;
+    max-width: 20rem;
+  }
+}

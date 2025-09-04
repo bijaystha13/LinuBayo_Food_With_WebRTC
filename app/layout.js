@@ -12,11 +12,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Navbar />
-        <div id="modal-hook"></div>
-        <div id="backdrop-hook"></div>
-        <div id="root"></div>
-        {children}
-        <main>{/* <SharedFoodAPI /> */}</main>
+        <main>
+          <div id="modal-hook"></div>
+          <div id="backdrop-hook"></div>
+          <div id="root"></div>
+          {children}
+        </main>
+        {/* <SharedFoodAPI /> */}
       </body>
     </html>
   );

@@ -118,6 +118,11 @@ const Navbar = () => {
                 Contact
               </NavLink>
             </li>
+            <li className="navbar-item">
+              <NavLink href="/sessions" className="navbar-link">
+                Live Sessions
+              </NavLink>
+            </li>
             {isLoggedIn && (
               <li className="navbar-item">
                 <NavLink href="/orders" className="navbar-link">
@@ -189,7 +194,7 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="auth-buttons">
-                <Link href="/login" className="navbar-button login-button">
+                <Link href="/auth" className="navbar-button login-button">
                   <span className="login-icon">🔑</span>
                   Login
                 </Link>

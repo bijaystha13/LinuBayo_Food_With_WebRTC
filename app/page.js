@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Search,
   ShoppingCart,
@@ -11,6 +12,12 @@ import {
   ArrowRight,
   MapPin,
   Phone,
+  Video,
+  Users,
+  Calendar,
+  Play,
+  Award,
+  BookOpen,
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -58,6 +65,57 @@ const Homepage = () => {
       time: "20-25 min",
       image: "🍣",
       chef: "Takeshi San",
+    },
+  ];
+
+  const onlineSessions = [
+    {
+      id: 1,
+      title: "Master Italian Pasta Making",
+      chef: "Chef Maria Rodriguez",
+      date: "Today",
+      time: "2:00 PM",
+      duration: "90 min",
+      participants: 24,
+      price: 45.0,
+      rating: 4.9,
+      category: "Italian",
+      level: "Intermediate",
+      isLive: false,
+      isUpcoming: true,
+      image: "🍝",
+    },
+    {
+      id: 2,
+      title: "Mexican Street Tacos Live",
+      chef: "Chef Carlos Mendez",
+      date: "Live Now",
+      time: "Live",
+      duration: "60 min",
+      participants: 45,
+      price: 35.0,
+      rating: 4.7,
+      category: "Mexican",
+      level: "Beginner",
+      isLive: true,
+      isUpcoming: false,
+      image: "🌮",
+    },
+    {
+      id: 3,
+      title: "French Pastry Fundamentals",
+      chef: "Chef Sophie Laurent",
+      date: "Tomorrow",
+      time: "10:00 AM",
+      duration: "120 min",
+      participants: 31,
+      price: 55.0,
+      rating: 4.8,
+      category: "Pastry",
+      level: "Beginner",
+      isLive: false,
+      isUpcoming: true,
+      image: "🥐",
     },
   ];
 
@@ -155,6 +213,119 @@ const Homepage = () => {
               <span className={styles.categoryName}>{category.name}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className={styles.onlineSessions}>
+        <div className={styles.sectionHeader}>
+          <h2>
+            <Video className={styles.sectionIcon} />
+            We Also Provide Online Cooking Sessions
+          </h2>
+          <p>
+            Master culinary arts from the comfort of your home with our expert
+            chefs
+          </p>
+        </div>
+
+        <div className={styles.sessionsHighlight}>
+          <div className={styles.highlightContent}>
+            <div className={styles.highlightText}>
+              <h3>Learn From Professional Chefs</h3>
+              <p className={styles.highlightDescription}>
+                Join our interactive online cooking sessions and elevate your
+                culinary skills. Our experienced chefs will guide you through
+                each step, ensuring you master every technique.
+              </p>
+              <ul className={styles.highlightFeatures}>
+                <li>
+                  <Video className={styles.featureIconSmall} />
+                  Interactive live cooking sessions
+                </li>
+                <li>
+                  <Users className={styles.featureIconSmall} />
+                  Small class sizes for personalized attention
+                </li>
+                <li>
+                  <Award className={styles.featureIconSmall} />
+                  Learn from certified professional chefs
+                </li>
+                <li>
+                  <BookOpen className={styles.featureIconSmall} />
+                  Recipe guides and video recordings included
+                </li>
+              </ul>
+            </div>
+            <div className={styles.highlightVisual}>
+              <div className={styles.sessionPreview}>
+                <div className={styles.previewHeader}>
+                  <ChefHat className={styles.previewIcon} />
+                  <div className={styles.previewText}>
+                    <h4>Interactive Cooking</h4>
+                    <p>Learn. Cook. Master.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.sessionShowcase}>
+          <h3 className={styles.showcaseTitle}>Featured Cooking Sessions</h3>
+          <div className={styles.sessionCards}>
+            {onlineSessions.map((session) => (
+              <div key={session.id} className={styles.sessionCard}>
+                <div className={styles.sessionImage}>
+                  <span className={styles.sessionEmoji}>{session.image}</span>
+                  <div className={styles.sessionBadge}>
+                    <span className={styles.badgeLevel}>{session.level}</span>
+                  </div>
+                </div>
+
+                <div className={styles.sessionContent}>
+                  <div className={styles.sessionHeader}>
+                    <h4 className={styles.sessionTitle}>{session.title}</h4>
+                    <div className={styles.sessionMeta}>
+                      <span className={styles.sessionChef}>
+                        by {session.chef}
+                      </span>
+                      <div className={styles.sessionRating}>
+                        <Star className={styles.starIconSmall} />
+                        <span>{session.rating}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className={styles.sessionDescription}>
+                    {session.description}
+                  </p>
+
+                  <div className={styles.sessionStats}>
+                    <div className={styles.sessionStat}>
+                      <Clock className={styles.statIcon} />
+                      <span>{session.duration}</span>
+                    </div>
+                    <div className={styles.sessionStat}>
+                      <Users className={styles.statIcon} />
+                      <span>{session.participants} enrolled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.sessionsCTA}>
+            <h3>Ready to Start Your Culinary Journey?</h3>
+            <p>
+              Register now for our online cooking sessions and learn from the
+              best chefs in the industry.
+            </p>
+            <Link href="/sessions" className={styles.registerBtn}>
+              <Video className={styles.btnIcon} />
+              Register for Online Cooking Sessions
+            </Link>
+          </div>
         </div>
       </section>
 

@@ -74,10 +74,10 @@ button:focus-visible {
   }
 }
 
-/* main {
-  /* padding-top: 10px; */
-/* background: #fefefe; */
-/* }  */
+main {
+  padding-top: 70px;
+  /* background: #fefefe; */
+}
 
 .center {
   display: flex;
