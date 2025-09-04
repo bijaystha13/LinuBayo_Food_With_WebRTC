@@ -185,7 +185,7 @@ const Homepage = () => {
               <div className={styles.foodItem} style={{ "--delay": "1.5s" }}>
                 🍝
               </div>
-              <div className={styles.foodItem} style={{ "--delay": "2s" }}>
+              <div className={styles.foodItem} style={{ "--delay": "0.1s" }}>
                 🥗
               </div>
             </div>
@@ -416,7 +416,7 @@ const Homepage = () => {
           </p>
           <button className={styles.ctaButton}>
             <Phone className={styles.ctaIcon} />
-            Order Now
+            <Link href="/menu">Order Now</Link>
           </button>
         </div>
         <div className={styles.ctaBackground}></div>
