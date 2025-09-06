@@ -143,14 +143,51 @@ const Navbar = () => {
             className={`navbar-menu ${isMobileMenuOpen ? "mobile-active" : ""}`}
           >
             {/* Home - Always visible */}
+            {/* <li className="navbar-item">
+              {authCtx.role === "admin" ? (
+                <NavLink
+                  href="/"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
+                 Admin Home
+                </NavLink>
+              ) : (
+                <NavLink href="/users">Users Home</NavLink>
+              ): <NavLink href='/'>Home</NavLink>}
+            </li> */}
+
             <li className="navbar-item">
-              <NavLink
-                href="/"
-                className="navbar-link"
-                onClick={closeMobileMenu}
-              >
-                Home
-              </NavLink>
+              {!authCtx.isLoggedIn && (
+                <NavLink
+                  href="/"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                  isHomeLink={true}
+                >
+                  Home
+                </NavLink>
+              )}
+              {authCtx.isLoggedIn && authCtx.role === "admin" && (
+                <NavLink
+                  href="/admin"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                  isHomeLink={true}
+                >
+                  Admin Home
+                </NavLink>
+              )}
+              {authCtx.isLoggedIn && authCtx.role !== "admin" && (
+                <NavLink
+                  href="/users"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                  isHomeLink={true}
+                >
+                  Users Home
+                </NavLink>
+              )}
             </li>
 
             {/* Menu - Always visible */}

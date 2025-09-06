@@ -35,10 +35,16 @@ const AuthPage = () => {
     });
 
     if (authCtx.isLoggedIn && !authCtx.isLoading) {
-      console.log("User is logged in, redirecting to home");
-      router.push("/");
+      console.log("User is logged in, redirecting based on role");
+
+      // Role-based redirection
+      if (authCtx.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/users");
+      }
     }
-  }, [authCtx.isLoggedIn, authCtx.isLoading, router]);
+  }, [authCtx.isLoggedIn, authCtx.isLoading, authCtx.role, router]);
 
   // Enhanced animation trigger on mount
   useEffect(() => {
@@ -107,9 +113,13 @@ const AuthPage = () => {
         setToastType("success");
         setToastOpen(true);
 
-        // Redirect after successful login
+        // Role-based navigation after successful login
         setTimeout(() => {
-          router.push("/");
+          if (response.role === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/users");
+          }
         }, 1500);
       } else {
         // Sign Up
@@ -124,7 +134,7 @@ const AuthPage = () => {
         const signupData = {
           name: `${formData.get("firstName")} ${formData.get("lastName")}`,
           email: formData.get("email"),
-          phonenumber: formData.get("phonenumber") || "", // Add phone number field if needed
+          phonenumber: formData.get("phonenumber") || "",
           password: password,
         };
 
@@ -146,9 +156,13 @@ const AuthPage = () => {
         setToastType("success");
         setToastOpen(true);
 
-        // Redirect after successful signup
+        // Role-based navigation after successful signup
         setTimeout(() => {
-          router.push("/");
+          if (response.role === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/users");
+          }
         }, 1500);
       }
     } catch (error) {

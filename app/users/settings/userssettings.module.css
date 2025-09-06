@@ -1,0 +1,594 @@
+/* User Settings Module CSS */
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d1823 0%, #1a2332 100%);
+  padding: 6rem 2rem 2rem;
+  color: #fff;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #ff6b35, #ffa500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 107, 53, 0.2);
+  border-top: 4px solid #ff6b35;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.message.success {
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.message.error {
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  color: #f44336;
+}
+
+.messageIcon {
+  font-size: 1.2rem;
+}
+
+.settingsLayout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sidebar {
+  position: sticky;
+  top: 120px;
+  height: fit-content;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+}
+
+.tabList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tabButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.tabButton:hover {
+  background: rgba(255, 107, 53, 0.1);
+  border-color: rgba(255, 107, 53, 0.2);
+  color: #fff;
+}
+
+.tabButton.active {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 107, 53, 0.2),
+    rgba(255, 165, 0, 0.2)
+  );
+  border-color: #ff6b35;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+}
+
+.tabIcon {
+  font-size: 1.2rem;
+}
+
+.content {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+}
+
+.settingsSection {
+  padding: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.input,
+.textarea,
+.select {
+  padding: 0.875rem 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.select option {
+  background: #1a2332;
+  color: #fff;
+}
+
+.toggleGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.toggleItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.toggleItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 107, 53, 0.3);
+}
+
+.toggleInfo {
+  flex: 1;
+}
+
+.toggleLabel {
+  display: block;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.toggleDescription {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: 0.4s;
+  border-radius: 26px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background: linear-gradient(45deg, #ff6b35, #ffa500);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+.saveButton {
+  background: linear-gradient(45deg, #ff6b35, #ffa500);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.saveButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.securitySection {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.securitySection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.subsectionTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+}
+
+.dangerZone {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.dangerTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #f44336;
+  margin-bottom: 1rem;
+}
+
+.dangerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dangerButton {
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dangerButton:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(244, 67, 54, 0.3);
+}
+
+.dangerText {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  flex: 1;
+}
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .settingsLayout {
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+  }
+
+  .container {
+    padding: 5rem 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 5rem 1rem 2rem;
+  }
+
+  .settingsLayout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .sidebar {
+    position: static;
+    order: -1;
+  }
+
+  .tabList {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.25rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .tabButton {
+    white-space: nowrap;
+    min-width: 120px;
+    justify-content: center;
+    padding: 0.875rem 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .settingsSection {
+    padding: 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.5rem;
+  }
+
+  .toggleItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .dangerActions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 4rem 0.75rem 1.5rem;
+  }
+
+  .settingsSection {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .tabButton {
+    min-width: 100px;
+    font-size: 0.9rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .tabIcon {
+    font-size: 1rem;
+  }
+
+  .input,
+  .textarea,
+  .select {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .saveButton {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .secondaryButton {
+    width: 100%;
+    padding: 0.875rem;
+  }
+
+  .dangerButton {
+    width: 100%;
+  }
+}
+
+/* Accessibility & Performance */
+@media (prefers-reduced-motion: reduce) {
+  .loader {
+    animation: none;
+  }
+
+  .tabButton,
+  .input,
+  .textarea,
+  .select,
+  .saveButton,
+  .secondaryButton,
+  .dangerButton {
+    transition: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .container {
+    background: #000;
+    color: #fff;
+  }
+
+  .sidebar,
+  .content {
+    background: #111;
+    border: 2px solid #fff;
+  }
+
+  .input,
+  .textarea,
+  .select {
+    background: #000;
+    border: 2px solid #fff;
+    color: #fff;
+  }
+
+  .saveButton {
+    background: #ff6b35;
+    border: 2px solid #fff;
+  }
+}
+
+/* Focus states for accessibility */
+.tabButton:focus-visible,
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible,
+.saveButton:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible {
+  outline: 2px solid #ff6b35;
+  outline-offset: 2px;
+}

@@ -1,60 +1,83 @@
-/* navlink.module.css */
+/* navlink.module.css - Enhanced styles for better active state feedback */
 
 .link {
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
   padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: #64748b;
+  font-weight: 500;
   border-radius: 0.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-in-out;
   position: relative;
   overflow: hidden;
-  display: inline-block;
 }
 
 .link::before {
   content: "";
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(45deg, #ff6b35, #ffa500);
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease-in-out;
 }
 
 .link:hover {
-  color: #fff;
-  background: rgba(255, 107, 53, 0.1);
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
   transform: translateY(-1px);
 }
 
 .link:hover::before {
-  width: 80%;
+  left: 100%;
 }
 
-/* Active state styling - Only underline, no background */
 .active {
-  color: #ff6b35;
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
   font-weight: 600;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
-.active::before {
-  width: 80%;
+.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 1px;
+  transform: translateX(-50%);
+  animation: activeIndicator 0.3s ease-out;
 }
 
-.active:hover {
-  color: #ffa500;
-  background: rgba(255, 107, 53, 0.1);
+@keyframes activeIndicator {
+  0% {
+    width: 0%;
+    opacity: 0;
+  }
+  100% {
+    width: 60%;
+    opacity: 1;
+  }
 }
 
-/* Remove the glow effect since we only want underline */
-
-/* Responsive adjustments */
+/* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .link {
     padding: 0.75rem 1rem;
-    font-size: 1.1rem;
+    margin: 0.25rem 0;
+  }
+
+  .active::after {
+    width: 80%;
   }
 }
