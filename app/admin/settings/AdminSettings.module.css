@@ -1,0 +1,789 @@
+/* Admin Settings Module CSS */
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0e13 0%, #1a1f29 50%, #2a1810 100%);
+  padding: 6rem 2rem 2rem;
+  color: #fff;
+  position: relative;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      ellipse at 20% 50%,
+      rgba(255, 107, 53, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 80% 20%,
+      rgba(255, 165, 0, 0.08) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #ff6b35, #ffa500, #ff6b35);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+}
+
+.adminBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 107, 53, 0.2),
+    rgba(255, 165, 0, 0.2)
+  );
+  border: 1px solid rgba(255, 107, 53, 0.4);
+  border-radius: 2rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  color: #ffa500;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(255, 107, 53, 0.2);
+}
+
+.crownIcon {
+  font-size: 1.3rem;
+  filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.6));
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1.5rem;
+}
+
+.loader {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255, 107, 53, 0.2);
+  border-top: 5px solid #ff6b35;
+  border-right: 5px solid #ffa500;
+  border-radius: 50%;
+  animation: adminSpin 1.2s linear infinite;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 2rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 1;
+}
+
+.message.success {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #66bb6a;
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.1);
+}
+
+.message.error {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  color: #ef5350;
+  box-shadow: 0 8px 32px rgba(244, 67, 54, 0.1);
+}
+
+.messageIcon {
+  font-size: 1.4rem;
+}
+
+.settingsLayout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar {
+  position: sticky;
+  top: 120px;
+  height: fit-content;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  backdrop-filter: blur(30px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.tabList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tabButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.tabButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 107, 53, 0.1),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.tabButton:hover::before {
+  left: 100%;
+}
+
+.tabButton:hover {
+  background: rgba(255, 107, 53, 0.15);
+  border-color: rgba(255, 107, 53, 0.3);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.tabButton.active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 53, 0.25),
+    rgba(255, 165, 0, 0.25)
+  );
+  border-color: #ff6b35;
+  color: #fff;
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+  transform: translateX(6px);
+}
+
+.tabIcon {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 0 4px rgba(255, 107, 53, 0.4));
+}
+
+.content {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(30px);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.settingsSection {
+  padding: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionTitle::before {
+  content: "🔧";
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.6));
+}
+
+.configSection {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.configSection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.subsectionTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subsectionTitle::before {
+  content: "▶";
+  color: #ff6b35;
+  font-size: 0.9rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.inputGroup.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input,
+.textarea,
+.select,
+.timeInput {
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(15px);
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus,
+.timeInput:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.select,
+.timeInput {
+  cursor: pointer;
+}
+
+.select option {
+  background: #1a1f29;
+  color: #fff;
+  padding: 0.5rem;
+}
+
+.toggleGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.toggleItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.toggleItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 107, 53, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.toggleInfo {
+  flex: 1;
+}
+
+.toggleLabel {
+  display: block;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.toggleDescription {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 32px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  transition: 0.4s;
+  border-radius: 32px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 2px;
+  bottom: 2px;
+  background: white;
+  transition: 0.4s;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+input:checked + .slider {
+  background: linear-gradient(45deg, #ff6b35, #ffa500);
+  border-color: #ff6b35;
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+}
+
+input:checked + .slider:before {
+  transform: translateX(28px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.businessHoursGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.businessHourItem {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+}
+
+.dayLabel {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.hourControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.closedToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+
+.closedToggle input {
+  accent-color: #ff6b35;
+}
+
+.timeInput {
+  padding: 0.75rem;
+  min-width: 120px;
+}
+
+.saveButton {
+  background: linear-gradient(45deg, #ff6b35, #ffa500);
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1.25rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+}
+
+.saveButton:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(255, 107, 53, 0.4);
+  background: linear-gradient(45deg, #ff8c35, #ffb500);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.75rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(15px);
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.securitySection {
+  margin-bottom: 3rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.securitySection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* Animations */
+@keyframes gradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes adminSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .settingsLayout {
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+  }
+
+  .container {
+    padding: 5rem 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 968px) {
+  .container {
+    padding: 5rem 1rem 2rem;
+  }
+
+  .settingsLayout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .sidebar {
+    position: static;
+    order: -1;
+  }
+
+  .tabList {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .tabButton {
+    white-space: nowrap;
+    min-width: 140px;
+    justify-content: center;
+    padding: 1rem 1.25rem;
+    transform: none;
+  }
+
+  .tabButton:hover,
+  .tabButton.active {
+    transform: none;
+  }
+
+  .title {
+    font-size: 2.2rem;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .businessHourItem {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .hourControls {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 4rem 0.75rem 1.5rem;
+  }
+
+  .settingsSection {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .adminBadge {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .tabButton {
+    min-width: 120px;
+    font-size: 0.95rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .tabIcon {
+    font-size: 1.2rem;
+  }
+
+  .input,
+  .textarea,
+  .select,
+  .timeInput {
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .toggleItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .toggle {
+    align-self: flex-end;
+  }
+
+  .saveButton {
+    width: 100%;
+    padding: 1.25rem;
+  }
+
+  .secondaryButton {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .hourControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .timeInput {
+    min-width: auto;
+  }
+}
+
+/* Accessibility & Performance */
+@media (prefers-reduced-motion: reduce) {
+  .loader,
+  .title {
+    animation: none;
+  }
+
+  .tabButton,
+  .input,
+  .textarea,
+  .select,
+  .toggleItem,
+  .saveButton,
+  .secondaryButton {
+    transition: none;
+  }
+
+  .tabButton::before {
+    display: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .container {
+    background: #000;
+    color: #fff;
+  }
+
+  .sidebar,
+  .content {
+    background: #111;
+    border: 3px solid #fff;
+  }
+
+  .input,
+  .textarea,
+  .select,
+  .timeInput {
+    background: #000;
+    border: 3px solid #fff;
+    color: #fff;
+  }
+
+  .saveButton {
+    background: #ff6b35;
+    border: 3px solid #fff;
+  }
+
+  .toggleItem {
+    border: 2px solid #fff;
+  }
+}
+
+/* Focus states for accessibility */
+.tabButton:focus-visible,
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible,
+.timeInput:focus-visible,
+.saveButton:focus-visible,
+.secondaryButton:focus-visible,
+.closedToggle:focus-visible {
+  outline: 3px solid #ff6b35;
+  outline-offset: 2px;
+}
+
+/* Performance optimizations */
+.tabButton,
+.toggleItem,
+.saveButton,
+.secondaryButton {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

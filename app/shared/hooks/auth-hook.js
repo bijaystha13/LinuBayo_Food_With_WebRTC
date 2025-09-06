@@ -1,18 +1,41 @@
+// app/shared/hooks/auth-hook.js
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 
 let logoutTimer;
 
 export const useAuth = () => {
   const [token, setToken] = useState(null);
-  const [tokenExpirationDate, setTokenExpirationDate] = useState(null); // Initialize as null
+  const [tokenExpirationDate, setTokenExpirationDate] = useState(null);
   const [userId, setUserId] = useState(null);
   const [role, setRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
-  const login = useCallback((uid, token, role, expirationDate) => {
-    // Added role parameter
-    setToken(token);
+  // Updated login function to match your AuthPage expectations
+  const login = useCallback((authData) => {
+    let uid, authToken, userRole, expirationDate;
+
+    // Handle both old pattern (uid, token, role, expirationDate) and new pattern ({ token, userId, role })
+    if (typeof authData === "object" && authData.token) {
+      // New pattern from AuthPage
+      uid = authData.userId;
+      authToken = authData.token;
+      userRole = authData.role || "user";
+      expirationDate = authData.expirationDate
+        ? new Date(authData.expirationDate)
+        : null;
+    } else {
+      // Old pattern (fallback)
+      uid = arguments[0];
+      authToken = arguments[1];
+      userRole = arguments[2] || "user";
+      expirationDate = arguments[3];
+    }
+
+    setToken(authToken);
     setUserId(uid);
-    setRole(role);
+    setRole(userRole);
 
     // Calculate expiration date - 1 hour from now if not provided
     const tokenExpDate =
@@ -23,8 +46,8 @@ export const useAuth = () => {
       "userData",
       JSON.stringify({
         userId: uid,
-        token,
-        role,
+        token: authToken,
+        role: userRole,
         expiration: tokenExpDate.toISOString(),
       })
     );
@@ -36,18 +59,27 @@ export const useAuth = () => {
     setUserId(null);
     setRole(null);
     localStorage.removeItem("userData");
+    if (logoutTimer) {
+      clearTimeout(logoutTimer);
+    }
   }, []);
 
+  // Auto logout when token expires
   useEffect(() => {
     if (token && tokenExpirationDate) {
       const remainingTime =
         tokenExpirationDate.getTime() - new Date().getTime();
-      logoutTimer = setTimeout(logout, remainingTime);
+      if (remainingTime > 0) {
+        logoutTimer = setTimeout(logout, remainingTime);
+      } else {
+        logout(); // Token already expired
+      }
     } else {
       clearTimeout(logoutTimer);
     }
   }, [token, logout, tokenExpirationDate]);
 
+  // Check for existing auth data on mount
   useEffect(() => {
     const storedData = JSON.parse(localStorage.getItem("userData"));
     if (storedData && storedData.token) {
@@ -57,17 +89,29 @@ export const useAuth = () => {
         : new Date(new Date().getTime() + 1000 * 60 * 60); // Default to 1 hour if missing
 
       if (!storedData.expiration || expirationDate > new Date()) {
-        login(
-          storedData.userId,
-          storedData.token,
-          storedData.role || "user", // Default role if missing
-          expirationDate
-        );
+        login({
+          userId: storedData.userId,
+          token: storedData.token,
+          role: storedData.role || "user",
+          expirationDate: expirationDate,
+        });
       } else {
         logout(); // Token expired
       }
     }
+    setIsLoading(false); // Set loading to false after checking
   }, [login, logout]);
 
-  return { token, login, logout, userId, role };
+  // Computed properties for easier usage
+  const isLoggedIn = !!token;
+
+  return {
+    token,
+    login,
+    logout,
+    userId,
+    role,
+    isLoggedIn,
+    isLoading,
+  };
 };

@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { useRouter } from "next/navigation";
+import { AuthContext } from "@/app/shared/Context/AuthContext"; // Use AuthContext instead
 import * as Form from "@radix-ui/react-form";
 import * as Tabs from "@radix-ui/react-tabs";
-import * as Dialog from "@radix-ui/react-dialog";
 import * as Toast from "@radix-ui/react-toast";
 import {
   EyeOpenIcon,
   EyeNoneIcon,
   GitHubLogoIcon,
-  TwitterLogoIcon,
 } from "@radix-ui/react-icons";
 import styles from "./auth.module.css";
 
@@ -22,47 +22,170 @@ const AuthPage = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
 
+  const router = useRouter();
+  const authCtx = useContext(AuthContext); // Use AuthContext instead of useAuth hook
+
+  // Redirect if already logged in
+  useEffect(() => {
+    console.log("AuthPage - Auth state:", {
+      isLoggedIn: authCtx.isLoggedIn,
+      isLoading: authCtx.isLoading,
+      userId: authCtx.userId,
+      role: authCtx.role,
+    });
+
+    if (authCtx.isLoggedIn && !authCtx.isLoading) {
+      console.log("User is logged in, redirecting to home");
+      router.push("/");
+    }
+  }, [authCtx.isLoggedIn, authCtx.isLoading, router]);
+
   // Enhanced animation trigger on mount
   useEffect(() => {
     const container = document.querySelector(`.${styles.authContainer}`);
     if (container) {
-      // Add slight delay for better visual effect
       setTimeout(() => {
         container.classList.add(styles.mounted);
       }, 100);
     }
   }, []);
 
+  // API call function for authentication
+  const callAuthAPI = async (endpoint, userData) => {
+    try {
+      // Update to match your Express backend routes
+      const apiEndpoint = endpoint === "login" ? "login" : "signup";
+      const response = await fetch(
+        `http://localhost:5001/api/users/${apiEndpoint}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `${endpoint} failed`);
+      }
+
+      return data;
+    } catch (error) {
+      throw new Error(error.message || `${endpoint} failed`);
+    }
+  };
+
   const handleSubmit = async (event, formType) => {
     event.preventDefault();
     setIsLoading(true);
 
-    // Enhanced loading simulation with better UX
-    setTimeout(() => {
-      setIsLoading(false);
-      setToastMessage(
-        `${
-          formType === "signin"
-            ? "Welcome back!"
-            : "Account created successfully!"
-        }`
-      );
-      setToastType("success");
+    const formData = new FormData(event.target);
+
+    try {
+      if (formType === "signin") {
+        // Sign In
+        const loginData = {
+          email: formData.get("email"),
+          password: formData.get("password"),
+        };
+
+        console.log("Attempting login with:", { email: loginData.email });
+        const response = await callAuthAPI("login", loginData);
+        console.log("Login response:", response);
+
+        // Use AuthContext login function with the expected format
+        authCtx.login({
+          userId: response.userId,
+          token: response.token,
+          role: response.role,
+        });
+
+        setToastMessage("Welcome back!");
+        setToastType("success");
+        setToastOpen(true);
+
+        // Redirect after successful login
+        setTimeout(() => {
+          router.push("/");
+        }, 1500);
+      } else {
+        // Sign Up
+        const password = formData.get("password");
+        const confirmPassword = formData.get("confirmPassword");
+
+        // Validate password match
+        if (password !== confirmPassword) {
+          throw new Error("Passwords don't match");
+        }
+
+        const signupData = {
+          name: `${formData.get("firstName")} ${formData.get("lastName")}`,
+          email: formData.get("email"),
+          phonenumber: formData.get("phonenumber") || "", // Add phone number field if needed
+          password: password,
+        };
+
+        console.log("Attempting signup with:", {
+          name: signupData.name,
+          email: signupData.email,
+        });
+        const response = await callAuthAPI("signup", signupData);
+        console.log("Signup response:", response);
+
+        // Auto login after successful signup using AuthContext
+        authCtx.login({
+          userId: response.userId,
+          token: response.token,
+          role: response.role,
+        });
+
+        setToastMessage("Account created successfully!");
+        setToastType("success");
+        setToastOpen(true);
+
+        // Redirect after successful signup
+        setTimeout(() => {
+          router.push("/");
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Auth error:", error);
+      setToastMessage(error.message);
+      setToastType("error");
       setToastOpen(true);
-    }, 2000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider) => {
-    setToastMessage(`Connecting to ${provider}...`);
+    setToastMessage(`${provider} login coming soon!`);
     setToastType("info");
     setToastOpen(true);
   };
 
   const handleForgotPassword = () => {
-    setToastMessage("Password reset instructions sent to your email!");
+    setToastMessage("Password reset feature coming soon!");
     setToastType("info");
     setToastOpen(true);
   };
+
+  // Show loading state while auth context is loading
+  if (authCtx.isLoading) {
+    return (
+      <div className={styles.authWrapper}>
+        <div className={styles.authContainer}>
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            <div className={styles.spinner}></div>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.authWrapper}>
@@ -84,9 +207,9 @@ const AuthPage = () => {
         <div className={styles.brandSection}>
           <div className={styles.logo}>
             <div className={styles.logoIcon}>
-              <span className={styles.logoEmoji}>🚀</span>
+              <span className={styles.logoEmoji}>🍔</span>
             </div>
-            <h1 className={styles.brandName}>NextAuth</h1>
+            <h1 className={styles.brandName}>LinuBayo Food</h1>
           </div>
           <p className={styles.brandTagline}>
             {activeTab === "signin"
@@ -127,6 +250,7 @@ const AuthPage = () => {
                     <Form.Control asChild>
                       <input
                         type="email"
+                        name="email"
                         className={styles.input}
                         placeholder="Enter your email"
                         required
@@ -157,6 +281,7 @@ const AuthPage = () => {
                       <Form.Control asChild>
                         <input
                           type={showPassword ? "text" : "password"}
+                          name="password"
                           className={styles.input}
                           placeholder="Enter your password"
                           required
@@ -187,7 +312,7 @@ const AuthPage = () => {
 
                 <div className={styles.formOptions}>
                   <label className={styles.checkbox}>
-                    <input type="checkbox" />
+                    <input type="checkbox" name="remember" />
                     <span className={styles.checkmark}></span>
                     <span className={styles.checkboxLabel}>Remember me</span>
                   </label>
@@ -239,6 +364,7 @@ const AuthPage = () => {
                       <Form.Control asChild>
                         <input
                           type="text"
+                          name="firstName"
                           className={styles.input}
                           placeholder="First name"
                           required
@@ -262,6 +388,7 @@ const AuthPage = () => {
                       <Form.Control asChild>
                         <input
                           type="text"
+                          name="lastName"
                           className={styles.input}
                           placeholder="Last name"
                           required
@@ -286,6 +413,7 @@ const AuthPage = () => {
                     <Form.Control asChild>
                       <input
                         type="email"
+                        name="email"
                         className={styles.input}
                         placeholder="Enter your email"
                         required
@@ -316,6 +444,7 @@ const AuthPage = () => {
                       <Form.Control asChild>
                         <input
                           type={showPassword ? "text" : "password"}
+                          name="password"
                           className={styles.input}
                           placeholder="Create a password"
                           required
@@ -353,6 +482,7 @@ const AuthPage = () => {
                       <Form.Control asChild>
                         <input
                           type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
                           className={styles.input}
                           placeholder="Confirm your password"
                           required
@@ -382,7 +512,7 @@ const AuthPage = () => {
 
                 <div className={styles.formOptions}>
                   <label className={styles.checkbox}>
-                    <input type="checkbox" required />
+                    <input type="checkbox" name="terms" required />
                     <span className={styles.checkmark}></span>
                     <span className={styles.checkboxLabel}>
                       I agree to the{" "}
@@ -432,6 +562,7 @@ const AuthPage = () => {
             <button
               className={styles.socialButton}
               onClick={() => handleSocialLogin("Google")}
+              disabled={isLoading}
             >
               <div className={styles.socialIconWrapper}>
                 <svg viewBox="0 0 24 24" className={styles.socialIcon}>
@@ -458,6 +589,7 @@ const AuthPage = () => {
             <button
               className={styles.socialButton}
               onClick={() => handleSocialLogin("GitHub")}
+              disabled={isLoading}
             >
               <div className={styles.socialIconWrapper}>
                 <GitHubLogoIcon className={styles.socialIcon} />
@@ -475,11 +607,19 @@ const AuthPage = () => {
             onOpenChange={setToastOpen}
           >
             <div className={styles.toastIcon}>
-              {toastType === "success" ? "✅" : "ℹ️"}
+              {toastType === "success"
+                ? "✅"
+                : toastType === "error"
+                ? "❌"
+                : "ℹ️"}
             </div>
             <div className={styles.toastContent}>
               <Toast.Title className={styles.toastTitle}>
-                {toastType === "success" ? "Success" : "Info"}
+                {toastType === "success"
+                  ? "Success"
+                  : toastType === "error"
+                  ? "Error"
+                  : "Info"}
               </Toast.Title>
               <Toast.Description className={styles.toastDescription}>
                 {toastMessage}

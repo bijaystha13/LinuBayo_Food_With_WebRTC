@@ -1,28 +1,39 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import Link from "next/link";
 import "./Navbar.css";
 import NavLink from "./NavLink";
+import { AuthContext } from "@/app/shared/Context/AuthContext";
 
 const Navbar = () => {
+  const authCtx = useContext(AuthContext);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // This should come from your auth context/state
-  const [cartCount, setCartCount] = useState(3); // This should come from your cart state
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [cartCount, setCartCount] = useState(3);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const searchRef = useRef(null);
-  const userMenuRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
-  // Simulate auth check - replace with your actual auth logic
+  // Debug: Log auth context values
   useEffect(() => {
-    // Check if user is logged in (from localStorage, context, etc.)
-    const checkAuth = () => {
-      const token = localStorage.getItem("authToken");
-      setIsLoggedIn(!!token);
-    };
+    console.log("Auth state updated:", {
+      isLoggedIn: authCtx.isLoggedIn,
+      isLoading: authCtx.isLoading,
+      userId: authCtx.userId,
+      role: authCtx.role,
+    });
+  }, [authCtx.isLoggedIn, authCtx.isLoading, authCtx.userId, authCtx.role]);
 
-    checkAuth();
-  }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log("Direct localStorage check:", {
+        token: localStorage.getItem("token"),
+        userId: localStorage.getItem("userId"),
+        role: localStorage.getItem("role"),
+      });
+    }
+  }, [authCtx.isLoggedIn]);
 
   const handleSearchToggle = () => {
     setIsSearchExpanded(!isSearchExpanded);
@@ -47,25 +58,25 @@ const Navbar = () => {
     }
   };
 
-  const handleLogin = () => {
-    // Implement your login logic here
-    console.log("Redirecting to login...");
-    // window.location.href = '/login';
-  };
-
   const handleLogout = () => {
-    // Implement your logout logic here
-    localStorage.removeItem("authToken");
-    setIsLoggedIn(false);
-    setShowUserMenu(false);
+    authCtx.logout();
+    setIsUserDropdownOpen(false);
     console.log("User logged out");
   };
 
-  const toggleUserMenu = () => {
-    setShowUserMenu(!showUserMenu);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Handle click outside for search and user menu
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Handle click outside for search and user dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Handle search dropdown
@@ -76,9 +87,12 @@ const Navbar = () => {
         }
       }
 
-      // Handle user menu dropdown
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
+      // Handle user dropdown
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
+        setIsUserDropdownOpen(false);
       }
     };
 
@@ -87,6 +101,23 @@ const Navbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Show loading state while auth is being checked
+  if (authCtx.isLoading) {
+    return (
+      <nav className="navbar">
+        <div className="navbar-container">
+          <Link href="/" className="navbar-logo">
+            <span className="logo-icon">🍔</span>
+            LinuBayo Food
+          </Link>
+          <div className="navbar-loading">
+            <div className="loading-skeleton"></div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <>
@@ -97,36 +128,142 @@ const Navbar = () => {
             LinuBayo Food
           </Link>
 
-          <ul className="navbar-menu">
+          {/* Mobile Menu Button */}
+          <button
+            className={`mobile-menu-toggle ${isMobileMenuOpen ? "active" : ""}`}
+            onClick={toggleMobileMenu}
+            aria-label="Toggle mobile menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <ul
+            className={`navbar-menu ${isMobileMenuOpen ? "mobile-active" : ""}`}
+          >
+            {/* Home - Always visible */}
             <li className="navbar-item">
-              <NavLink href="/" className="navbar-link">
+              <NavLink
+                href="/"
+                className="navbar-link"
+                onClick={closeMobileMenu}
+              >
                 Home
               </NavLink>
             </li>
+
+            {/* Menu - Always visible */}
             <li className="navbar-item">
-              <NavLink href="/menu" className="navbar-link">
+              <NavLink
+                href="/menu"
+                className="navbar-link"
+                onClick={closeMobileMenu}
+              >
                 Menu
               </NavLink>
             </li>
+
+            {/* About - Only visible when NOT logged in */}
+            {!authCtx.isLoggedIn && (
+              <li className="navbar-item">
+                <NavLink
+                  href="/about"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
+                  About
+                </NavLink>
+              </li>
+            )}
+
+            {/* Contact - Always visible */}
             <li className="navbar-item">
-              <NavLink href="/about" className="navbar-link">
-                About
-              </NavLink>
-            </li>
-            <li className="navbar-item">
-              <NavLink href="/contact" className="navbar-link">
+              <NavLink
+                href="/contact"
+                className="navbar-link"
+                onClick={closeMobileMenu}
+              >
                 Contact
               </NavLink>
             </li>
-            <li className="navbar-item">
-              <NavLink href="/sessions" className="navbar-link">
-                Live Sessions
-              </NavLink>
-            </li>
-            {isLoggedIn && (
+
+            {/* Live Sessions - Only for logged in users */}
+            {authCtx.isLoggedIn && (
               <li className="navbar-item">
-                <NavLink href="/orders" className="navbar-link">
+                <NavLink
+                  href="/sessions"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
+                  Live Sessions
+                </NavLink>
+              </li>
+            )}
+
+            {/* My Orders - Only for logged in regular users */}
+            {authCtx.isLoggedIn && authCtx.role === "user" && (
+              <li className="navbar-item">
+                <NavLink
+                  href="/orders"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
                   My Orders
+                </NavLink>
+              </li>
+            )}
+
+            {/* Admin Panel - Only for admin users */}
+            {authCtx.isLoggedIn && authCtx.role === "admin" && (
+              <li className="navbar-item">
+                <NavLink
+                  href="/admin"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
+                  Admin Panel
+                </NavLink>
+              </li>
+            )}
+
+            {/* Dashboard - Only for admin users */}
+            {authCtx.isLoggedIn && authCtx.role === "admin" && (
+              <li className="navbar-item">
+                <NavLink
+                  href="/admin/dashboard"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
+                  Dashboard
+                </NavLink>
+              </li>
+            )}
+
+            {/* User Management - Only for admin users */}
+            {authCtx.isLoggedIn && authCtx.role === "admin" && (
+              <li className="navbar-item">
+                <NavLink
+                  href="/admin/users"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
+                  Users
+                </NavLink>
+              </li>
+            )}
+
+            {/* Reservations - Only for logged in users */}
+            {authCtx.isLoggedIn && (
+              <li className="navbar-item">
+                <NavLink
+                  href="/reservations"
+                  className="navbar-link"
+                  onClick={closeMobileMenu}
+                >
+                  {authCtx.role === "admin"
+                    ? "All Reservations"
+                    : "My Reservations"}
                 </NavLink>
               </li>
             )}
@@ -143,68 +280,103 @@ const Navbar = () => {
               <span className="search-icon">🔍</span>
             </button>
 
-            {/* Cart Button - Only show if logged in */}
-            {isLoggedIn && (
-              <Link href="/cart" className="navbar-button cart-button">
-                <span className="cart-icon">🛒</span>
-                {cartCount > 0 && (
-                  <span className="cart-count">{cartCount}</span>
-                )}
-              </Link>
-            )}
-
-            {/* User Authentication Section */}
-            {isLoggedIn ? (
-              <div className="user-menu-container" ref={userMenuRef}>
-                <button
-                  className="navbar-button account-button"
-                  onClick={toggleUserMenu}
-                >
-                  <span className="account-icon">👤</span>
-                </button>
-
-                {showUserMenu && (
-                  <div className="user-dropdown">
-                    <Link href="/profile" className="user-dropdown-item">
-                      <span className="dropdown-icon">👤</span>
-                      Profile
-                    </Link>
-                    <Link href="/orders" className="user-dropdown-item">
-                      <span className="dropdown-icon">📋</span>
-                      My Orders
-                    </Link>
-                    <Link href="/favorites" className="user-dropdown-item">
-                      <span className="dropdown-icon">❤️</span>
-                      Favorites
-                    </Link>
-                    <Link href="/settings" className="user-dropdown-item">
-                      <span className="dropdown-icon">⚙️</span>
-                      Settings
-                    </Link>
-                    <hr className="dropdown-divider" />
-                    <button
-                      onClick={handleLogout}
-                      className="user-dropdown-item logout-item"
-                    >
-                      <span className="dropdown-icon">🚪</span>
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
+            {/* Auth Section */}
+            {!authCtx.isLoggedIn ? (
               <div className="auth-buttons">
+                {/* Sign Up link for non-authenticated users */}
+                <Link href="/auth" className="navbar-button signup-button">
+                  <span className="signup-icon">📝</span>
+                  <span className="button-text">Sign Up</span>
+                </Link>
                 <Link href="/auth" className="navbar-button login-button">
                   <span className="login-icon">🔑</span>
-                  Login
+                  <span className="button-text">Login</span>
                 </Link>
-                {/* <Link
-                  href="/register"
-                  className="navbar-button register-button"
-                >
-                  <span className="register-icon">📝</span>
-                  Sign Up
-                </Link> */}
+              </div>
+            ) : (
+              <div className="user-actions">
+                {/* Cart Button - Only show for regular users */}
+                {authCtx.role === "user" && (
+                  <Link href="/cart" className="navbar-button cart-button">
+                    <span className="cart-icon">🛒</span>
+                    {cartCount > 0 && (
+                      <span className="cart-count">{cartCount}</span>
+                    )}
+                  </Link>
+                )}
+
+                {/* User Dropdown */}
+                <div className="user-menu-container" ref={userDropdownRef}>
+                  <button
+                    className="navbar-button user-menu-toggle"
+                    onClick={toggleUserDropdown}
+                    aria-label="User menu"
+                    aria-expanded={isUserDropdownOpen}
+                  >
+                    <span className="profile-icon">
+                      {authCtx.role === "admin" ? "👑" : "👤"}
+                    </span>
+                    <span className="dropdown-arrow">▼</span>
+                  </button>
+
+                  {isUserDropdownOpen && (
+                    <div className="user-dropdown">
+                      <div className="user-dropdown-header">
+                        <span className="user-role">
+                          {authCtx.role === "admin" ? "Admin" : "User"}
+                        </span>
+                        {authCtx.userId && (
+                          <span className="user-id">ID: {authCtx.userId}</span>
+                        )}
+                      </div>
+
+                      <Link
+                        href={
+                          authCtx.role === "admin"
+                            ? "/admin/profile"
+                            : "/profile"
+                        }
+                        className="user-dropdown-item"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        <span className="dropdown-icon">👤</span>
+                        Profile
+                      </Link>
+
+                      <Link
+                        href="/notifications"
+                        className="user-dropdown-item"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        <span className="dropdown-icon">🔔</span>
+                        Notifications
+                      </Link>
+
+                      <Link
+                        href={
+                          authCtx.role === "admin"
+                            ? "/admin/settings"
+                            : "/settings"
+                        }
+                        className="user-dropdown-item"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        <span className="dropdown-icon">⚙️</span>
+                        Settings
+                      </Link>
+
+                      <div className="dropdown-divider"></div>
+
+                      <button
+                        onClick={handleLogout}
+                        className="user-dropdown-item logout-item"
+                      >
+                        <span className="dropdown-icon">🚪</span>
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -245,30 +417,68 @@ const Navbar = () => {
           <div className="quick-links">
             <h3>Quick Links</h3>
             <div className="quick-links-grid">
+              {/* Dynamic quick links based on auth status */}
+              {!authCtx.isLoggedIn ? (
+                <>
+                  <Link href="/about" className="quick-link-item">
+                    <span className="quick-link-icon">ℹ️</span>
+                    <span className="quick-link-text">About Us</span>
+                  </Link>
+                  <Link href="/menu" className="quick-link-item">
+                    <span className="quick-link-icon">🍽️</span>
+                    <span className="quick-link-text">Our Menu</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/favorites" className="quick-link-item">
+                    <span className="quick-link-icon">❤️</span>
+                    <span className="quick-link-text">Favorites</span>
+                  </Link>
+                  <Link href="/order-history" className="quick-link-item">
+                    <span className="quick-link-icon">📋</span>
+                    <span className="quick-link-text">Order History</span>
+                  </Link>
+                </>
+              )}
+
               <Link href="/stores" className="quick-link-item">
                 <span className="quick-link-icon">📍</span>
                 <span className="quick-link-text">Find a Store</span>
               </Link>
+
               <Link href="/deals" className="quick-link-item">
                 <span className="quick-link-icon">🎯</span>
                 <span className="quick-link-text">Today's Deals</span>
               </Link>
-              <Link href="/meal-plans" className="quick-link-item">
-                <span className="quick-link-icon">🎒</span>
-                <span className="quick-link-text">Meal Plans</span>
-              </Link>
+
+              {authCtx.isLoggedIn && (
+                <Link href="/meal-plans" className="quick-link-item">
+                  <span className="quick-link-icon">🎒</span>
+                  <span className="quick-link-text">Meal Plans</span>
+                </Link>
+              )}
+
               <Link href="/nutrition" className="quick-link-item">
                 <span className="quick-link-icon">🥗</span>
                 <span className="quick-link-text">Nutrition Info</span>
               </Link>
-              <Link href="/rewards" className="quick-link-item">
-                <span className="quick-link-icon">🎁</span>
-                <span className="quick-link-text">Rewards Program</span>
-              </Link>
+
+              {authCtx.isLoggedIn && (
+                <Link href="/rewards" className="quick-link-item">
+                  <span className="quick-link-icon">🎁</span>
+                  <span className="quick-link-text">Rewards Program</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>
+      )}
     </>
   );
 };
