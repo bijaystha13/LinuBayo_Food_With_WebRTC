@@ -128,94 +128,102 @@ const sampleFoods = [
   },
 
   // Desserts
-  //   {
-  //     name: "Chocolate Cake",
-  //     description: "Rich and moist chocolate cake with a creamy ganache topping.",
-  //     price: 6.0,
-  //     image: "nami.jpeg",
-  //     quantity: 20,
-  //     category: "Dessert",
-  //   },
-  //   {
-  //     name: "Cheesecake",
-  //     description: "New York style cheesecake with fresh strawberry topping.",
-  //     price: 7.5,
-  //     image: "cheesecake.jpg",
-  //     quantity: 25,
-  //     category: "Dessert",
-  //   },
-  //   {
-  //     name: "Tiramisu",
-  //     description:
-  //       "Classic Italian dessert with coffee-soaked ladyfingers and mascarpone.",
-  //     price: 8.99,
-  //     image: "tiramisu.jpg",
-  //     quantity: 18,
-  //     category: "Dessert",
-  //   },
-  //   {
-  //     name: "Ice Cream Sundae",
-  //     description:
-  //       "Vanilla ice cream with chocolate sauce, whipped cream, and cherry.",
-  //     price: 5.5,
-  //     image: "ice_cream_sundae.jpg",
-  //     quantity: 40,
-  //     category: "Dessert",
-  //   },
-  //   {
-  //     name: "Apple Pie",
-  //     description: "Homemade apple pie with cinnamon and a flaky pastry crust.",
-  //     price: 6.99,
-  //     image: "apple_pie.jpg",
-  //     quantity: 12,
-  //     category: "Dessert",
-  //   },
+  {
+    name: "Boa Hancock Cake",
+    description: "Rich and moist chocolate cake with a creamy ganache topping.",
+    price: 6.0,
+    image: "Boa Hancock1.jpg",
+    quantity: 20,
+    category: "Dessert",
+  },
+  {
+    name: "Boa Hancock Cheesecake",
+    description: "New York style cheesecake with fresh strawberry topping.",
+    price: 7.5,
+    image: "Boa Hancock2.jpg",
+    quantity: 25,
+    category: "Dessert",
+  },
+  {
+    name: "Tiramisu",
+    description:
+      "Classic Italian dessert with coffee-soaked ladyfingers and mascarpone.",
+    price: 8.99,
+    image: "n3.jpg",
+    quantity: 18,
+    category: "Dessert",
+  },
+  {
+    name: "Ice Cream Sundae",
+    description:
+      "Vanilla ice cream with chocolate sauce, whipped cream, and cherry.",
+    price: 5.5,
+    image: "n4.jpg",
+    quantity: 40,
+    category: "Dessert",
+  },
+  {
+    name: "Apple Pie",
+    description: "Homemade apple pie with cinnamon and a flaky pastry crust.",
+    price: 6.99,
+    image: "n14.jpg",
+    quantity: 12,
+    category: "Dessert",
+  },
+  {
+    name: "Ngan",
+    description: "Homemade apple pie with cinnamon and a flaky pastry crust.",
+    price: 6.99,
+    image: "n24.jpg",
+    quantity: 12,
+    category: "Dessert",
+  },
 
-  //   // Nepali
-  //   {
-  //     name: "Chicken Biryani",
-  //     description:
-  //       "Aromatic basmati rice cooked with tender chicken and Indian spices.",
-  //     price: 10.0,
-  //     image: "nico.jpg",
-  //     quantity: 40,
-  //     category: "Nepali",
-  //   },
-  //   {
-  //     name: "Dal Bhat",
-  //     description:
-  //       "Traditional Nepali meal with lentil soup, rice, and vegetable curry.",
-  //     price: 9.99,
-  //     image: "dal_bhat.jpg",
-  //     quantity: 35,
-  //     category: "Nepali",
-  //   },
-  //   {
-  //     name: "Chicken Momo",
-  //     description:
-  //       "Steamed dumplings filled with seasoned ground chicken and herbs.",
-  //     price: 8.5,
-  //     image: "chicken_momo.jpg",
-  //     quantity: 50,
-  //     category: "Nepali",
-  //   },
-  //   {
-  //     name: "Vegetable Curry",
-  //     description: "Mixed vegetables cooked in a spicy tomato-based curry sauce.",
-  //     price: 7.99,
-  //     image: "veg_curry.jpg",
-  //     quantity: 30,
-  //     category: "Nepali",
-  //   },
-  //   {
-  //     name: "Chicken Sekuwa",
-  //     description:
-  //       "Grilled chicken marinated in Nepali spices and served with rice.",
-  //     price: 12.99,
-  //     image: "chicken_sekuwa.jpg",
-  //     quantity: 25,
-  //     category: "Nepali",
-  //   },
+  // Nepali
+  {
+    name: "Retsu Unohana Chicken Biryani",
+    description:
+      "Aromatic basmati rice cooked with tender chicken and Indian spices.",
+    price: 10.0,
+    image: "Retsu Unohana1.jpg",
+    quantity: 40,
+    category: "Nepali",
+  },
+  {
+    name: "Retsu Unohana Dal Bhat",
+    description:
+      "Traditional Nepali meal with lentil soup, rice, and vegetable curry.",
+    price: 9.99,
+    image: "Retsu Unohana2.jpg",
+    quantity: 35,
+    category: "Nepali",
+  },
+  {
+    name: "Mei Mei Chicken Momo",
+    description:
+      "Steamed dumplings filled with seasoned ground chicken and herbs.",
+    price: 8.5,
+    image: "Mei Mei1.jpg",
+    quantity: 50,
+    category: "Nepali",
+  },
+  {
+    name: "Mei Mei Vegetable Curry",
+    description: "Mixed vegetables cooked in a spicy tomato-based curry sauce.",
+    price: 7.99,
+    image: "Mei Mei2.jpg",
+    quantity: 30,
+    category: "Nepali",
+  },
+  {
+    name: "Boa Hancock Chicken Sekuwa",
+    description:
+      "Grilled chicken marinated in Nepali spices and served with rice.",
+    price: 12.99,
+    image: "Boa Hancock18.jpg",
+    quantity: 25,
+    category: "Nepali",
+  },
 
   //   // Mexican
   //   {

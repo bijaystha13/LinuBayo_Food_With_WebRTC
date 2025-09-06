@@ -116,6 +116,7 @@ export default function MenuPage() {
         hasNextPage: false,
         hasPrevPage: false,
       });
+      // Only set currentPage if it's different from what we expect
       setCurrentPage(page);
     },
     [itemsPerPage]
@@ -126,11 +127,54 @@ export default function MenuPage() {
     async (page = 1, resetPage = false) => {
       try {
         const targetPage = resetPage ? 1 : page;
+
+        // Set the current page FIRST, before the API call
+        setCurrentPage(targetPage);
+
         let responseData;
 
         if (selectedCategory === "all") {
-          // Use the general foods endpoint with category filter
-          const queryParams = buildQueryParams(targetPage);
+          // Build query params manually to avoid dependency issues
+          const params = new URLSearchParams();
+
+          if (searchQuery.trim()) {
+            params.append("search", searchQuery.trim());
+          }
+
+          if (priceRange[0] > 0) {
+            params.append("minPrice", priceRange[0].toString());
+          }
+
+          if (priceRange[1] < 1000) {
+            params.append("maxPrice", priceRange[1].toString());
+          }
+
+          // Map sortBy values to backend format
+          let backendSortBy = "name";
+          let order = "asc";
+
+          switch (sortBy) {
+            case "price-low":
+              backendSortBy = "price";
+              order = "asc";
+              break;
+            case "price-high":
+              backendSortBy = "price";
+              order = "desc";
+              break;
+            case "name":
+            default:
+              backendSortBy = "name";
+              order = "asc";
+              break;
+          }
+
+          params.append("sortBy", backendSortBy);
+          params.append("order", order);
+          params.append("page", targetPage.toString());
+          params.append("limit", itemsPerPage.toString());
+
+          const queryParams = params.toString();
           responseData = await sendRequest(
             `${API_BASE}/api/foods?${queryParams}`
           );
@@ -186,12 +230,10 @@ export default function MenuPage() {
             // Response from /api/foods endpoint
             setLoadedFoods(responseData.foods);
             setPagination(responseData.pagination);
-            setCurrentPage(targetPage);
           } else if (responseData.products && responseData.pagination) {
             // Response from /api/foods/category endpoint with pagination
             setLoadedFoods(responseData.products);
             setPagination(responseData.pagination);
-            setCurrentPage(targetPage);
           } else if (
             responseData.products &&
             Array.isArray(responseData.products)
@@ -216,7 +258,6 @@ export default function MenuPage() {
               hasNextPage: targetPage < totalPages,
               hasPrevPage: targetPage > 1,
             });
-            setCurrentPage(targetPage);
           } else if (Array.isArray(responseData)) {
             // Direct array response (fallback)
             const totalItems = responseData.length;
@@ -234,7 +275,6 @@ export default function MenuPage() {
               hasNextPage: targetPage < totalPages,
               hasPrevPage: targetPage > 1,
             });
-            setCurrentPage(targetPage);
           } else {
             // Empty or unexpected response
             console.log("Empty or unexpected response:", responseData);
@@ -257,17 +297,30 @@ export default function MenuPage() {
       priceRange,
       sortBy,
       itemsPerPage,
-      buildQueryParams,
       sendRequest,
       initializeEmptyState,
     ]
   );
+
+  useEffect(() => {
+    // Reset to page 1 when filters change
+    fetchFoods(1, true);
+  }, [selectedCategory, searchQuery, priceRange, sortBy]);
 
   // Combined effect to handle all filter changes
   useEffect(() => {
     fetchFoods(1, true);
   }, [fetchFoods]);
 
+  // useEffect(() => {
+  //   // Initial load only
+  //   fetchFoods(1, true);
+  // }, []);
+
+  useEffect(() => {
+    // Initial load only
+    fetchFoods(1, true);
+  }, []);
   // Initial load - removed duplicate useEffect
 
   const handleCategoryChange = (category) => {
