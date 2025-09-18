@@ -4,7 +4,7 @@ import { AuthContext } from "@/app/shared/Context/AuthContext";
 import Link from "next/link";
 import styles from "./adminhome.module.css";
 
-const AdminHome = () => {
+const AdminHomePage = () => {
   const authCtx = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
@@ -582,4 +582,4 @@ const AdminHome = () => {
   );
 };
 
-export default AdminHome;
+export default AdminHomePage;

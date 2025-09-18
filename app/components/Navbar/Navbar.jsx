@@ -35,6 +35,23 @@ const Navbar = () => {
     }
   }, [authCtx.isLoggedIn]);
 
+  // Function to get the logo destination URL
+  const getLogoDestination = () => {
+    if (!authCtx.isLoggedIn) {
+      return "/"; // Public home page for non-logged in users
+    }
+
+    if (authCtx.role === "admin") {
+      return "/admin"; // Admin home page
+    }
+
+    if (authCtx.role === "user") {
+      return "/users"; // User home page
+    }
+
+    return "/"; // Fallback to public home
+  };
+
   const handleSearchToggle = () => {
     setIsSearchExpanded(!isSearchExpanded);
     if (!isSearchExpanded) {
@@ -123,7 +140,8 @@ const Navbar = () => {
     <>
       <nav className="navbar">
         <div className="navbar-container">
-          <Link href="/" className="navbar-logo">
+          {/* Dynamic Logo Navigation */}
+          <Link href={getLogoDestination()} className="navbar-logo">
             <span className="logo-icon">🍔</span>
             LinuBayo Food
           </Link>
@@ -142,21 +160,7 @@ const Navbar = () => {
           <ul
             className={`navbar-menu ${isMobileMenuOpen ? "mobile-active" : ""}`}
           >
-            {/* Home - Always visible */}
-            {/* <li className="navbar-item">
-              {authCtx.role === "admin" ? (
-                <NavLink
-                  href="/"
-                  className="navbar-link"
-                  onClick={closeMobileMenu}
-                >
-                 Admin Home
-                </NavLink>
-              ) : (
-                <NavLink href="/users">Users Home</NavLink>
-              ): <NavLink href='/'>Home</NavLink>}
-            </li> */}
-
+            {/* Home - Dynamic based on login status */}
             <li className="navbar-item">
               {!authCtx.isLoggedIn && (
                 <NavLink
@@ -242,7 +246,7 @@ const Navbar = () => {
             {authCtx.isLoggedIn && authCtx.role === "user" && (
               <li className="navbar-item">
                 <NavLink
-                  href="/orders"
+                  href="/users/orders"
                   className="navbar-link"
                   onClick={closeMobileMenu}
                 >

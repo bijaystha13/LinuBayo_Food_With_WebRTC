@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "@/app/shared/Context/AuthContext"; // Use AuthContext instead
+import { AuthContext } from "@/app/shared/Context/AuthContext";
+import { useForm } from "@/app/shared/hooks/form-hook";
 import * as Form from "@radix-ui/react-form";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Toast from "@radix-ui/react-toast";
@@ -21,23 +22,64 @@ const AuthPage = () => {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
+  const [mounted, setMounted] = useState(false);
 
   const router = useRouter();
-  const authCtx = useContext(AuthContext); // Use AuthContext instead of useAuth hook
+  const authCtx = useContext(AuthContext);
 
-  // Redirect if already logged in
+  // Form state for Sign In
+  const [signinFormState, signinInputHandler, setSigninData, resetSigninForm] =
+    useForm(
+      {
+        email: {
+          value: "",
+          isValid: false,
+        },
+        password: {
+          value: "",
+          isValid: false,
+        },
+      },
+      false
+    );
+
+  // Form state for Sign Up - Added phone number
+  const [signupFormState, signupInputHandler, setSignupData, resetSignupForm] =
+    useForm(
+      {
+        firstName: {
+          value: "",
+          isValid: false,
+        },
+        lastName: {
+          value: "",
+          isValid: false,
+        },
+        email: {
+          value: "",
+          isValid: false,
+        },
+        phoneNumber: {
+          value: "",
+          isValid: false,
+        },
+        password: {
+          value: "",
+          isValid: false,
+        },
+        confirmPassword: {
+          value: "",
+          isValid: false,
+        },
+      },
+      false
+    );
+
+  // Handle mounting animation and auth state
   useEffect(() => {
-    console.log("AuthPage - Auth state:", {
-      isLoggedIn: authCtx.isLoggedIn,
-      isLoading: authCtx.isLoading,
-      userId: authCtx.userId,
-      role: authCtx.role,
-    });
+    setMounted(true);
 
     if (authCtx.isLoggedIn && !authCtx.isLoading) {
-      console.log("User is logged in, redirecting based on role");
-
-      // Role-based redirection
       if (authCtx.role === "admin") {
         router.push("/admin");
       } else {
@@ -46,20 +88,79 @@ const AuthPage = () => {
     }
   }, [authCtx.isLoggedIn, authCtx.isLoading, authCtx.role, router]);
 
-  // Enhanced animation trigger on mount
-  useEffect(() => {
-    const container = document.querySelector(`.${styles.authContainer}`);
-    if (container) {
-      setTimeout(() => {
-        container.classList.add(styles.mounted);
-      }, 100);
+  // Input validation
+  const validateEmail = (email) => {
+    return email.includes("@") && email.length > 5;
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  };
+
+  const validateName = (name) => {
+    return name.trim().length >= 2;
+  };
+
+  const validatePhoneNumber = (phone) => {
+    // Basic phone validation - accepts various formats
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    return (
+      phone.length >= 10 && phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""))
+    );
+  };
+
+  // Handle input changes
+  const handleInputChange = (inputId, value, formType) => {
+    let isValid = false;
+
+    switch (inputId) {
+      case "email":
+        isValid = validateEmail(value);
+        break;
+      case "password":
+        isValid = validatePassword(value);
+        break;
+      case "confirmPassword":
+        isValid =
+          validatePassword(value) &&
+          value === signupFormState.inputs.password?.value;
+        break;
+      case "firstName":
+      case "lastName":
+        isValid = validateName(value);
+        break;
+      case "phoneNumber":
+        isValid = validatePhoneNumber(value);
+        break;
+      default:
+        isValid = value.length > 0;
     }
-  }, []);
+
+    if (formType === "signin") {
+      signinInputHandler(inputId, value, isValid);
+    } else {
+      signupInputHandler(inputId, value, isValid);
+
+      // Re-validate confirm password when password changes
+      if (
+        inputId === "password" &&
+        signupFormState.inputs.confirmPassword?.value
+      ) {
+        const confirmPasswordValid =
+          validatePassword(signupFormState.inputs.confirmPassword.value) &&
+          signupFormState.inputs.confirmPassword.value === value;
+        signupInputHandler(
+          "confirmPassword",
+          signupFormState.inputs.confirmPassword.value,
+          confirmPasswordValid
+        );
+      }
+    }
+  };
 
   // API call function for authentication
   const callAuthAPI = async (endpoint, userData) => {
     try {
-      // Update to match your Express backend routes
       const apiEndpoint = endpoint === "login" ? "login" : "signup";
       const response = await fetch(
         `http://localhost:5001/api/users/${apiEndpoint}`,
@@ -88,21 +189,26 @@ const AuthPage = () => {
     event.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData(event.target);
+    const currentFormState =
+      formType === "signin" ? signinFormState : signupFormState;
+
+    if (!currentFormState.isValid) {
+      setToastMessage("Please fill in all fields correctly");
+      setToastType("error");
+      setToastOpen(true);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       if (formType === "signin") {
-        // Sign In
         const loginData = {
-          email: formData.get("email"),
-          password: formData.get("password"),
+          email: signinFormState.inputs.email.value,
+          password: signinFormState.inputs.password.value,
         };
 
-        console.log("Attempting login with:", { email: loginData.email });
         const response = await callAuthAPI("login", loginData);
-        console.log("Login response:", response);
 
-        // Use AuthContext login function with the expected format
         authCtx.login({
           userId: response.userId,
           token: response.token,
@@ -113,7 +219,6 @@ const AuthPage = () => {
         setToastType("success");
         setToastOpen(true);
 
-        // Role-based navigation after successful login
         setTimeout(() => {
           if (response.role === "admin") {
             router.push("/admin");
@@ -122,30 +227,22 @@ const AuthPage = () => {
           }
         }, 1500);
       } else {
-        // Sign Up
-        const password = formData.get("password");
-        const confirmPassword = formData.get("confirmPassword");
+        const password = signupFormState.inputs.password.value;
+        const confirmPassword = signupFormState.inputs.confirmPassword.value;
 
-        // Validate password match
         if (password !== confirmPassword) {
           throw new Error("Passwords don't match");
         }
 
         const signupData = {
-          name: `${formData.get("firstName")} ${formData.get("lastName")}`,
-          email: formData.get("email"),
-          phonenumber: formData.get("phonenumber") || "",
+          name: `${signupFormState.inputs.firstName.value} ${signupFormState.inputs.lastName.value}`,
+          email: signupFormState.inputs.email.value,
+          phonenumber: signupFormState.inputs.phoneNumber.value,
           password: password,
         };
 
-        console.log("Attempting signup with:", {
-          name: signupData.name,
-          email: signupData.email,
-        });
         const response = await callAuthAPI("signup", signupData);
-        console.log("Signup response:", response);
 
-        // Auto login after successful signup using AuthContext
         authCtx.login({
           userId: response.userId,
           token: response.token,
@@ -156,7 +253,6 @@ const AuthPage = () => {
         setToastType("success");
         setToastOpen(true);
 
-        // Role-based navigation after successful signup
         setTimeout(() => {
           if (response.role === "admin") {
             router.push("/admin");
@@ -167,7 +263,18 @@ const AuthPage = () => {
       }
     } catch (error) {
       console.error("Auth error:", error);
-      setToastMessage(error.message);
+
+      // Better error message handling
+      let errorMessage = error.message;
+      if (error.message.includes("validation")) {
+        errorMessage = "Please check your input and try again";
+      } else if (error.message.includes("email")) {
+        errorMessage = "Email already exists or is invalid";
+      } else if (error.message.includes("network")) {
+        errorMessage = "Network error. Please check your connection";
+      }
+
+      setToastMessage(errorMessage);
       setToastType("error");
       setToastOpen(true);
     } finally {
@@ -181,20 +288,18 @@ const AuthPage = () => {
     setToastOpen(true);
   };
 
-  const handleForgotPassword = () => {
-    setToastMessage("Password reset feature coming soon!");
-    setToastType("info");
-    setToastOpen(true);
-  };
-
   // Show loading state while auth context is loading
   if (authCtx.isLoading) {
     return (
       <div className={styles.authWrapper}>
-        <div className={styles.authContainer}>
-          <div style={{ textAlign: "center", padding: "2rem" }}>
-            <div className={styles.spinner}></div>
-            <p>Loading...</p>
+        <div className={`${styles.authContainer} ${styles.loading}`}>
+          <div className={styles.loadingContent}>
+            <div className={styles.loadingSpinner}>
+              <div className={styles.spinnerRing}></div>
+              <div className={styles.spinnerRing}></div>
+              <div className={styles.spinnerRing}></div>
+            </div>
+            <p className={styles.loadingText}>Authenticating...</p>
           </div>
         </div>
       </div>
@@ -203,382 +308,279 @@ const AuthPage = () => {
 
   return (
     <div className={styles.authWrapper}>
-      {/* Enhanced Background Animation */}
+      {/* Animated Background */}
       <div className={styles.backgroundAnimation}>
-        <div className={styles.floatingShape}></div>
-        <div className={styles.floatingShape}></div>
-        <div className={styles.floatingShape}></div>
-        <div className={styles.floatingShape}></div>
-        <div className={styles.floatingShape}></div>
-        <div className={styles.floatingShape}></div>
+        <div className={styles.wave}>
+          <div className={styles.waveLayer1}></div>
+          <div className={styles.waveLayer2}></div>
+        </div>
+        <div className={styles.aurora}>
+          <div className={styles.auroraLayer1}></div>
+        </div>
       </div>
 
-      {/* Gradient overlay for depth */}
-      <div className={styles.gradientOverlay}></div>
-
-      <div className={styles.authContainer}>
-        {/* Enhanced Brand Section */}
+      <div
+        className={`${styles.authContainer} ${mounted ? styles.mounted : ""}`}
+      >
+        {/* Compact Brand Section */}
         <div className={styles.brandSection}>
           <div className={styles.logo}>
-            <div className={styles.logoIcon}>
-              <span className={styles.logoEmoji}>🍔</span>
-            </div>
+            <span className={styles.logoEmoji}>🍔</span>
             <h1 className={styles.brandName}>LinuBayo Food</h1>
           </div>
-          <p className={styles.brandTagline}>
-            {activeTab === "signin"
-              ? "Welcome back! Please enter your details."
-              : "Create your account to get started."}
-          </p>
         </div>
 
-        {/* Enhanced Auth Form */}
+        {/* Compact Auth Form */}
         <div className={styles.formContainer}>
           <Tabs.Root
             value={activeTab}
             onValueChange={setActiveTab}
             className={styles.tabsRoot}
           >
-            {/* Enhanced Tab List */}
-            <Tabs.List className={styles.tabsList}>
+            {/* Compact Tab List */}
+            <Tabs.List className={styles.tabsList} data-value={activeTab}>
               <Tabs.Trigger value="signin" className={styles.tabsTrigger}>
-                <span>Sign In</span>
+                Sign In
               </Tabs.Trigger>
               <Tabs.Trigger value="signup" className={styles.tabsTrigger}>
-                <span>Sign Up</span>
+                Sign Up
               </Tabs.Trigger>
               <div className={styles.tabIndicator}></div>
             </Tabs.List>
 
-            {/* Enhanced Sign In Tab */}
+            {/* Compact Sign In Tab */}
             <Tabs.Content value="signin" className={styles.tabsContent}>
-              <Form.Root
-                className={styles.form}
+              <form
                 onSubmit={(e) => handleSubmit(e, "signin")}
+                className={styles.form}
               >
-                <Form.Field name="email" className={styles.formField}>
-                  <Form.Label className={styles.formLabel}>
-                    <span>Email</span>
-                  </Form.Label>
-                  <div className={styles.inputContainer}>
-                    <Form.Control asChild>
+                <div className={styles.formGrid}>
+                  <div className={styles.inputGroup}>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      className={styles.input}
+                      value={signinFormState.inputs.email?.value || ""}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value, "signin")
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <div className={styles.passwordContainer}>
                       <input
-                        type="email"
-                        name="email"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
                         className={styles.input}
-                        placeholder="Enter your email"
+                        value={signinFormState.inputs.password?.value || ""}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "password",
+                            e.target.value,
+                            "signin"
+                          )
+                        }
                         required
                       />
-                    </Form.Control>
-                    <div className={styles.inputFocus}></div>
-                  </div>
-                  <Form.Message
-                    match="valueMissing"
-                    className={styles.formMessage}
-                  >
-                    Please enter your email
-                  </Form.Message>
-                  <Form.Message
-                    match="typeMismatch"
-                    className={styles.formMessage}
-                  >
-                    Please provide a valid email
-                  </Form.Message>
-                </Form.Field>
-
-                <Form.Field name="password" className={styles.formField}>
-                  <Form.Label className={styles.formLabel}>
-                    <span>Password</span>
-                  </Form.Label>
-                  <div className={styles.passwordContainer}>
-                    <div className={styles.inputContainer}>
-                      <Form.Control asChild>
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          name="password"
-                          className={styles.input}
-                          placeholder="Enter your password"
-                          required
-                          minLength={6}
-                        />
-                      </Form.Control>
-                      <div className={styles.inputFocus}></div>
+                      <button
+                        type="button"
+                        className={styles.passwordToggle}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeNoneIcon /> : <EyeOpenIcon />}
+                      </button>
                     </div>
+                  </div>
+
+                  <div className={styles.formOptions}>
+                    <label className={styles.checkbox}>
+                      <input type="checkbox" />
+                      <span className={styles.checkmark}></span>
+                      <span>Remember me</span>
+                    </label>
                     <button
                       type="button"
-                      className={styles.passwordToggle}
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label="Toggle password visibility"
+                      className={styles.forgotPassword}
+                      onClick={() => {
+                        setToastMessage("Password reset coming soon!");
+                        setToastType("info");
+                        setToastOpen(true);
+                      }}
                     >
-                      {showPassword ? <EyeNoneIcon /> : <EyeOpenIcon />}
+                      Forgot password?
                     </button>
                   </div>
-                  <Form.Message
-                    match="valueMissing"
-                    className={styles.formMessage}
-                  >
-                    Please enter your password
-                  </Form.Message>
-                  <Form.Message match="tooShort" className={styles.formMessage}>
-                    Password must be at least 6 characters
-                  </Form.Message>
-                </Form.Field>
 
-                <div className={styles.formOptions}>
-                  <label className={styles.checkbox}>
-                    <input type="checkbox" name="remember" />
-                    <span className={styles.checkmark}></span>
-                    <span className={styles.checkboxLabel}>Remember me</span>
-                  </label>
-                  <button
-                    type="button"
-                    className={styles.forgotPassword}
-                    onClick={handleForgotPassword}
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-
-                <Form.Submit asChild>
                   <button
                     type="submit"
-                    className={`${styles.submitButton} ${
-                      isLoading ? styles.loading : ""
-                    }`}
-                    disabled={isLoading}
+                    className={`${styles.submitButton} ${styles.liquidGlass}`}
+                    disabled={isLoading || !signinFormState.isValid}
                   >
                     <div className={styles.buttonContent}>
                       {isLoading ? (
                         <>
-                          <span className={styles.spinner}></span>
+                          <div className={styles.loadingDots}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </div>
                           <span>Signing In...</span>
                         </>
                       ) : (
                         <span>Sign In</span>
                       )}
                     </div>
-                    <div className={styles.buttonShine}></div>
+                    <div className={styles.liquidEffect}></div>
                   </button>
-                </Form.Submit>
-              </Form.Root>
+                </div>
+              </form>
             </Tabs.Content>
 
-            {/* Enhanced Sign Up Tab */}
+            {/* Compact Sign Up Tab */}
             <Tabs.Content value="signup" className={styles.tabsContent}>
-              <Form.Root
-                className={styles.form}
+              <form
                 onSubmit={(e) => handleSubmit(e, "signup")}
+                className={styles.form}
               >
-                <div className={styles.nameFields}>
-                  <Form.Field name="firstName" className={styles.formField}>
-                    <Form.Label className={styles.formLabel}>
-                      <span>First Name</span>
-                    </Form.Label>
-                    <div className={styles.inputContainer}>
-                      <Form.Control asChild>
-                        <input
-                          type="text"
-                          name="firstName"
-                          className={styles.input}
-                          placeholder="First name"
-                          required
-                        />
-                      </Form.Control>
-                      <div className={styles.inputFocus}></div>
-                    </div>
-                    <Form.Message
-                      match="valueMissing"
-                      className={styles.formMessage}
-                    >
-                      Please enter your first name
-                    </Form.Message>
-                  </Form.Field>
-
-                  <Form.Field name="lastName" className={styles.formField}>
-                    <Form.Label className={styles.formLabel}>
-                      <span>Last Name</span>
-                    </Form.Label>
-                    <div className={styles.inputContainer}>
-                      <Form.Control asChild>
-                        <input
-                          type="text"
-                          name="lastName"
-                          className={styles.input}
-                          placeholder="Last name"
-                          required
-                        />
-                      </Form.Control>
-                      <div className={styles.inputFocus}></div>
-                    </div>
-                    <Form.Message
-                      match="valueMissing"
-                      className={styles.formMessage}
-                    >
-                      Please enter your last name
-                    </Form.Message>
-                  </Form.Field>
-                </div>
-
-                <Form.Field name="email" className={styles.formField}>
-                  <Form.Label className={styles.formLabel}>
-                    <span>Email</span>
-                  </Form.Label>
-                  <div className={styles.inputContainer}>
-                    <Form.Control asChild>
-                      <input
-                        type="email"
-                        name="email"
-                        className={styles.input}
-                        placeholder="Enter your email"
-                        required
-                      />
-                    </Form.Control>
-                    <div className={styles.inputFocus}></div>
+                <div className={styles.formGrid}>
+                  <div className={styles.nameRow}>
+                    <input
+                      type="text"
+                      placeholder="First Name"
+                      className={styles.input}
+                      value={signupFormState.inputs.firstName?.value || ""}
+                      onChange={(e) =>
+                        handleInputChange("firstName", e.target.value, "signup")
+                      }
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Last Name"
+                      className={styles.input}
+                      value={signupFormState.inputs.lastName?.value || ""}
+                      onChange={(e) =>
+                        handleInputChange("lastName", e.target.value, "signup")
+                      }
+                      required
+                    />
                   </div>
-                  <Form.Message
-                    match="valueMissing"
-                    className={styles.formMessage}
-                  >
-                    Please enter your email
-                  </Form.Message>
-                  <Form.Message
-                    match="typeMismatch"
-                    className={styles.formMessage}
-                  >
-                    Please provide a valid email
-                  </Form.Message>
-                </Form.Field>
 
-                <Form.Field name="password" className={styles.formField}>
-                  <Form.Label className={styles.formLabel}>
-                    <span>Password</span>
-                  </Form.Label>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className={styles.input}
+                    value={signupFormState.inputs.email?.value || ""}
+                    onChange={(e) =>
+                      handleInputChange("email", e.target.value, "signup")
+                    }
+                    required
+                  />
+
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    className={styles.input}
+                    value={signupFormState.inputs.phoneNumber?.value || ""}
+                    onChange={(e) =>
+                      handleInputChange("phoneNumber", e.target.value, "signup")
+                    }
+                    required
+                  />
+
                   <div className={styles.passwordContainer}>
-                    <div className={styles.inputContainer}>
-                      <Form.Control asChild>
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          name="password"
-                          className={styles.input}
-                          placeholder="Create a password"
-                          required
-                          minLength={6}
-                        />
-                      </Form.Control>
-                      <div className={styles.inputFocus}></div>
-                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      className={styles.input}
+                      value={signupFormState.inputs.password?.value || ""}
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value, "signup")
+                      }
+                      required
+                    />
                     <button
                       type="button"
                       className={styles.passwordToggle}
                       onClick={() => setShowPassword(!showPassword)}
-                      aria-label="Toggle password visibility"
                     >
                       {showPassword ? <EyeNoneIcon /> : <EyeOpenIcon />}
                     </button>
                   </div>
-                  <Form.Message
-                    match="valueMissing"
-                    className={styles.formMessage}
-                  >
-                    Please enter a password
-                  </Form.Message>
-                  <Form.Message match="tooShort" className={styles.formMessage}>
-                    Password must be at least 6 characters
-                  </Form.Message>
-                </Form.Field>
 
-                <Form.Field name="confirmPassword" className={styles.formField}>
-                  <Form.Label className={styles.formLabel}>
-                    <span>Confirm Password</span>
-                  </Form.Label>
                   <div className={styles.passwordContainer}>
-                    <div className={styles.inputContainer}>
-                      <Form.Control asChild>
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          name="confirmPassword"
-                          className={styles.input}
-                          placeholder="Confirm your password"
-                          required
-                          minLength={6}
-                        />
-                      </Form.Control>
-                      <div className={styles.inputFocus}></div>
-                    </div>
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm Password"
+                      className={styles.input}
+                      value={
+                        signupFormState.inputs.confirmPassword?.value || ""
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          "confirmPassword",
+                          e.target.value,
+                          "signup"
+                        )
+                      }
+                      required
+                    />
                     <button
                       type="button"
                       className={styles.passwordToggle}
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      aria-label="Toggle confirm password visibility"
                     >
                       {showConfirmPassword ? <EyeNoneIcon /> : <EyeOpenIcon />}
                     </button>
                   </div>
-                  <Form.Message
-                    match="valueMissing"
-                    className={styles.formMessage}
-                  >
-                    Please confirm your password
-                  </Form.Message>
-                </Form.Field>
 
-                <div className={styles.formOptions}>
                   <label className={styles.checkbox}>
-                    <input type="checkbox" name="terms" required />
+                    <input type="checkbox" required />
                     <span className={styles.checkmark}></span>
-                    <span className={styles.checkboxLabel}>
-                      I agree to the{" "}
-                      <a href="#" className={styles.link}>
-                        Terms
-                      </a>{" "}
-                      and{" "}
-                      <a href="#" className={styles.link}>
-                        Privacy Policy
-                      </a>
-                    </span>
+                    <span>I agree to the Terms and Privacy Policy</span>
                   </label>
-                </div>
 
-                <Form.Submit asChild>
                   <button
                     type="submit"
-                    className={`${styles.submitButton} ${
-                      isLoading ? styles.loading : ""
-                    }`}
-                    disabled={isLoading}
+                    className={`${styles.submitButton} ${styles.liquidGlass}`}
+                    disabled={isLoading || !signupFormState.isValid}
                   >
                     <div className={styles.buttonContent}>
                       {isLoading ? (
                         <>
-                          <span className={styles.spinner}></span>
+                          <div className={styles.loadingDots}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </div>
                           <span>Creating Account...</span>
                         </>
                       ) : (
                         <span>Create Account</span>
                       )}
                     </div>
-                    <div className={styles.buttonShine}></div>
+                    <div className={styles.liquidEffect}></div>
                   </button>
-                </Form.Submit>
-              </Form.Root>
+                </div>
+              </form>
             </Tabs.Content>
           </Tabs.Root>
 
-          {/* Enhanced Divider */}
-          <div className={styles.divider}>
-            <span>Or continue with</span>
-          </div>
-
-          {/* Enhanced Social Login */}
-          <div className={styles.socialButtons}>
-            <button
-              className={styles.socialButton}
-              onClick={() => handleSocialLogin("Google")}
-              disabled={isLoading}
-            >
-              <div className={styles.socialIconWrapper}>
+          {/* Compact Social Login */}
+          <div className={styles.socialSection}>
+            <div className={styles.divider}>
+              <span>Or continue with</span>
+            </div>
+            <div className={styles.socialButtons}>
+              <button
+                className={`${styles.socialButton} ${styles.liquidGlass}`}
+                onClick={() => handleSocialLogin("Google")}
+                disabled={isLoading}
+              >
                 <svg viewBox="0 0 24 24" className={styles.socialIcon}>
                   <path
                     fill="#4285F4"
@@ -597,23 +599,32 @@ const AuthPage = () => {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-              </div>
-              <span>Google</span>
-            </button>
-            <button
-              className={styles.socialButton}
-              onClick={() => handleSocialLogin("GitHub")}
-              disabled={isLoading}
-            >
-              <div className={styles.socialIconWrapper}>
-                <GitHubLogoIcon className={styles.socialIcon} />
-              </div>
-              <span>GitHub</span>
-            </button>
+                <span>Google</span>
+                <div className={styles.liquidEffect}></div>
+              </button>
+              <button
+                className={`${styles.socialButton} ${styles.liquidGlass}`}
+                onClick={() => handleSocialLogin("Apple")}
+                disabled={isLoading}
+              >
+                <svg viewBox="0 0 24 24" className={styles.socialIcon}>
+                  <path
+                    fill="currentColor"
+                    d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.653-.026 2.681-1.489 3.71-2.95 1.18-1.694 1.668-3.369 1.694-3.456-.037-.013-3.258-1.24-3.27-4.94-.013-3.117 2.537-4.609 2.651-4.696-1.17-1.947-3.91-1.894-4.699-1.894l-.402-.089z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M10.174 4.222c.845-1.022 1.408-2.473 1.253-3.910-1.214.049-2.681.808-3.54 1.686-.546.546-.859 1.183-.859 1.83.013.546.195 1.0797.39 1.408.859.065 1.713-.546 2.756-1.014z"
+                  />
+                </svg>
+                <span>Apple</span>
+                <div className={styles.liquidEffect}></div>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Enhanced Toast Notification */}
+        {/* Toast Notification */}
         <Toast.Provider swipeDirection="right">
           <Toast.Root
             className={`${styles.toastRoot} ${styles[toastType]}`}

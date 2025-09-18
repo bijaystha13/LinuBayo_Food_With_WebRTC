@@ -17,9 +17,8 @@ router.post(
       .isEmail()
       .withMessage("Valid email is required"),
     check("phonenumber")
-      .optional()
-      .isMobilePhone("ne-NP")
-      .withMessage("Please enter a valid 10-digit Nepali phone number"),
+      .isMobilePhone("any")
+      .withMessage("Please enter a valid phone number"),
     check("password")
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters long"),

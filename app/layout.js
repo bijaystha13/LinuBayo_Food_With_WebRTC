@@ -1,9 +1,8 @@
-// app/layout.js
-import SharedFoodAPI from "./components/FoodsComponents/SharedFoodAPI";
 import Navbar from "./components/Navbar/Navbar";
 import { LoadingProvider } from "@/app/shared/Context/LoadingContext";
-import { AuthProvider } from "./shared/Context/AuthProvider"; // Make sure this path is correct
+import { AuthProvider } from "./shared/Context/AuthProvider";
 import "./globals.css";
+import RouteGuard from "./components/HOC/RouteGuard";
 
 export const metadata = {
   title: "LinuBayo Food",
@@ -17,13 +16,14 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <LoadingProvider>
             <Navbar />
-            <main>
-              <div id="modal-hook"></div>
-              <div id="backdrop-hook"></div>
-              <div id="root"></div>
-              {children}
-            </main>
-            {/* <SharedFoodAPI /> */}
+            <RouteGuard>
+              <main>
+                <div id="modal-hook"></div>
+                <div id="backdrop-hook"></div>
+                <div id="root"></div>
+                {children}
+              </main>
+            </RouteGuard>
           </LoadingProvider>
         </AuthProvider>
       </body>

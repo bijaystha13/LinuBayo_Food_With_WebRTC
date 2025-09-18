@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./AdminCreateFoodPage.module.css";
 import AdminCreateFood from "@/app/components/Admin/AdminCreateFood";
+import Image from "next/image";
 
 const AdminCreateFoodPage = () => {
   const router = useRouter();
@@ -36,7 +37,7 @@ const AdminCreateFoodPage = () => {
         <div className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>Admin Dashboard</h1>
           <p className={styles.pageSubtitle}>
-            Create and manage your restaurant's delicious offerings
+            Create and manage your restaurant&aeos;s delicious offerings
           </p>
 
           <div className={styles.actionButtons}>
@@ -70,7 +71,7 @@ const AdminCreateFoodPage = () => {
                 {recentlyCreated.map((food) => (
                   <div key={food.id} className={styles.recentCard}>
                     <div className={styles.cardImage}>
-                      <img
+                      <Image
                         src={`http://localhost:5001/${food.image}`}
                         alt={food.name}
                         className={styles.foodImage}
