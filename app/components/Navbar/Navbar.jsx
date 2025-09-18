@@ -251,32 +251,6 @@ const Navbar = () => {
               </li>
             )}
 
-            {/* Admin Panel - Only for admin users */}
-            {authCtx.isLoggedIn && authCtx.role === "admin" && (
-              <li className="navbar-item">
-                <NavLink
-                  href="/admin"
-                  className="navbar-link"
-                  onClick={closeMobileMenu}
-                >
-                  Admin Panel
-                </NavLink>
-              </li>
-            )}
-
-            {/* Dashboard - Only for admin users */}
-            {authCtx.isLoggedIn && authCtx.role === "admin" && (
-              <li className="navbar-item">
-                <NavLink
-                  href="/admin/dashboard"
-                  className="navbar-link"
-                  onClick={closeMobileMenu}
-                >
-                  Dashboard
-                </NavLink>
-              </li>
-            )}
-
             {/* User Management - Only for admin users */}
             {authCtx.isLoggedIn && authCtx.role === "admin" && (
               <li className="navbar-item">

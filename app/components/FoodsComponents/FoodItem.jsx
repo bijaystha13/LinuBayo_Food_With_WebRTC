@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Card from "@/app/shared/UIElements/Card";
 import styles from "./FoodItem.module.css";
 import {
   FaEye,
@@ -12,16 +11,21 @@ import {
   FaClock,
   FaPlus,
   FaMinus,
+  FaStar,
+  FaStarHalfAlt,
 } from "react-icons/fa";
 
 export default function FoodItem(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [servingCount, setServingCount] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const router = useRouter();
 
-  const handleViewDetails = () => {
+  const handleViewDetails = async () => {
     setIsLoading(true);
-    router.push(`/product/${props.id}`);
+    setTimeout(() => {
+      router.push(`/product/${props.id}`);
+    }, 300);
   };
 
   const handleUpdate = () => {
@@ -36,33 +40,55 @@ export default function FoodItem(props) {
     }
   };
 
-  const handleAddToCart = () => {
-    console.log("Add to cart:", props.id, "Servings:", servingCount);
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+
+    setTimeout(() => {
+      console.log("Added to cart:", props.id, "Servings:", servingCount);
+      setIsAddingToCart(false);
+    }, 1000);
   };
 
   const incrementServing = () => {
-    setServingCount((prev) => prev + 1);
+    setServingCount((prev) => Math.min(prev + 1, 10));
   };
 
   const decrementServing = () => {
-    setServingCount((prev) => (prev > 1 ? prev - 1 : 1));
+    setServingCount((prev) => Math.max(prev - 1, 1));
   };
 
-  // Default cook time if not provided
   const cookTime = props.cookTime || "15-20";
+  const rating = props.rating || 4.5;
+  const reviewCount = props.reviewCount || 124;
+
+  const discountPercentage =
+    props.originalPrice && props.price
+      ? Math.round(
+          ((props.originalPrice - props.price) / props.originalPrice) * 100
+        )
+      : props.discount || 0;
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<FaStar key={i} />);
+    }
+
+    if (hasHalfStar) {
+      stars.push(<FaStarHalfAlt key="half" />);
+    }
+
+    return stars;
+  };
 
   return (
-    <li
-      className={styles.productItem}
-      style={{
-        animationDelay: `${props.animationDelay}ms`,
-      }}
-    >
+    <li className={styles.productItem}>
       <div className={styles.productItemContent}>
-        {/* Special Badge */}
         {props.isSpecial && <div className={styles.specialBadge}>FEATURED</div>}
 
-        {/* Image Section */}
         <div className={styles.productItemImage}>
           <div className={styles.imageContainer}>
             <img
@@ -80,40 +106,41 @@ export default function FoodItem(props) {
           </div>
         </div>
 
-        {/* Info Section */}
         <div className={styles.productItemInfo}>
           <h2 className={styles.productItemTitle}>
             {props.name || "Unnamed Item"}
           </h2>
 
-          {/* Prices Section */}
+          <div className={styles.rating}>
+            <div className={styles.ratingStars}>{renderStars(rating)}</div>
+            <span className={styles.ratingCount}>({reviewCount})</span>
+          </div>
+
           <div className={styles.productItemPrices}>
             {props.originalPrice && (
               <span className={styles.productItemOriginalPrice}>
-                ${props.originalPrice}
+                ${parseFloat(props.originalPrice).toFixed(2)}
               </span>
             )}
 
             <span className={styles.productItemPrice}>
-              ${props.price || "0.00"}
+              ${parseFloat(props.price || 0).toFixed(2)}
             </span>
 
-            {props.discount && (
+            {discountPercentage > 0 && (
               <span className={styles.productItemDiscount}>
-                -{props.discount}%
+                -{discountPercentage}%
               </span>
             )}
           </div>
 
-          {/* Cook Time */}
           <div className={styles.productItemCookTime}>
             <FaClock className={styles.clockIcon} />
             <span className={styles.cookTimeText}>
-              Cook Time: <strong>{cookTime} mins</strong>
+              <strong>{cookTime} mins</strong>
             </span>
           </div>
 
-          {/* Serving Counter */}
           <div className={styles.servingCounter}>
             <span className={styles.servingLabel}>Servings:</span>
             <div className={styles.counterControls}>
@@ -121,18 +148,23 @@ export default function FoodItem(props) {
                 className={styles.counterBtn}
                 onClick={decrementServing}
                 disabled={servingCount <= 1}
+                aria-label="Decrease servings"
               >
-                -{/* <FaMinus /> */}
+                <FaMinus /> -
               </button>
               <span className={styles.servingCount}>{servingCount}</span>
-              <button className={styles.counterBtn} onClick={incrementServing}>
-                {/* <FaPlus /> */}+
+              <button
+                className={styles.counterBtn}
+                onClick={incrementServing}
+                disabled={servingCount >= 10}
+                aria-label="Increase servings"
+              >
+                <FaPlus /> +
               </button>
             </div>
           </div>
         </div>
 
-        {/* Buttons Section */}
         <div className={styles.productItemButtons}>
           <button
             className={`${styles.btn} ${styles.btnView} ${
@@ -140,40 +172,46 @@ export default function FoodItem(props) {
             }`}
             onClick={handleViewDetails}
             disabled={isLoading}
+            aria-label="View product details"
           >
             <FaEye />
             {isLoading ? "Loading..." : "VIEW DETAILS"}
           </button>
 
-          {/* Update Button */}
           {props.canEdit && (
             <button
               className={`${styles.btn} ${styles.btnUpdate}`}
               onClick={handleUpdate}
+              aria-label="Edit product"
             >
               <FaEdit />
               UPDATE
             </button>
           )}
 
-          {/* Delete Button */}
           {props.canDelete && (
             <button
               className={`${styles.btn} ${styles.btnDelete}`}
               onClick={handleDelete}
+              aria-label="Delete product"
             >
               <FaTrashAlt />
               DELETE
             </button>
           )}
 
-          {/* Add to Cart Button */}
           <button
-            className={`${styles.btn} ${styles.btnAddToCart}`}
+            className={`${styles.btn} ${styles.btnAddToCart} ${
+              isAddingToCart ? styles.btnLoading : ""
+            }`}
             onClick={handleAddToCart}
+            disabled={isAddingToCart}
+            aria-label={`Add ${servingCount} serving${
+              servingCount > 1 ? "s" : ""
+            } to cart`}
           >
-            <FaCartPlus />
-            ADD TO CART ({servingCount})
+            {!isAddingToCart && <FaCartPlus />}
+            {isAddingToCart ? "ADDING..." : `ADD TO CART (${servingCount})`}
           </button>
         </div>
       </div>

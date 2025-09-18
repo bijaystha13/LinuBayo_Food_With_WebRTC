@@ -76,7 +76,6 @@ import HttpError from "./models/HttpError.js";
 dotenv.config();
 const app = express();
 
-// Enable CORS for all routes - MUST be before other middleware
 app.use(
   cors({
     origin: ["http://localhost:3000", "http://localhost:3001"],
@@ -91,9 +90,6 @@ app.use(
     credentials: true,
   })
 );
-
-// Remove this line - it's causing the path-to-regexp error:
-// app.options("*", cors());
 
 app.use(bodyParser.json());
 

@@ -1,7 +1,6 @@
-/* ProductList.module.css */
 .productListContainer {
-  padding: 2rem;
-  min-height: calc(100vh - 80px); /* Adjust based on your navbar height */
+  padding: 1rem;
+  min-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #0a0e1a, #1a1f2e, #0f1419),
@@ -34,20 +33,133 @@
 
 .productList {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2.5rem;
-  padding: 2rem 0;
-  max-width: 1400px;
+  /* grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); */
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+  max-width: 2000px;
   margin: 0 auto;
-  animation: fadeIn 0.8s ease-out;
   flex: 1;
   width: 100%;
 }
 
-@keyframes fadeIn {
-  from {
+.itemWrapper {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.itemWrapper:nth-child(1),
+.itemWrapper:nth-child(2),
+.itemWrapper:nth-child(3) {
+  --row-delay: 0ms;
+}
+
+.itemWrapper:nth-child(4),
+.itemWrapper:nth-child(5),
+.itemWrapper:nth-child(6),
+.itemWrapper:nth-child(7) {
+  --row-delay: 200ms;
+}
+
+.itemWrapper:nth-child(8),
+.itemWrapper:nth-child(9),
+.itemWrapper:nth-child(10),
+.itemWrapper:nth-child(11) {
+  --row-delay: 400ms;
+}
+
+.itemWrapper:nth-child(12),
+.itemWrapper:nth-child(13),
+.itemWrapper:nth-child(14),
+.itemWrapper:nth-child(15) {
+  --row-delay: 600ms;
+}
+
+.itemWrapper:nth-child(16),
+.itemWrapper:nth-child(17),
+.itemWrapper:nth-child(18),
+.itemWrapper:nth-child(19) {
+  --row-delay: 800ms;
+}
+
+.itemWrapper:nth-child(20),
+.itemWrapper:nth-child(21),
+.itemWrapper:nth-child(22),
+.itemWrapper:nth-child(23) {
+  --row-delay: 1000ms;
+}
+
+.productListContainer.animating .itemWrapper {
+  animation: smoothRowSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--row-delay, 0ms);
+}
+
+.productListContainer.complete .itemWrapper {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes smoothRowSlideIn {
+  0% {
     opacity: 0;
     transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.productListContainer.animating {
+  animation: containerFadeIn 0.6s ease-out;
+}
+
+@keyframes containerFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.productListContainer.complete .itemWrapper:hover {
+  transform: translateY(-2px);
+  transition: transform 0.3s ease;
+}
+
+.itemWrapper::before {
+  display: none;
+}
+
+.productListContainer::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.02) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.productListContainer.animating {
+  animation: containerFadeIn 1s ease-out;
+}
+
+@keyframes containerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -55,42 +167,154 @@
   }
 }
 
-/* Stagger animation for grid items */
-.productList > :nth-child(1) {
-  animation-delay: 0.1s;
-}
-.productList > :nth-child(2) {
-  animation-delay: 0.2s;
-}
-.productList > :nth-child(3) {
-  animation-delay: 0.3s;
-}
-.productList > :nth-child(4) {
-  animation-delay: 0.4s;
-}
-.productList > :nth-child(5) {
-  animation-delay: 0.5s;
-}
-.productList > :nth-child(6) {
-  animation-delay: 0.6s;
-}
-.productList > :nth-child(7) {
-  animation-delay: 0.7s;
-}
-.productList > :nth-child(8) {
-  animation-delay: 0.8s;
-}
-.productList > :nth-child(9) {
-  animation-delay: 0.9s;
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0;
+  margin-top: 1rem;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
-/* Enhanced No Product Found Section */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.paginationBtn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.02)
+  );
+  border-radius: inherit;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.paginationBtn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 1);
+}
+
+.paginationBtn:hover:not(:disabled)::after {
+  left: 100%;
+}
+
+.paginationBtn:hover:not(:disabled)::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.05)
+  );
+}
+
+.paginationBtn:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.paginationBtn:disabled {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.paginationBtnActive {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: rgba(199, 210, 254, 1);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.paginationBtnActive::before {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.2),
+    rgba(99, 102, 241, 0.1)
+  );
+}
+
+.paginationInfo {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
 .noProductContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 160px);
-  padding: 2rem;
+  padding: 1.5rem;
   animation: fadeIn 1s ease-out;
   position: relative;
 }
@@ -99,7 +323,7 @@
   background: linear-gradient(145deg, #1a2332, #243447, #1e3042),
     radial-gradient(circle at top right, rgba(30, 144, 255, 0.15), transparent);
   border-radius: 25px;
-  padding: 4rem 3rem;
+  padding: 3rem 2.5rem;
   text-align: center;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -111,7 +335,6 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Enhanced animated gradient background */
 .noProduct::before {
   content: "";
   position: absolute;
@@ -151,7 +374,6 @@
   }
 }
 
-/* Enhanced shimmer effect */
 .noProduct::after {
   content: "";
   position: absolute;
@@ -213,7 +435,6 @@
   }
 }
 
-/* Enhanced emoji icon */
 .noProductIcon {
   font-size: 4.5rem;
   margin-bottom: 2rem;
@@ -238,7 +459,6 @@
   }
 }
 
-/* Enhanced container pulse animation */
 .noProduct {
   animation: containerPulse 4s ease-in-out infinite;
 }
@@ -258,15 +478,14 @@
   }
 }
 
-/* Enhanced loading animation */
 .loadingContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 160px);
-  padding: 2rem;
+  padding: 1.5rem;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .loadingSpinner {
@@ -306,28 +525,68 @@
   }
 }
 
-/* Responsive design */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1200px) {
   .productList {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
+    gap: 1.4rem;
+  }
+
+  .pagination {
+    padding: 0.6rem 0.8rem;
+  }
+
+  .paginationBtn {
+    width: 36px;
+    height: 36px;
   }
 }
 
 @media (max-width: 768px) {
   .productListContainer {
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
   .productList {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    padding: 1rem 0;
+    gap: 1.25rem;
+    padding: 0.25rem 0;
+  }
+
+  .paginationContainer {
+    padding: 0.75rem 0;
+    margin-top: 0.75rem;
+  }
+
+  .pagination {
+    padding: 0.5rem 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .paginationBtn {
+    width: 34px;
+    height: 34px;
+    font-size: 0.85rem;
+  }
+
+  .paginationInfo {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
   }
 
   .noProduct {
-    padding: 3rem 2rem;
-    margin: 1rem;
+    padding: 2.5rem 2rem;
+    margin: 1rem 0.5rem;
   }
 
   .noProductText {
@@ -337,6 +596,10 @@
   .noProductIcon {
     font-size: 4rem;
     margin-bottom: 1.5rem;
+  }
+
+  .loadingContainer {
+    padding: 1.25rem;
   }
 
   .loadingSpinner {
@@ -352,18 +615,41 @@
 
   .productList {
     grid-template-columns: 1fr;
-    gap: 1.2rem;
+    gap: 1rem;
+    padding: 0.25rem 0;
+  }
+
+  .paginationContainer {
     padding: 0.5rem 0;
+    margin-top: 0.5rem;
+  }
+
+  .pagination {
+    padding: 0.4rem 0.5rem;
+    gap: 0.3rem;
+  }
+
+  .paginationBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
+  .paginationInfo {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    margin: 0 0.3rem;
   }
 
   .noProductContainer {
     min-height: calc(100vh - 120px);
-    padding: 1rem;
+    padding: 1rem 0.5rem;
   }
 
   .noProduct {
-    padding: 2.5rem 1.5rem;
+    padding: 2rem 1.5rem;
     border-radius: 20px;
+    margin: 0;
   }
 
   .noProductText {
@@ -387,7 +673,6 @@
   }
 }
 
-/* Add a subtle grid pattern overlay */
 .productListContainer::after {
   content: "";
   position: fixed;
@@ -405,7 +690,6 @@
   z-index: -1;
 }
 
-/* Smooth scrolling enhancement */
 .productListContainer {
   scroll-behavior: smooth;
 }

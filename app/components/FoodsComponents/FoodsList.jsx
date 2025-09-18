@@ -1,29 +1,30 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import Card from "../../shared/UIElements/Card";
 import FoodItem from "@/app/components/FoodsComponents/FoodItem";
 import styles from "./FoodsList.module.css";
 
 export default function ProductList(props) {
   const [animationState, setAnimationState] = useState("idle");
 
-  // Handle animation state
   useEffect(() => {
     if (props.items && props.items.length > 0) {
       setAnimationState("animating");
 
-      // Animation complete after staggered delay
-      const animationDuration = props.items.length * 100 + 500;
-      setTimeout(() => {
+      const totalAnimationTime = Math.max(
+        props.items.length * 100 + 1500,
+        2500
+      );
+
+      const completeTimer = setTimeout(() => {
         setAnimationState("complete");
-      }, animationDuration);
+      }, totalAnimationTime);
+
+      return () => clearTimeout(completeTimer);
     } else {
       setAnimationState("idle");
     }
   }, [props.items]);
 
-  // Show loading state
   if (props.isLoading) {
     return (
       <div className={styles.productListContainer}>
@@ -35,7 +36,6 @@ export default function ProductList(props) {
     );
   }
 
-  // No items found
   if (!props.items || props.items.length === 0) {
     return (
       <div className={styles.productListContainer}>
@@ -52,27 +52,54 @@ export default function ProductList(props) {
   }
 
   return (
-    <div className={styles.productListContainer}>
+    <div className={`${styles.productListContainer} ${styles[animationState]}`}>
       <ul className={styles.productList}>
         {props.items.map((item, index) => (
-          <FoodItem
-            key={item._id || item.id || `item-${index}`} // Fix: Use _id first, then id as fallback
-            id={item._id || item.id} // Fix: Use _id first, then id as fallback
-            name={item.name}
-            image={item.image}
-            price={item.price}
-            category={item.category}
-            quantity={item.quantity}
-            originalPrice={item.originalPrice}
-            discount={item.discount}
-            isSpecial={item.isSpecial || false}
-            canEdit={props.canEdit || false}
-            canDelete={props.canDelete || false}
-            onDeleteProduct={props.onDeleteProduct}
-            animationDelay={index * 100}
-          />
+          <div
+            key={item._id || item.id || `item-${index}`}
+            className={styles.itemWrapper}
+            style={{
+              "--stagger-delay":
+                index > 19 ? `${(index + 1) * 100}ms` : undefined,
+            }}
+          >
+            <FoodItem
+              id={item._id || item.id}
+              name={item.name}
+              image={item.image}
+              price={item.price}
+              category={item.category}
+              quantity={item.quantity}
+              originalPrice={item.originalPrice}
+              discount={item.discount}
+              cookTime={item.cookTime}
+              isSpecial={item.isSpecial || false}
+              canEdit={props.canEdit || false}
+              canDelete={props.canDelete || false}
+              onDeleteProduct={props.onDeleteProduct}
+            />
+          </div>
         ))}
       </ul>
+
+      {animationState === "animating" && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            background: "rgba(0,0,0,0.7)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "20px",
+            fontSize: "12px",
+            zIndex: 1000,
+            display: "none",
+          }}
+        >
+          Animating items... ({props.items.length} items)
+        </div>
+      )}
     </div>
   );
 }

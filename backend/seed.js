@@ -8,315 +8,309 @@ dotenv.config();
 
 const sampleFoods = [
   // Fast Food
-  {
-    name: "Cheeseburger",
-    description:
-      "Juicy grilled beef patty with cheddar cheese, lettuce, tomato, and pickles.",
-    price: 8.99,
-    image: "cheeseburger.jpg",
-    quantity: 50,
-    category: "Fast Food",
-  },
-  {
-    name: "Chicken Wings",
-    description:
-      "Crispy buffalo chicken wings served with celery and blue cheese dip.",
-    price: 9.99,
-    image: "chicken_wings.jpg",
-    quantity: 40,
-    category: "Fast Food",
-  },
-  {
-    name: "Fish & Chips",
-    description: "Beer-battered cod served with golden fries and tartar sauce.",
-    price: 11.5,
-    image: "fish_chips.jpg",
-    quantity: 25,
-    category: "Fast Food",
-  },
-  {
-    name: "Hotdog",
-    description:
-      "Grilled beef frankfurter in a toasted bun with mustard and ketchup.",
-    price: 5.99,
-    image: "hotdog.jpg",
-    quantity: 60,
-    category: "Fast Food",
-  },
-  //
-  {
-    name: "Boa Hancock",
-    description:
-      "Juicy grilled beef patty with cheddar cheese, lettuce, tomato, and pickles.",
-    price: 8.99,
-    image: "boa.jpg",
-    quantity: 50,
-    category: "Fast Food",
-  },
-  {
-    name: "Nami",
-    description:
-      "Crispy buffalo chicken wings served with celery and blue cheese dip.",
-    price: 9.99,
-    image: "nami.jpeg",
-    quantity: 40,
-    category: "Fast Food",
-  },
-  {
-    name: "Nico Robin",
-    description: "Beer-battered cod served with golden fries and tartar sauce.",
-    price: 11.5,
-    image: "nico.jpg",
-    quantity: 25,
-    category: "Fast Food",
-  },
-  {
-    name: "Alya",
-    description:
-      "Grilled beef frankfurter in a toasted bun with mustard and ketchup.",
-    price: 5.99,
-    image: "alya.jpeg",
-    quantity: 60,
-    category: "Fast Food",
-  },
-
-  // Italian
-  {
-    name: "Margherita Pizza",
-    description:
-      "Classic pizza with fresh mozzarella, basil, and tomato sauce.",
-    price: 12.5,
-    image: "margherita_pizza.jpg",
-    quantity: 30,
-    category: "Italian",
-  },
-  {
-    name: "Spaghetti Carbonara",
-    description:
-      "Creamy pasta with pancetta, eggs, parmesan cheese, and black pepper.",
-    price: 14.99,
-    image: "carbonara.jpg",
-    quantity: 35,
-    category: "Italian",
-  },
-  {
-    name: "Chicken Parmesan",
-    description:
-      "Breaded chicken breast topped with marinara sauce and melted mozzarella.",
-    price: 16.99,
-    image: "chicken_parm.jpg",
-    quantity: 20,
-    category: "Italian",
-  },
-  {
-    name: "Lasagna",
-    description:
-      "Layers of pasta with meat sauce, ricotta, and mozzarella cheese.",
-    price: 15.5,
-    image: "lasagna.jpg",
-    quantity: 15,
-    category: "Italian",
-  },
-  {
-    name: "Caesar Salad",
-    description:
-      "Crisp romaine lettuce with parmesan cheese, croutons, and Caesar dressing.",
-    price: 8.99,
-    image: "caesar_salad.jpg",
-    quantity: 45,
-    category: "Italian",
-  },
-
-  // Desserts
-  {
-    name: "Boa Hancock Cake",
-    description: "Rich and moist chocolate cake with a creamy ganache topping.",
-    price: 6.0,
-    image: "Boa Hancock1.jpg",
-    quantity: 20,
-    category: "Dessert",
-  },
-  {
-    name: "Boa Hancock Cheesecake",
-    description: "New York style cheesecake with fresh strawberry topping.",
-    price: 7.5,
-    image: "Boa Hancock2.jpg",
-    quantity: 25,
-    category: "Dessert",
-  },
-  {
-    name: "Tiramisu",
-    description:
-      "Classic Italian dessert with coffee-soaked ladyfingers and mascarpone.",
-    price: 8.99,
-    image: "n3.jpg",
-    quantity: 18,
-    category: "Dessert",
-  },
-  {
-    name: "Ice Cream Sundae",
-    description:
-      "Vanilla ice cream with chocolate sauce, whipped cream, and cherry.",
-    price: 5.5,
-    image: "n4.jpg",
-    quantity: 40,
-    category: "Dessert",
-  },
-  {
-    name: "Apple Pie",
-    description: "Homemade apple pie with cinnamon and a flaky pastry crust.",
-    price: 6.99,
-    image: "n14.jpg",
-    quantity: 12,
-    category: "Dessert",
-  },
-  {
-    name: "Ngan",
-    description: "Homemade apple pie with cinnamon and a flaky pastry crust.",
-    price: 6.99,
-    image: "n24.jpg",
-    quantity: 12,
-    category: "Dessert",
-  },
-
-  // Nepali
-  {
-    name: "Retsu Unohana Chicken Biryani",
-    description:
-      "Aromatic basmati rice cooked with tender chicken and Indian spices.",
-    price: 10.0,
-    image: "Retsu Unohana1.jpg",
-    quantity: 40,
-    category: "Nepali",
-  },
-  {
-    name: "Retsu Unohana Dal Bhat",
-    description:
-      "Traditional Nepali meal with lentil soup, rice, and vegetable curry.",
-    price: 9.99,
-    image: "Retsu Unohana2.jpg",
-    quantity: 35,
-    category: "Nepali",
-  },
-  {
-    name: "Mei Mei Chicken Momo",
-    description:
-      "Steamed dumplings filled with seasoned ground chicken and herbs.",
-    price: 8.5,
-    image: "Mei Mei1.jpg",
-    quantity: 50,
-    category: "Nepali",
-  },
-  {
-    name: "Mei Mei Vegetable Curry",
-    description: "Mixed vegetables cooked in a spicy tomato-based curry sauce.",
-    price: 7.99,
-    image: "Mei Mei2.jpg",
-    quantity: 30,
-    category: "Nepali",
-  },
-  {
-    name: "Boa Hancock Chicken Sekuwa",
-    description:
-      "Grilled chicken marinated in Nepali spices and served with rice.",
-    price: 12.99,
-    image: "Boa Hancock18.jpg",
-    quantity: 25,
-    category: "Nepali",
-  },
-
+  // {
+  //   name: "Cheeseburger",
+  //   description:
+  //     "Juicy grilled beef patty with cheddar cheese, lettuce, tomato, and pickles.",
+  //   price: 8.99,
+  //   image: "cheeseburger.jpg",
+  //   quantity: 50,
+  //   category: "Fast Food",
+  // },
+  // {
+  //   name: "Chicken Wings",
+  //   description:
+  //     "Crispy buffalo chicken wings served with celery and blue cheese dip.",
+  //   price: 9.99,
+  //   image: "chicken_wings.jpg",
+  //   quantity: 40,
+  //   category: "Fast Food",
+  // },
+  // {
+  //   name: "Fish & Chips",
+  //   description: "Beer-battered cod served with golden fries and tartar sauce.",
+  //   price: 11.5,
+  //   image: "fish_chips.jpg",
+  //   quantity: 25,
+  //   category: "Fast Food",
+  // },
+  // {
+  //   name: "Hotdog",
+  //   description:
+  //     "Grilled beef frankfurter in a toasted bun with mustard and ketchup.",
+  //   price: 5.99,
+  //   image: "hotdog.jpg",
+  //   quantity: 60,
+  //   category: "Fast Food",
+  // },
+  // //
+  // {
+  //   name: "Boa Hancock",
+  //   description:
+  //     "Juicy grilled beef patty with cheddar cheese, lettuce, tomato, and pickles.",
+  //   price: 8.99,
+  //   image: "boa.jpg",
+  //   quantity: 50,
+  //   category: "Fast Food",
+  // },
+  // {
+  //   name: "Nami",
+  //   description:
+  //     "Crispy buffalo chicken wings served with celery and blue cheese dip.",
+  //   price: 9.99,
+  //   image: "nami.jpeg",
+  //   quantity: 40,
+  //   category: "Fast Food",
+  // },
+  // {
+  //   name: "Nico Robin",
+  //   description: "Beer-battered cod served with golden fries and tartar sauce.",
+  //   price: 11.5,
+  //   image: "nico.jpg",
+  //   quantity: 25,
+  //   category: "Fast Food",
+  // },
+  // {
+  //   name: "Alya",
+  //   description:
+  //     "Grilled beef frankfurter in a toasted bun with mustard and ketchup.",
+  //   price: 5.99,
+  //   image: "alya.jpeg",
+  //   quantity: 60,
+  //   category: "Fast Food",
+  // },
+  // // Italian
+  // {
+  //   name: "Margherita Pizza",
+  //   description:
+  //     "Classic pizza with fresh mozzarella, basil, and tomato sauce.",
+  //   price: 12.5,
+  //   image: "margherita_pizza.jpg",
+  //   quantity: 30,
+  //   category: "Italian",
+  // },
+  // {
+  //   name: "Spaghetti Carbonara",
+  //   description:
+  //     "Creamy pasta with pancetta, eggs, parmesan cheese, and black pepper.",
+  //   price: 14.99,
+  //   image: "carbonara.jpg",
+  //   quantity: 35,
+  //   category: "Italian",
+  // },
+  // {
+  //   name: "Chicken Parmesan",
+  //   description:
+  //     "Breaded chicken breast topped with marinara sauce and melted mozzarella.",
+  //   price: 16.99,
+  //   image: "chicken_parm.jpg",
+  //   quantity: 20,
+  //   category: "Italian",
+  // },
+  // {
+  //   name: "Lasagna",
+  //   description:
+  //     "Layers of pasta with meat sauce, ricotta, and mozzarella cheese.",
+  //   price: 15.5,
+  //   image: "lasagna.jpg",
+  //   quantity: 15,
+  //   category: "Italian",
+  // },
+  // {
+  //   name: "Caesar Salad",
+  //   description:
+  //     "Crisp romaine lettuce with parmesan cheese, croutons, and Caesar dressing.",
+  //   price: 8.99,
+  //   image: "caesar_salad.jpg",
+  //   quantity: 45,
+  //   category: "Italian",
+  // },
+  // // Desserts
+  // {
+  //   name: "Boa Hancock Cake",
+  //   description: "Rich and moist chocolate cake with a creamy ganache topping.",
+  //   price: 6.0,
+  //   image: "Boa Hancock1.jpg",
+  //   quantity: 20,
+  //   category: "Dessert",
+  // },
+  // {
+  //   name: "Boa Hancock Cheesecake",
+  //   description: "New York style cheesecake with fresh strawberry topping.",
+  //   price: 7.5,
+  //   image: "Boa Hancock2.jpg",
+  //   quantity: 25,
+  //   category: "Dessert",
+  // },
+  // {
+  //   name: "Tiramisu",
+  //   description:
+  //     "Classic Italian dessert with coffee-soaked ladyfingers and mascarpone.",
+  //   price: 8.99,
+  //   image: "n3.jpg",
+  //   quantity: 18,
+  //   category: "Dessert",
+  // },
+  // {
+  //   name: "Ice Cream Sundae",
+  //   description:
+  //     "Vanilla ice cream with chocolate sauce, whipped cream, and cherry.",
+  //   price: 5.5,
+  //   image: "n4.jpg",
+  //   quantity: 40,
+  //   category: "Dessert",
+  // },
+  // {
+  //   name: "Apple Pie",
+  //   description: "Homemade apple pie with cinnamon and a flaky pastry crust.",
+  //   price: 6.99,
+  //   image: "n14.jpg",
+  //   quantity: 12,
+  //   category: "Dessert",
+  // },
+  // {
+  //   name: "Ngan",
+  //   description: "Homemade apple pie with cinnamon and a flaky pastry crust.",
+  //   price: 6.99,
+  //   image: "n24.jpg",
+  //   quantity: 12,
+  //   category: "Dessert",
+  // },
+  // // Nepali
+  // {
+  //   name: "Retsu Unohana Chicken Biryani",
+  //   description:
+  //     "Aromatic basmati rice cooked with tender chicken and Indian spices.",
+  //   price: 10.0,
+  //   image: "Retsu Unohana1.jpg",
+  //   quantity: 40,
+  //   category: "Nepali",
+  // },
+  // {
+  //   name: "Retsu Unohana Dal Bhat",
+  //   description:
+  //     "Traditional Nepali meal with lentil soup, rice, and vegetable curry.",
+  //   price: 9.99,
+  //   image: "Retsu Unohana2.jpg",
+  //   quantity: 35,
+  //   category: "Nepali",
+  // },
+  // {
+  //   name: "Mei Mei Chicken Momo",
+  //   description:
+  //     "Steamed dumplings filled with seasoned ground chicken and herbs.",
+  //   price: 8.5,
+  //   image: "Mei Mei1.jpg",
+  //   quantity: 50,
+  //   category: "Nepali",
+  // },
+  // {
+  //   name: "Mei Mei Vegetable Curry",
+  //   description: "Mixed vegetables cooked in a spicy tomato-based curry sauce.",
+  //   price: 7.99,
+  //   image: "Mei Mei2.jpg",
+  //   quantity: 30,
+  //   category: "Nepali",
+  // },
+  // {
+  //   name: "Boa Hancock Chicken Sekuwa",
+  //   description:
+  //     "Grilled chicken marinated in Nepali spices and served with rice.",
+  //   price: 12.99,
+  //   image: "Boa Hancock18.jpg",
+  //   quantity: 25,
+  //   category: "Nepali",
+  // },
   //   // Mexican
-  //   {
-  //     name: "Chicken Tacos",
-  //     description:
-  //       "Soft tortillas filled with seasoned chicken, salsa, and fresh cilantro.",
-  //     price: 9.99,
-  //     image: "chicken_tacos.jpg",
-  //     quantity: 45,
-  //     category: "Mexican",
-  //   },
-  //   {
-  //     name: "Beef Burrito",
-  //     description:
-  //       "Large flour tortilla wrapped with seasoned beef, rice, beans, and cheese.",
-  //     price: 11.5,
-  //     image: "beef_burrito.jpg",
-  //     quantity: 35,
-  //     category: "Mexican",
-  //   },
-  //   {
-  //     name: "Guacamole & Chips",
-  //     description: "Fresh avocado dip served with crispy tortilla chips.",
-  //     price: 6.99,
-  //     image: "guacamole.jpg",
-  //     quantity: 60,
-  //     category: "Mexican",
-  //   },
-  //   {
-  //     name: "Quesadilla",
-  //     description:
-  //       "Grilled tortilla filled with melted cheese and served with sour cream.",
-  //     price: 8.99,
-  //     image: "quesadilla.jpg",
-  //     quantity: 40,
-  //     category: "Mexican",
-  //   },
-  //   {
-  //     name: "Nachos Supreme",
-  //     description:
-  //       "Tortilla chips topped with cheese, jalapeños, sour cream, and ground beef.",
-  //     price: 10.99,
-  //     image: "nachos.jpg",
-  //     quantity: 30,
-  //     category: "Mexican",
-  //   },
-
-  //   // Chinese
-  //   {
-  //     name: "Sweet & Sour Chicken",
-  //     description:
-  //       "Battered chicken pieces in a tangy sweet and sour sauce with pineapple.",
-  //     price: 13.99,
-  //     image: "sweet_sour_chicken.jpg",
-  //     quantity: 30,
-  //     category: "Chinese",
-  //   },
-  //   {
-  //     name: "Fried Rice",
-  //     description: "Wok-fried rice with eggs, vegetables, and soy sauce.",
-  //     price: 8.5,
-  //     image: "fried_rice.jpg",
-  //     quantity: 50,
-  //     category: "Chinese",
-  //   },
-  //   {
-  //     name: "Beef Lo Mein",
-  //     description:
-  //       "Soft noodles stir-fried with beef and vegetables in savory sauce.",
-  //     price: 12.99,
-  //     image: "lo_mein.jpg",
-  //     quantity: 25,
-  //     category: "Chinese",
-  //   },
-  //   {
-  //     name: "Spring Rolls",
-  //     description:
-  //       "Crispy fried rolls filled with vegetables and served with sweet sauce.",
-  //     price: 6.99,
-  //     image: "spring_rolls.jpg",
-  //     quantity: 40,
-  //     category: "Chinese",
-  //   },
-  //   {
-  //     name: "Kung Pao Chicken",
-  //     description:
-  //       "Spicy stir-fried chicken with peanuts and dried chili peppers.",
-  //     price: 14.5,
-  //     image: "kung_pao.jpg",
-  //     quantity: 20,
-  //     category: "Chinese",
-  //   },
-
+  {
+    name: "Chicken Tacos",
+    description:
+      "Soft tortillas filled with seasoned chicken, salsa, and fresh cilantro.",
+    price: 9.99,
+    image: "chicken_tacos.jpg",
+    quantity: 45,
+    category: "Mexican",
+  },
+  {
+    name: "Beef Burrito",
+    description:
+      "Large flour tortilla wrapped with seasoned beef, rice, beans, and cheese.",
+    price: 11.5,
+    image: "beef_burrito.jpg",
+    quantity: 35,
+    category: "Mexican",
+  },
+  {
+    name: "Guacamole & Chips",
+    description: "Fresh avocado dip served with crispy tortilla chips.",
+    price: 6.99,
+    image: "guacamole.jpg",
+    quantity: 60,
+    category: "Mexican",
+  },
+  {
+    name: "Quesadilla",
+    description:
+      "Grilled tortilla filled with melted cheese and served with sour cream.",
+    price: 8.99,
+    image: "quesadilla.jpg",
+    quantity: 40,
+    category: "Mexican",
+  },
+  {
+    name: "Nachos Supreme",
+    description:
+      "Tortilla chips topped with cheese, jalapeños, sour cream, and ground beef.",
+    price: 10.99,
+    image: "nachos.jpg",
+    quantity: 30,
+    category: "Mexican",
+  },
+  // Chinese
+  {
+    name: "Sweet & Sour Chicken",
+    description:
+      "Battered chicken pieces in a tangy sweet and sour sauce with pineapple.",
+    price: 13.99,
+    image: "sweet_sour_chicken.jpg",
+    quantity: 30,
+    category: "Chinese",
+  },
+  {
+    name: "Fried Rice",
+    description: "Wok-fried rice with eggs, vegetables, and soy sauce.",
+    price: 8.5,
+    image: "fried_rice.jpg",
+    quantity: 50,
+    category: "Chinese",
+  },
+  {
+    name: "Beef Lo Mein",
+    description:
+      "Soft noodles stir-fried with beef and vegetables in savory sauce.",
+    price: 12.99,
+    image: "lo_mein.jpg",
+    quantity: 25,
+    category: "Chinese",
+  },
+  {
+    name: "Spring Rolls",
+    description:
+      "Crispy fried rolls filled with vegetables and served with sweet sauce.",
+    price: 6.99,
+    image: "spring_rolls.jpg",
+    quantity: 40,
+    category: "Chinese",
+  },
+  {
+    name: "Kung Pao Chicken",
+    description:
+      "Spicy stir-fried chicken with peanuts and dried chili peppers.",
+    price: 14.5,
+    image: "kung_pao.jpg",
+    quantity: 20,
+    category: "Chinese",
+  },
   //   // American
   //   {
   //     name: "BBQ Ribs",
@@ -351,7 +345,6 @@ const sampleFoods = [
   //     quantity: 25,
   //     category: "American",
   //   },
-
   //   // Japanese
   //   {
   //     name: "California Roll",
@@ -397,7 +390,6 @@ const sampleFoods = [
   //     quantity: 35,
   //     category: "Japanese",
   //   },
-
   //   // Indian
   //   {
   //     name: "Butter Chicken",
@@ -431,7 +423,6 @@ const sampleFoods = [
   //     quantity: 20,
   //     category: "Indian",
   //   },
-
   //   // Thai
   //   {
   //     name: "Pad Thai",
