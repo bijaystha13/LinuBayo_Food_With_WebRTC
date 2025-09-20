@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import styles from "./UserOrders.module.css";
 import {
@@ -22,8 +21,10 @@ import {
   Phone,
   MessageCircle,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const UserOrders = () => {
+  const router = useRouter();
   const [orders, setOrders] = useState([
     {
       id: "ORD-2024-001",
@@ -213,6 +214,7 @@ const UserOrders = () => {
 
   const handleTrackOrder = (orderId) => {
     console.log("Tracking:", orderId);
+    router.push(`/orders/track/${orderId}`);
     // Implement order tracking
   };
 

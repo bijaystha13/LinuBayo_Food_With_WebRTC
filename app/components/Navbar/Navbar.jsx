@@ -246,7 +246,7 @@ const Navbar = () => {
             {authCtx.isLoggedIn && authCtx.role === "user" && (
               <li className="navbar-item">
                 <NavLink
-                  href="/users/orders"
+                  href="/orders"
                   className="navbar-link"
                   onClick={closeMobileMenu}
                 >
@@ -272,7 +272,7 @@ const Navbar = () => {
             {authCtx.isLoggedIn && (
               <li className="navbar-item">
                 <NavLink
-                  href="/reservations"
+                  href="/users/reservation"
                   className="navbar-link"
                   onClick={closeMobileMenu}
                 >
@@ -299,10 +299,7 @@ const Navbar = () => {
             {!authCtx.isLoggedIn ? (
               <div className="auth-buttons">
                 {/* Sign Up link for non-authenticated users */}
-                <Link href="/auth" className="navbar-button signup-button">
-                  <span className="signup-icon">📝</span>
-                  <span className="button-text">Sign Up</span>
-                </Link>
+
                 <Link href="/auth" className="navbar-button login-button">
                   <span className="login-icon">🔑</span>
                   <span className="button-text">Login</span>
