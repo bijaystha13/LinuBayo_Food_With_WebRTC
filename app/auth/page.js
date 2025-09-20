@@ -4,6 +4,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/app/shared/Context/AuthContext";
 import { useForm } from "@/app/shared/hooks/form-hook";
+import { useHttpClient } from "@/app/shared/hooks/http-hook";
 import * as Form from "@radix-ui/react-form";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Toast from "@radix-ui/react-toast";
@@ -24,8 +25,13 @@ const AuthPage = () => {
   const [toastType, setToastType] = useState("success");
   const [mounted, setMounted] = useState(false);
 
+  // Add error state that will trigger error boundary on next render
+  const [hasNetworkError, setHasNetworkError] = useState(false);
+  const [networkError, setNetworkError] = useState(null);
+
   const router = useRouter();
   const authCtx = useContext(AuthContext);
+  const { sendRequest } = useHttpClient();
 
   // Form state for Sign In
   const [signinFormState, signinInputHandler, setSigninData, resetSigninForm] =
@@ -43,7 +49,7 @@ const AuthPage = () => {
       false
     );
 
-  // Form state for Sign Up - Added phone number
+  // Form state for Sign Up
   const [signupFormState, signupInputHandler, setSignupData, resetSignupForm] =
     useForm(
       {
@@ -88,7 +94,12 @@ const AuthPage = () => {
     }
   }, [authCtx.isLoggedIn, authCtx.isLoading, authCtx.role, router]);
 
-  // Input validation
+  // Throw error during render to trigger error boundary
+  if (hasNetworkError && networkError) {
+    throw networkError;
+  }
+
+  // Input validation functions
   const validateEmail = (email) => {
     return email.includes("@") && email.length > 5;
   };
@@ -102,7 +113,6 @@ const AuthPage = () => {
   };
 
   const validatePhoneNumber = (phone) => {
-    // Basic phone validation - accepts various formats
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
     return (
       phone.length >= 10 && phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""))
@@ -158,31 +168,19 @@ const AuthPage = () => {
     }
   };
 
-  // API call function for authentication
-  const callAuthAPI = async (endpoint, userData) => {
-    try {
-      const apiEndpoint = endpoint === "login" ? "login" : "signup";
-      const response = await fetch(
-        `http://localhost:5001/api/users/${apiEndpoint}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `${endpoint} failed`);
-      }
-
-      return data;
-    } catch (error) {
-      throw new Error(error.message || `${endpoint} failed`);
-    }
+  // Helper function to check if error should show toast vs trigger error boundary
+  const isValidationError = (error) => {
+    const message = error?.message?.toLowerCase() || "";
+    return (
+      (message.includes("password") && message.includes("match")) ||
+      (message.includes("email") && message.includes("already exists")) ||
+      message.includes("invalid credentials") ||
+      message.includes("user not found") ||
+      message.includes("incorrect password") ||
+      error?.status === 400 ||
+      error?.status === 401 ||
+      error?.status === 409
+    );
   };
 
   const handleSubmit = async (event, formType) => {
@@ -207,7 +205,11 @@ const AuthPage = () => {
           password: signinFormState.inputs.password.value,
         };
 
-        const response = await callAuthAPI("login", loginData);
+        const response = await sendRequest(
+          "http://localhost:5001/api/users/login",
+          "POST",
+          loginData
+        );
 
         authCtx.login({
           userId: response.userId,
@@ -218,6 +220,7 @@ const AuthPage = () => {
         setToastMessage("Welcome back!");
         setToastType("success");
         setToastOpen(true);
+        setIsLoading(false);
 
         setTimeout(() => {
           if (response.role === "admin") {
@@ -231,7 +234,11 @@ const AuthPage = () => {
         const confirmPassword = signupFormState.inputs.confirmPassword.value;
 
         if (password !== confirmPassword) {
-          throw new Error("Passwords don't match");
+          setToastMessage("Passwords don't match");
+          setToastType("error");
+          setToastOpen(true);
+          setIsLoading(false);
+          return;
         }
 
         const signupData = {
@@ -241,7 +248,11 @@ const AuthPage = () => {
           password: password,
         };
 
-        const response = await callAuthAPI("signup", signupData);
+        const response = await sendRequest(
+          "http://localhost:5001/api/users/signup",
+          "POST",
+          signupData
+        );
 
         authCtx.login({
           userId: response.userId,
@@ -252,6 +263,7 @@ const AuthPage = () => {
         setToastMessage("Account created successfully!");
         setToastType("success");
         setToastOpen(true);
+        setIsLoading(false);
 
         setTimeout(() => {
           if (response.role === "admin") {
@@ -262,23 +274,18 @@ const AuthPage = () => {
         }, 1500);
       }
     } catch (error) {
-      console.error("Auth error:", error);
-
-      // Better error message handling
-      let errorMessage = error.message;
-      if (error.message.includes("validation")) {
-        errorMessage = "Please check your input and try again";
-      } else if (error.message.includes("email")) {
-        errorMessage = "Email already exists or is invalid";
-      } else if (error.message.includes("network")) {
-        errorMessage = "Network error. Please check your connection";
-      }
-
-      setToastMessage(errorMessage);
-      setToastType("error");
-      setToastOpen(true);
-    } finally {
       setIsLoading(false);
+
+      // Check if it's a validation error that should show as toast
+      if (isValidationError(error)) {
+        setToastMessage(error.message || "Authentication failed");
+        setToastType("error");
+        setToastOpen(true);
+      } else {
+        // For network/server errors, set state to trigger error boundary on next render
+        setNetworkError(error);
+        setHasNetworkError(true);
+      }
     }
   };
 
@@ -306,6 +313,7 @@ const AuthPage = () => {
     );
   }
 
+  // Normal auth page render
   return (
     <div className={styles.authWrapper}>
       {/* Animated Background */}
@@ -322,7 +330,7 @@ const AuthPage = () => {
       <div
         className={`${styles.authContainer} ${mounted ? styles.mounted : ""}`}
       >
-        {/* Compact Brand Section */}
+        {/* Brand Section */}
         <div className={styles.brandSection}>
           <div className={styles.logo}>
             <span className={styles.logoEmoji}>🍔</span>
@@ -330,14 +338,14 @@ const AuthPage = () => {
           </div>
         </div>
 
-        {/* Compact Auth Form */}
+        {/* Auth Form */}
         <div className={styles.formContainer}>
           <Tabs.Root
             value={activeTab}
             onValueChange={setActiveTab}
             className={styles.tabsRoot}
           >
-            {/* Compact Tab List */}
+            {/* Tab List */}
             <Tabs.List className={styles.tabsList} data-value={activeTab}>
               <Tabs.Trigger value="signin" className={styles.tabsTrigger}>
                 Sign In
@@ -348,7 +356,7 @@ const AuthPage = () => {
               <div className={styles.tabIndicator}></div>
             </Tabs.List>
 
-            {/* Compact Sign In Tab */}
+            {/* Sign In Tab */}
             <Tabs.Content value="signin" className={styles.tabsContent}>
               <form
                 onSubmit={(e) => handleSubmit(e, "signin")}
@@ -438,7 +446,7 @@ const AuthPage = () => {
               </form>
             </Tabs.Content>
 
-            {/* Compact Sign Up Tab */}
+            {/* Sign Up Tab */}
             <Tabs.Content value="signup" className={styles.tabsContent}>
               <form
                 onSubmit={(e) => handleSubmit(e, "signup")}
@@ -570,7 +578,7 @@ const AuthPage = () => {
             </Tabs.Content>
           </Tabs.Root>
 
-          {/* Compact Social Login */}
+          {/* Social Login */}
           <div className={styles.socialSection}>
             <div className={styles.divider}>
               <span>Or continue with</span>

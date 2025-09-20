@@ -32,6 +32,10 @@ export default function MenuPage() {
   const [sortBy, setSortBy] = useState("name");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Add initialization tracking
+  const [hasInitialized, setHasInitialized] = useState(false);
+  const [renderError, setRenderError] = useState(null);
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
@@ -46,64 +50,6 @@ export default function MenuPage() {
 
   const API_BASE = "http://localhost:5001";
 
-  // Build query parameters for API calls
-  const buildQueryParams = useCallback(
-    (page = currentPage) => {
-      const params = new URLSearchParams();
-
-      if (selectedCategory !== "all") {
-        params.append("category", selectedCategory);
-      }
-
-      if (searchQuery.trim()) {
-        params.append("search", searchQuery.trim());
-      }
-
-      if (priceRange[0] > 0) {
-        params.append("minPrice", priceRange[0].toString());
-      }
-
-      if (priceRange[1] < 1000) {
-        params.append("maxPrice", priceRange[1].toString());
-      }
-
-      // Map sortBy values to backend format
-      let backendSortBy = "name";
-      let order = "asc";
-
-      switch (sortBy) {
-        case "price-low":
-          backendSortBy = "price";
-          order = "asc";
-          break;
-        case "price-high":
-          backendSortBy = "price";
-          order = "desc";
-          break;
-        case "name":
-        default:
-          backendSortBy = "name";
-          order = "asc";
-          break;
-      }
-
-      params.append("sortBy", backendSortBy);
-      params.append("order", order);
-      params.append("page", page.toString());
-      params.append("limit", itemsPerPage.toString());
-
-      return params.toString();
-    },
-    [
-      selectedCategory,
-      searchQuery,
-      priceRange,
-      sortBy,
-      currentPage,
-      itemsPerPage,
-    ]
-  );
-
   // Initialize empty state
   const initializeEmptyState = useCallback(
     (page = 1) => {
@@ -116,25 +62,25 @@ export default function MenuPage() {
         hasNextPage: false,
         hasPrevPage: false,
       });
-      // Only set currentPage if it's different from what we expect
       setCurrentPage(page);
     },
     [itemsPerPage]
   );
+
+  // Track if this is the initial load
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Unified fetch function for both "all" and category-specific requests
   const fetchFoods = useCallback(
     async (page = 1, resetPage = false) => {
       try {
         const targetPage = resetPage ? 1 : page;
-
-        // Set the current page FIRST, before the API call
         setCurrentPage(targetPage);
 
         let responseData;
 
         if (selectedCategory === "all") {
-          // Build query params manually to avoid dependency issues
+          // Build query params for "all" category
           const params = new URLSearchParams();
 
           if (searchQuery.trim()) {
@@ -179,7 +125,7 @@ export default function MenuPage() {
             `${API_BASE}/api/foods?${queryParams}`
           );
         } else {
-          // Use category-specific endpoint
+          // Build query params for specific category
           const params = new URLSearchParams();
 
           if (searchQuery.trim()) {
@@ -285,8 +231,20 @@ export default function MenuPage() {
           console.log("No response data received");
           initializeEmptyState(targetPage);
         }
+
+        // Mark as successfully initialized
+        setHasInitialized(true);
+        setIsInitialLoad(false);
       } catch (err) {
         console.error("Failed to fetch foods:", err);
+
+        // For initial load, set error to trigger boundary during render
+        if (isInitialLoad || !hasInitialized) {
+          setRenderError(err);
+          return; // Don't continue with error handling
+        }
+
+        // For subsequent requests (filtering, pagination), handle gracefully
         toast.error("Failed to load menu items");
         initializeEmptyState(targetPage);
       }
@@ -299,29 +257,35 @@ export default function MenuPage() {
       itemsPerPage,
       sendRequest,
       initializeEmptyState,
+      isInitialLoad,
     ]
   );
 
+  // Effect for initial load
   useEffect(() => {
-    // Reset to page 1 when filters change
-    fetchFoods(1, true);
-  }, [selectedCategory, searchQuery, priceRange, sortBy]);
-
-  // Combined effect to handle all filter changes
-  useEffect(() => {
-    fetchFoods(1, true);
-  }, [fetchFoods]);
-
-  // useEffect(() => {
-  //   // Initial load only
-  //   fetchFoods(1, true);
-  // }, []);
-
-  useEffect(() => {
-    // Initial load only
     fetchFoods(1, true);
   }, []);
-  // Initial load - removed duplicate useEffect
+
+  // Effect for filter changes (reset to page 1)
+  useEffect(() => {
+    if (
+      hasInitialized && // Only refetch if we've initialized once
+      (selectedCategory ||
+        searchQuery ||
+        priceRange[0] > 0 ||
+        priceRange[1] < 1000 ||
+        sortBy !== "name")
+    ) {
+      fetchFoods(1, true);
+    }
+  }, [
+    selectedCategory,
+    searchQuery,
+    priceRange,
+    sortBy,
+    fetchFoods,
+    hasInitialized,
+  ]);
 
   const handleCategoryChange = (category) => {
     console.log(`Category changed to: ${category}`);
@@ -382,7 +346,8 @@ export default function MenuPage() {
         await fetchFoods(currentPage);
 
         toast.success("Food item deleted successfully!");
-      } catch {
+      } catch (error) {
+        console.error("Delete error:", error);
         toast.error("Failed to delete food item");
       } finally {
         setIsDeleting(false);
@@ -398,6 +363,12 @@ export default function MenuPage() {
       FOOD_CATEGORIES[0]
     );
   };
+
+  // Show error page if there's an error and we haven't initialized yet
+  // Throw during render to trigger Next.js error boundary
+  if (renderError && !hasInitialized) {
+    throw renderError;
+  }
 
   return (
     <div className={styles.menuContainer}>
@@ -518,7 +489,7 @@ export default function MenuPage() {
           )}
       </div>
 
-      {/* Floating Chat Widget - Add this at the end */}
+      {/* Floating Chat Widget */}
       <CustomerChats isFloating={true} />
     </div>
   );

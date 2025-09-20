@@ -265,7 +265,7 @@
   font-weight: 500;
 }
 
-/* Compact Brand Section */
+/* Brand Section */
 .brandSection {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -329,7 +329,7 @@
   }
 }
 
-/* Compact Form Container */
+/* Form Container */
 .formContainer {
   animation: formSlideUp 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.5s both;
 }
@@ -345,7 +345,7 @@
   }
 }
 
-/* Compact Tabs */
+/* Tabs */
 .tabsRoot {
   width: 100%;
 }
@@ -424,7 +424,7 @@
   }
 }
 
-/* Compact Form Styles - Made Bigger */
+/* Form Styles */
 .form {
   width: 100%;
 }
@@ -493,7 +493,7 @@
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
-/* Compact Password Container */
+/* Password Container */
 .passwordContainer {
   position: relative;
 }
@@ -524,7 +524,7 @@
   transform: translateY(-50%) scale(1.05);
 }
 
-/* Compact Form Options */
+/* Form Options */
 .formOptions {
   display: flex;
   justify-content: space-between;
@@ -534,7 +534,7 @@
   font-size: 0.85rem;
 }
 
-/* Compact Checkbox */
+/* Checkbox */
 .checkbox {
   display: flex;
   align-items: center;
@@ -601,7 +601,7 @@
   text-decoration: underline;
 }
 
-/* Submit Button - Made Bigger */
+/* Submit Button */
 .submitButton {
   width: 100%;
   padding: 0;
@@ -689,7 +689,7 @@
   }
 }
 
-/* Compact Loading Dots */
+/* Loading Dots */
 .loadingDots {
   display: flex;
   gap: 0.25rem;
@@ -727,7 +727,7 @@
   }
 }
 
-/* Compact Social Section */
+/* Social Section */
 .socialSection {
   margin-top: 1.5rem;
 }
@@ -766,7 +766,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Social Buttons - Made Bigger */
+/* Social Buttons */
 .socialButtons {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -823,7 +823,7 @@
   flex-shrink: 0;
 }
 
-/* Compact Toast Styles */
+/* Toast Styles */
 .toastViewport {
   position: fixed;
   bottom: 0;
@@ -1129,369 +1129,4 @@
   .tabsList {
     margin-bottom: 1rem;
   }
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  .authContainer,
-  .brandSection,
-  .formContainer,
-  .tabsContent,
-  .toastRoot,
-  .submitButton,
-  .socialButton,
-  .input,
-  .passwordToggle,
-  .tabsTrigger,
-  .tabIndicator,
-  .logoEmoji,
-  .liquidEffect {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  .wave,
-  .aurora {
-    animation: none !important;
-    opacity: 0.1 !important;
-  }
-
-  .loadingSpinner .spinnerRing {
-    animation: spinRing 2s linear infinite;
-  }
-
-  .loadingDots span {
-    animation: dotBounce 1.4s ease-in-out infinite both;
-  }
-
-  .authContainer::after {
-    animation: none !important;
-    opacity: 0.8 !important;
-  }
-
-  .brandName {
-    animation: none !important;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .authContainer {
-    background: rgba(255, 255, 255, 0.15);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .input {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: white;
-  }
-
-  .submitButton,
-  .socialButton {
-    border: 2px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .brandName,
-  .checkbox,
-  .forgotPassword {
-    color: rgba(255, 255, 255, 0.95);
-  }
-
-  .tabsList {
-    border: 2px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .tabIndicator {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-  }
-}
-
-/* Dark mode enhancements */
-@media (prefers-color-scheme: dark) {
-  .authWrapper {
-    background: radial-gradient(
-        circle at 20% 20%,
-        rgba(120, 119, 198, 0.4) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 80% 80%,
-        rgba(255, 119, 198, 0.3) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 40% 40%,
-        rgba(120, 219, 255, 0.2) 0%,
-        transparent 50%
-      ),
-      linear-gradient(
-        135deg,
-        #050507 0%,
-        #0f0f1a 25%,
-        #0d1525 50%,
-        #082545 75%,
-        #2d1b69 100%
-      );
-  }
-
-  .authContainer {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
-  .input {
-    background: rgba(255, 255, 255, 0.02);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
-  .tabsList {
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  .submitButton,
-  .socialButton {
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  .toastRoot {
-    background: rgba(255, 255, 255, 0.05);
-  }
-}
-
-/* Reduced transparency support */
-@media (prefers-reduced-transparency) {
-  .authContainer,
-  .input,
-  .submitButton,
-  .socialButton,
-  .tabsList,
-  .toastRoot {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: rgba(255, 255, 255, 0.95);
-  }
-
-  .authContainer {
-    background: rgba(30, 41, 59, 0.95);
-  }
-
-  .input {
-    background: rgba(30, 41, 59, 0.8);
-  }
-
-  .tabsList {
-    background: rgba(30, 41, 59, 0.9);
-  }
-
-  .submitButton {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  .socialButton {
-    background: rgba(30, 41, 59, 0.8);
-  }
-
-  .toastRoot {
-    background: rgba(30, 41, 59, 0.95);
-  }
-
-  .divider span {
-    background: rgba(30, 41, 59, 0.9);
-  }
-
-  .checkmark {
-    background: rgba(30, 41, 59, 0.8);
-  }
-
-  .passwordToggle {
-    background: rgba(139, 92, 246, 0.3);
-  }
-}
-
-/* Print styles */
-@media print {
-  .authWrapper {
-    background: white !important;
-    color: black !important;
-    min-height: auto !important;
-  }
-
-  .authContainer {
-    background: white !important;
-    box-shadow: none !important;
-    border: 2px solid #ccc !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    page-break-inside: avoid;
-    color: black !important;
-  }
-
-  .backgroundAnimation,
-  .wave,
-  .aurora,
-  .liquidEffect {
-    display: none !important;
-  }
-
-  .submitButton,
-  .socialButton {
-    background: #f0f0f0 !important;
-    color: black !important;
-    border: 2px solid #ccc !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .input {
-    background: white !important;
-    color: black !important;
-    border: 2px solid #ccc !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .brandName {
-    background: none !important;
-    -webkit-background-clip: unset !important;
-    -webkit-text-fill-color: black !important;
-    background-clip: unset !important;
-    color: black !important;
-  }
-
-  .toastRoot,
-  .toastViewport {
-    display: none !important;
-  }
-
-  .checkbox,
-  .forgotPassword {
-    color: black !important;
-  }
-
-  .tabsList {
-    background: #f0f0f0 !important;
-    border: 1px solid #ccc !important;
-  }
-
-  .tabsTrigger {
-    color: black !important;
-  }
-
-  .tabIndicator {
-    background: white !important;
-    border: 1px solid #999 !important;
-  }
-}
-
-/* Utility classes */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.5);
-}
-
-/* Selection styles */
-::selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-::-moz-selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* Form validation helper classes */
-.form-valid .input {
-  border-color: rgba(16, 185, 129, 0.6);
-}
-
-.form-invalid .input {
-  border-color: rgba(239, 68, 68, 0.6);
-}
-
-/* Button loading state helpers */
-.button-loading {
-  pointer-events: none;
-}
-
-.button-loading .buttonContent {
-  opacity: 0.8;
-}
-
-/* Toast animation variants */
-.toast-enter {
-  animation: toastSlideIn 0.5s ease;
-}
-
-.toast-exit {
-  animation: toastSlideOut 0.3s ease;
-}
-
-@keyframes toastSlideOut {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(calc(100% + 1rem));
-    opacity: 0;
-  }
-}
-
-/* Hover effect for interactive elements */
-.interactive-hover {
-  transition: all 0.2s ease;
-}
-
-.interactive-hover:hover {
-  transform: translateY(-1px);
-}
-
-/* Glass effect variants */
-.glass-light {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.glass-medium {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-}
-
-.glass-heavy {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
