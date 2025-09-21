@@ -1,3 +1,4 @@
+// app/user-dashboard/page.js
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -19,28 +20,36 @@ import {
   ChevronRight,
   Loader,
   RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
   Wifi,
   WifiOff,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { useHttpClient } from "../shared/hooks/http-hook";
 import styles from "./HomePage.module.css";
 
+// SafeImage component and helper functions
+const fallbackImage =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='0.3em' font-family='sans-serif' font-size='14' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
+
+// Custom Error class for better error handling
+class DashboardError extends Error {
+  constructor(message, type = "general") {
+    super(message);
+    this.name = "DashboardError";
+    this.errorType = type;
+    this.dashboardError = true;
+  }
+}
+
 const UserDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [imageErrors, setImageErrors] = useState(new Set());
 
   const { isLoading: httpLoading, sendRequest } = useHttpClient();
-
-  // Fallback image URL
-  const fallbackImage =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='0.3em' font-family='sans-serif' font-size='14' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
 
   // Handle image error with tracking to prevent infinite loops
   const handleImageError = useCallback(
@@ -76,7 +85,38 @@ const UserDashboard = () => {
     };
   }, []);
 
-  // Fetch dashboard data from backend
+  // Enhanced error detection
+  const determineErrorType = (errorMessage) => {
+    const msg = errorMessage.toLowerCase();
+
+    if (
+      msg.includes("fetch") ||
+      msg.includes("network") ||
+      msg.includes("internet connection")
+    ) {
+      return "network";
+    }
+    if (
+      msg.includes("server") ||
+      msg.includes("backend") ||
+      msg.includes("500")
+    ) {
+      return "server";
+    }
+    if (
+      msg.includes("unauthorized") ||
+      msg.includes("401") ||
+      msg.includes("authentication")
+    ) {
+      return "auth";
+    }
+    if (msg.includes("api endpoint") || msg.includes("404")) {
+      return "config";
+    }
+    return "general";
+  };
+
+  // Fetch dashboard data from backend with enhanced error throwing
   const fetchDashboardData = useCallback(
     async (showRefresh = false) => {
       try {
@@ -86,19 +126,26 @@ const UserDashboard = () => {
           setIsLoading(true);
         }
 
-        setError(null);
-
+        // Check online status first
         if (!navigator.onLine) {
-          throw new Error(
-            "No internet connection. Please check your connection and try again."
+          const error = new DashboardError(
+            "No internet connection. Please check your connection and try again.",
+            "network"
           );
+          throw error;
         }
 
+        // Check authentication
         const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error("Authentication required. Please log in again.");
+          const error = new DashboardError(
+            "Authentication required. Please log in again.",
+            "auth"
+          );
+          throw error;
         }
 
+        // Make the API request
         const response = await sendRequest(
           "http://localhost:5001/api/users/dashboard",
           "GET",
@@ -108,49 +155,68 @@ const UserDashboard = () => {
           }
         );
 
-        if (response.success) {
+        if (response && response.success) {
           setDashboardData(response.data);
           // Reset image errors on successful data fetch
           setImageErrors(new Set());
         } else {
-          throw new Error(response.message || "Failed to fetch dashboard data");
+          const errorMsg =
+            response?.message || "Failed to fetch dashboard data";
+          const error = new DashboardError(
+            errorMsg,
+            determineErrorType(errorMsg)
+          );
+          throw error;
         }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
 
-        let errorMessage = "Something went wrong while loading your dashboard.";
+        // If it's already a DashboardError, just throw it
+        if (err.dashboardError) {
+          throw err;
+        }
 
-        if (
-          err.message.includes("Network error") ||
-          err.message.includes("Failed to fetch")
-        ) {
+        // Handle different types of errors and convert them to DashboardError
+        let errorMessage = "Something went wrong while loading your dashboard.";
+        let errorType = "general";
+
+        if (err.name === "TypeError" && err.message.includes("fetch")) {
           errorMessage =
-            "Unable to connect to server. Please check if the backend is running and try again.";
-        } else if (err.message.includes("No internet connection")) {
+            "Network error: Unable to connect to server. Please check if the backend server is running and accessible.";
+          errorType = "network";
+        } else if (err.message.includes("Failed to fetch")) {
           errorMessage =
-            "No internet connection. Please check your connection and try again.";
+            "Network error: Backend server is unreachable. Please check your connection.";
+          errorType = "network";
+        } else if (err.message.includes("AbortError")) {
+          errorMessage = "Request was aborted or timed out";
+          errorType = "network";
         } else if (
           err.message.includes("Server error") ||
           err.message.includes("500")
         ) {
-          errorMessage =
-            "Server is experiencing issues. Please try again in a few minutes.";
+          errorMessage = "Server error: Backend server is experiencing issues";
+          errorType = "server";
         } else if (
           err.message.includes("Unauthorized") ||
           err.message.includes("401")
         ) {
-          errorMessage = "Your session has expired. Please log in again.";
+          errorMessage = "Unauthorized access";
+          errorType = "auth";
         } else if (
           err.message.includes("API endpoint not found") ||
           err.message.includes("404")
         ) {
-          errorMessage =
-            "API endpoint not found. Please check your backend configuration.";
-        } else if (err.message.includes("Authentication required")) {
+          errorMessage = "API endpoint not found";
+          errorType = "config";
+        } else if (err.message) {
           errorMessage = err.message;
+          errorType = determineErrorType(err.message);
         }
 
-        setError(errorMessage);
+        // Create and throw a DashboardError that the error boundary can catch
+        const dashboardError = new DashboardError(errorMessage, errorType);
+        throw dashboardError;
       } finally {
         setIsLoading(false);
         setRefreshing(false);
@@ -165,11 +231,12 @@ const UserDashboard = () => {
 
   // Auto-retry when coming back online
   useEffect(() => {
-    if (isOnline && error && error.includes("internet connection")) {
+    if (isOnline && !dashboardData) {
       fetchDashboardData();
     }
-  }, [isOnline, error, fetchDashboardData]);
+  }, [isOnline, dashboardData, fetchDashboardData]);
 
+  // Helper functions
   const getStatusColor = (status) => {
     const colors = {
       delivered: "#10B981",
@@ -212,43 +279,6 @@ const UserDashboard = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const getErrorType = (errorMessage) => {
-    if (
-      errorMessage.includes("internet connection") ||
-      errorMessage.includes("offline")
-    ) {
-      return "network";
-    } else if (
-      errorMessage.includes("backend") ||
-      errorMessage.includes("server")
-    ) {
-      return "server";
-    } else if (
-      errorMessage.includes("Authentication") ||
-      errorMessage.includes("session")
-    ) {
-      return "auth";
-    } else if (errorMessage.includes("API endpoint")) {
-      return "config";
-    }
-    return "general";
-  };
-
-  const getErrorIcon = (errorType) => {
-    switch (errorType) {
-      case "network":
-        return <WifiOff size={48} color="#EF4444" />;
-      case "server":
-        return <AlertCircle size={48} color="#F59E0B" />;
-      case "auth":
-        return <User size={48} color="#3B82F6" />;
-      case "config":
-        return <Settings size={48} color="#8B5CF6" />;
-      default:
-        return <AlertCircle size={48} color="#EF4444" />;
-    }
-  };
-
   // Custom Image component to handle errors better
   const SafeImage = ({
     src,
@@ -268,7 +298,7 @@ const UserDashboard = () => {
     );
   };
 
-  // Loading state
+  // Loading state - simplified since error handling is now centralized
   if (isLoading && !dashboardData) {
     return (
       <div className={styles.loadingContainer}>
@@ -286,73 +316,15 @@ const UserDashboard = () => {
     );
   }
 
-  // Error state (when no data is available)
-  if (error && !dashboardData) {
-    const errorType = getErrorType(error);
-
-    return (
-      <div className={styles.errorContainer}>
-        <div className={styles.errorContent}>
-          {getErrorIcon(errorType)}
-          <h2>Oops! Something went wrong</h2>
-          <p className={styles.errorMessage}>{error}</p>
-
-          <div className={styles.errorActions}>
-            {errorType === "network" && (
-              <>
-                <div className={styles.networkStatus}>
-                  <span
-                    className={`${styles.statusIndicator} ${
-                      isOnline ? styles.online : styles.offline
-                    }`}
-                  >
-                    {isOnline ? <Wifi size={16} /> : <WifiOff size={16} />}
-                    {isOnline ? "Online" : "Offline"}
-                  </span>
-                </div>
-              </>
-            )}
-
-            <button
-              onClick={() => fetchDashboardData()}
-              className={styles.retryButton}
-              disabled={httpLoading || (!isOnline && errorType === "network")}
-            >
-              <RefreshCw
-                size={16}
-                className={httpLoading ? styles.spinning : ""}
-              />
-              {httpLoading ? "Retrying..." : "Try Again"}
-            </button>
-
-            {errorType === "server" && (
-              <div className={styles.serverHelp}>
-                <p>
-                  If you're running this locally, make sure your backend server
-                  is started:
-                </p>
-                <code>npm run dev</code> or <code>node server.js</code>
-              </div>
-            )}
-
-            {errorType === "auth" && (
-              <button
-                onClick={() => {
-                  localStorage.removeItem("token");
-                }}
-                className={styles.loginButton}
-              >
-                Go to Login
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+  // If no data is available after loading, this indicates an error
+  // The error should have been thrown and caught by the error boundary
+  if (!dashboardData) {
+    // This is a fallback - the error boundary should have caught it
+    throw new DashboardError("No dashboard data available", "general");
   }
 
   const { user, stats, recentOrders, favoriteItems, notifications } =
-    dashboardData || {};
+    dashboardData;
 
   return (
     <div className={styles.dashboard}>
@@ -362,20 +334,6 @@ const UserDashboard = () => {
           <div className={styles.connectionBanner}>
             <WifiOff size={20} />
             <span>You're offline. Some features may not work properly.</span>
-          </div>
-        )}
-
-        {/* Error toast for non-critical errors */}
-        {error && dashboardData && (
-          <div className={styles.errorToast}>
-            <AlertCircle size={16} />
-            <p>{error}</p>
-            <button
-              onClick={() => setError(null)}
-              className={styles.closeButton}
-            >
-              <XCircle size={16} />
-            </button>
           </div>
         )}
 
@@ -435,7 +393,7 @@ const UserDashboard = () => {
             {
               icon: CreditCard,
               label: "Total Spent",
-              value: `$${stats?.totalSpent || 0}`,
+              value: `${stats?.totalSpent || 0}`,
               iconClass: styles.iconGreen,
               growth: stats?.growth?.spent || 0,
             },

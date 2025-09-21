@@ -1,8 +1,7 @@
 /* MenuError.module.css - Compact Version */
 
 .container {
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -19,7 +18,7 @@
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   padding: 1rem;
-  margin: 0;
+  margin-top: 28px;
 }
 
 /* Background elements */
