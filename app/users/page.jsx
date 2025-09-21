@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
   Clock,
@@ -32,16 +33,6 @@ import styles from "./HomePage.module.css";
 const fallbackImage =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='0.3em' font-family='sans-serif' font-size='14' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-// Custom Error class for better error handling
-class DashboardError extends Error {
-  constructor(message, type = "general") {
-    super(message);
-    this.name = "DashboardError";
-    this.errorType = type;
-    this.dashboardError = true;
-  }
-}
-
 const UserDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,6 +40,7 @@ const UserDashboard = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [imageErrors, setImageErrors] = useState(new Set());
 
+  const router = useRouter();
   const { isLoading: httpLoading, sendRequest } = useHttpClient();
 
   // Handle image error with tracking to prevent infinite loops
@@ -85,38 +77,103 @@ const UserDashboard = () => {
     };
   }, []);
 
-  // Enhanced error detection
-  const determineErrorType = (errorMessage) => {
-    const msg = errorMessage.toLowerCase();
+  // Enhanced error detection and handling
+  const handleError = (error, context = "") => {
+    console.error(`Dashboard error ${context}:`, error);
 
-    if (
-      msg.includes("fetch") ||
-      msg.includes("network") ||
-      msg.includes("internet connection")
+    let errorMessage = "Something went wrong while loading your dashboard.";
+    let errorType = "general";
+
+    // Handle network/connection errors
+    if (!navigator.onLine) {
+      errorMessage =
+        "No internet connection. Please check your connection and try again.";
+      errorType = "network";
+    }
+    // Handle fetch/network errors
+    else if (error.name === "TypeError" && error.message.includes("fetch")) {
+      errorMessage =
+        "Network error: Unable to connect to server. Please check if the backend server is running on http://localhost:5001";
+      errorType = "network";
+    } else if (
+      error.message.includes("Failed to fetch") ||
+      error.message.includes("NetworkError")
     ) {
-      return "network";
+      errorMessage =
+        "Backend server is unreachable. Please ensure the server is running on http://localhost:5001 and try again.";
+      errorType = "network";
     }
-    if (
-      msg.includes("server") ||
-      msg.includes("backend") ||
-      msg.includes("500")
+    // Handle server errors
+    else if (
+      error.message.includes("Server error") ||
+      error.message.includes("500") ||
+      error.message.includes("Internal Server Error")
     ) {
-      return "server";
+      errorMessage =
+        "Server error: Backend server is experiencing issues. Please try again later.";
+      errorType = "server";
     }
-    if (
-      msg.includes("unauthorized") ||
-      msg.includes("401") ||
-      msg.includes("authentication")
+    // Handle authentication errors
+    else if (
+      error.message.includes("Unauthorized") ||
+      error.message.includes("401") ||
+      error.message.includes("Authentication")
     ) {
-      return "auth";
+      errorMessage =
+        "Your session has expired. Please log in again to continue.";
+      errorType = "auth";
     }
-    if (msg.includes("api endpoint") || msg.includes("404")) {
-      return "config";
+    // Handle configuration/endpoint errors
+    else if (
+      error.message.includes("API endpoint not found") ||
+      error.message.includes("404") ||
+      error.message.includes("Not Found")
+    ) {
+      errorMessage =
+        "API endpoint not found. Please check your server configuration.";
+      errorType = "config";
     }
-    return "general";
+    // Handle timeout errors
+    else if (
+      error.message.includes("timeout") ||
+      error.message.includes("AbortError")
+    ) {
+      errorMessage =
+        "Request timed out. Please check your connection and try again.";
+      errorType = "network";
+    }
+    // Use custom error message if available
+    else if (error.message && error.message.length > 0) {
+      errorMessage = error.message;
+      // Try to determine type from message
+      const msg = error.message.toLowerCase();
+      if (
+        msg.includes("network") ||
+        msg.includes("connection") ||
+        msg.includes("fetch")
+      ) {
+        errorType = "network";
+      } else if (msg.includes("server") || msg.includes("backend")) {
+        errorType = "server";
+      } else if (
+        msg.includes("auth") ||
+        msg.includes("token") ||
+        msg.includes("unauthorized")
+      ) {
+        errorType = "auth";
+      }
+    }
+
+    // Create a custom error with the type information and throw it
+    const customError = new Error(errorMessage);
+    customError.errorType = errorType;
+    customError.dashboardError = true;
+
+    // Throw the error to be caught by the error boundary
+    throw customError;
   };
 
-  // Fetch dashboard data from backend with enhanced error throwing
+  // Fetch dashboard data from backend with enhanced error handling
   const fetchDashboardData = useCallback(
     async (showRefresh = false) => {
       try {
@@ -128,21 +185,13 @@ const UserDashboard = () => {
 
         // Check online status first
         if (!navigator.onLine) {
-          const error = new DashboardError(
-            "No internet connection. Please check your connection and try again.",
-            "network"
-          );
-          throw error;
+          throw new Error("No internet connection detected.");
         }
 
         // Check authentication
         const token = localStorage.getItem("token");
         if (!token) {
-          const error = new DashboardError(
-            "Authentication required. Please log in again.",
-            "auth"
-          );
-          throw error;
+          throw new Error("Authentication required. Please log in again.");
         }
 
         // Make the API request
@@ -161,68 +210,17 @@ const UserDashboard = () => {
           setImageErrors(new Set());
         } else {
           const errorMsg =
-            response?.message || "Failed to fetch dashboard data";
-          const error = new DashboardError(
-            errorMsg,
-            determineErrorType(errorMsg)
-          );
-          throw error;
+            response?.message || "Failed to fetch dashboard data from server";
+          throw new Error(errorMsg);
         }
       } catch (err) {
-        console.error("Dashboard fetch error:", err);
-
-        // If it's already a DashboardError, just throw it
-        if (err.dashboardError) {
-          throw err;
-        }
-
-        // Handle different types of errors and convert them to DashboardError
-        let errorMessage = "Something went wrong while loading your dashboard.";
-        let errorType = "general";
-
-        if (err.name === "TypeError" && err.message.includes("fetch")) {
-          errorMessage =
-            "Network error: Unable to connect to server. Please check if the backend server is running and accessible.";
-          errorType = "network";
-        } else if (err.message.includes("Failed to fetch")) {
-          errorMessage =
-            "Network error: Backend server is unreachable. Please check your connection.";
-          errorType = "network";
-        } else if (err.message.includes("AbortError")) {
-          errorMessage = "Request was aborted or timed out";
-          errorType = "network";
-        } else if (
-          err.message.includes("Server error") ||
-          err.message.includes("500")
-        ) {
-          errorMessage = "Server error: Backend server is experiencing issues";
-          errorType = "server";
-        } else if (
-          err.message.includes("Unauthorized") ||
-          err.message.includes("401")
-        ) {
-          errorMessage = "Unauthorized access";
-          errorType = "auth";
-        } else if (
-          err.message.includes("API endpoint not found") ||
-          err.message.includes("404")
-        ) {
-          errorMessage = "API endpoint not found";
-          errorType = "config";
-        } else if (err.message) {
-          errorMessage = err.message;
-          errorType = determineErrorType(err.message);
-        }
-
-        // Create and throw a DashboardError that the error boundary can catch
-        const dashboardError = new DashboardError(errorMessage, errorType);
-        throw dashboardError;
+        handleError(err, "while fetching dashboard data");
       } finally {
         setIsLoading(false);
         setRefreshing(false);
       }
     },
-    [sendRequest]
+    [sendRequest, router]
   );
 
   useEffect(() => {
@@ -231,10 +229,10 @@ const UserDashboard = () => {
 
   // Auto-retry when coming back online
   useEffect(() => {
-    if (isOnline && !dashboardData) {
+    if (isOnline && !dashboardData && !isLoading) {
       fetchDashboardData();
     }
-  }, [isOnline, dashboardData, fetchDashboardData]);
+  }, [isOnline, dashboardData, isLoading, fetchDashboardData]);
 
   // Helper functions
   const getStatusColor = (status) => {
@@ -298,7 +296,7 @@ const UserDashboard = () => {
     );
   };
 
-  // Loading state - simplified since error handling is now centralized
+  // Loading state
   if (isLoading && !dashboardData) {
     return (
       <div className={styles.loadingContainer}>
@@ -316,11 +314,14 @@ const UserDashboard = () => {
     );
   }
 
-  // If no data is available after loading, this indicates an error
-  // The error should have been thrown and caught by the error boundary
+  // If we reach here and have no data, something went wrong
+  // This should not happen if error handling is working correctly
   if (!dashboardData) {
-    // This is a fallback - the error boundary should have caught it
-    throw new DashboardError("No dashboard data available", "general");
+    handleError(
+      new Error("No dashboard data available after loading"),
+      "data check"
+    );
+    return null;
   }
 
   const { user, stats, recentOrders, favoriteItems, notifications } =

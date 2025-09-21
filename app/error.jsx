@@ -1,3 +1,4 @@
+// app/error.js
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -15,13 +16,16 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import styles from "./Error.module.css";
 
 const GlobalError = ({ error, reset }) => {
   const [errorType, setErrorType] = useState("general");
+  const [errorMessage, setErrorMessage] = useState("");
   const [isRetrying, setIsRetrying] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const searchParams = useSearchParams();
 
   // Handle hydration
   useEffect(() => {
@@ -45,42 +49,64 @@ const GlobalError = ({ error, reset }) => {
     };
   }, [mounted]);
 
-  // Determine error type based on error message
+  // Determine error type based on URL parameters or error object
   useEffect(() => {
-    if (!error) return;
+    // First check for URL parameters (from dashboard redirect)
+    const urlMessage = searchParams.get("message");
+    const urlType = searchParams.get("type");
 
-    const message = error.message || "";
+    if (urlMessage && urlType) {
+      setErrorMessage(decodeURIComponent(urlMessage));
+      setErrorType(urlType);
+      return;
+    }
 
+    // Fallback to error object (for non-dashboard errors)
+    const message = error?.message || "An unexpected error occurred";
+    setErrorMessage(message);
+
+    if (error?.errorType) {
+      setErrorType(error.errorType);
+      return;
+    }
+
+    // Determine error type from message
     if (
       message.includes("Network error") ||
       message.includes("Failed to fetch") ||
       message.includes("internet connection") ||
-      message.includes("fetch")
+      message.includes("fetch") ||
+      message.includes("network") ||
+      message.includes("Cannot connect to server") ||
+      message.includes("backend server")
     ) {
       setErrorType("network");
     } else if (
       message.includes("Server error") ||
       message.includes("500") ||
       message.includes("backend") ||
-      message.includes("Backend server")
+      message.includes("Backend server") ||
+      message.includes("server")
     ) {
       setErrorType("server");
     } else if (
       message.includes("Unauthorized") ||
       message.includes("401") ||
       message.includes("Authentication") ||
-      message.includes("session")
+      message.includes("session") ||
+      message.includes("auth")
     ) {
       setErrorType("auth");
     } else if (
       message.includes("API endpoint not found") ||
-      message.includes("404")
+      message.includes("404") ||
+      message.includes("endpoint")
     ) {
       setErrorType("config");
     } else {
       setErrorType("general");
     }
-  }, [error]);
+  }, [error, searchParams]);
 
   const getErrorIcon = (errorType) => {
     switch (errorType) {
@@ -98,17 +124,15 @@ const GlobalError = ({ error, reset }) => {
   };
 
   const getErrorContent = () => {
-    const message = error?.message || "An unexpected error occurred";
-
     switch (errorType) {
       case "network":
         return {
           title: "Connection Lost",
-          message: !navigator.onLine
-            ? "No internet connection detected. Please check your network and try again."
-            : message.includes("internet connection")
-            ? message
-            : "Unable to reach our servers. Please check if the backend server is running and accessible.",
+          message:
+            errorMessage ||
+            (!navigator.onLine
+              ? "No internet connection detected. Please check your network and try again."
+              : "Unable to reach our servers. Please check if the backend server is running and accessible."),
           emoji: "🌐",
           suggestions: [
             "Check your internet connection",
@@ -120,11 +144,7 @@ const GlobalError = ({ error, reset }) => {
       case "server":
         return {
           title: "Server Unavailable",
-          message:
-            message.includes("Server error") ||
-            message.includes("Backend server")
-              ? message
-              : "Our servers are experiencing issues. Our team has been notified and is working on a fix.",
+          message: errorMessage,
           emoji: "🔧",
           suggestions: [
             "Wait a few minutes and try again",
@@ -136,10 +156,7 @@ const GlobalError = ({ error, reset }) => {
       case "auth":
         return {
           title: "Authentication Required",
-          message:
-            message.includes("session") || message.includes("Authentication")
-              ? message
-              : "Your session has expired. Please sign in again to continue.",
+          message: errorMessage,
           emoji: "🔐",
           suggestions: [
             "Click 'Go to Login' below",
@@ -151,8 +168,7 @@ const GlobalError = ({ error, reset }) => {
       case "config":
         return {
           title: "Service Configuration Error",
-          message:
-            "API endpoint not found. There seems to be a configuration issue with our services.",
+          message: errorMessage,
           emoji: "⚙️",
           suggestions: [
             "Check API endpoint URLs",
@@ -164,9 +180,7 @@ const GlobalError = ({ error, reset }) => {
       default:
         return {
           title: "Something Unexpected Happened",
-          message:
-            message ||
-            "We encountered an unexpected error. Don't worry, our team has been notified.",
+          message: errorMessage,
           emoji: "⚠️",
           suggestions: [
             "Try refreshing the page",
@@ -229,7 +243,6 @@ const GlobalError = ({ error, reset }) => {
         <div className={styles.errorHeader}>
           <div className={styles.errorIconContainer}>
             {getErrorIcon(errorType)}
-            {/* <div className={styles.errorEmoji}>{errorContent.emoji}</div> */}
           </div>
           <h1
             className={`${styles.errorTitle} ${

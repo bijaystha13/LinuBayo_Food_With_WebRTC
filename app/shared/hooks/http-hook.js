@@ -15,28 +15,70 @@ export const useHttpClient = () => {
           ...headers,
         };
 
+        console.log("Making request to:", url, "with method:", method);
+        console.log("Request body:", body);
+
         const response = await fetch(url, {
           method,
           body: body ? JSON.stringify(body) : null,
           headers: defaultHeaders,
         });
 
+        console.log("Response status:", response.status);
+        console.log("Response ok:", response.ok);
+
         if (!response.ok) {
-          if (response.status >= 500) {
-            throw new Error(
-              `Server error: Backend server is experiencing issues (${response.status})`
-            );
-          } else if (response.status === 404) {
-            throw new Error(`API endpoint not found: ${url}`);
-          } else if (response.status === 401) {
-            throw new Error(`Unauthorized access`);
-          } else if (response.status === 403) {
-            throw new Error(`Access forbidden`);
-          } else if (response.status >= 400) {
-            throw new Error(`Client error: ${response.status}`);
-          } else {
-            throw new Error(`HTTP error: ${response.status}`);
+          // First try to parse the response to get the actual error message
+          let errorMessage = `HTTP error: ${response.status}`;
+          let errorResponse = null;
+
+          try {
+            const responseText = await response.text();
+            console.log("Raw error response text:", responseText);
+
+            if (responseText) {
+              errorResponse = JSON.parse(responseText);
+              console.log("Parsed error response:", errorResponse);
+
+              // Extract error message from backend response
+              if (errorResponse.message) {
+                errorMessage = errorResponse.message;
+                console.log("Using errorResponse.message:", errorMessage);
+              } else if (errorResponse.error) {
+                errorMessage = errorResponse.error;
+                console.log("Using errorResponse.error:", errorMessage);
+              } else if (
+                errorResponse.errors &&
+                errorResponse.errors.length > 0
+              ) {
+                errorMessage =
+                  errorResponse.errors[0].msg || errorResponse.errors[0];
+                console.log("Using errorResponse.errors[0]:", errorMessage);
+              }
+            }
+          } catch (parseError) {
+            console.log("Failed to parse error response:", parseError);
+            // If we can't parse JSON, use status-based messages
+            if (response.status >= 500) {
+              errorMessage = `Server error: Backend server is experiencing issues (${response.status})`;
+            } else if (response.status === 404) {
+              errorMessage = `API endpoint not found: ${url}`;
+            } else if (response.status === 401) {
+              errorMessage = `Unauthorized access`;
+            } else if (response.status === 403) {
+              errorMessage = `Access forbidden`;
+            } else if (response.status >= 400) {
+              errorMessage = `Client error: ${response.status}`;
+            }
           }
+
+          console.log("Final error message to throw:", errorMessage);
+
+          // Create error with status code attached
+          const error = new Error(errorMessage);
+          error.status = response.status;
+          error.response = errorResponse;
+          throw error;
         }
 
         // Try to parse JSON response
@@ -49,10 +91,16 @@ export const useHttpClient = () => {
           responseData = await response.text();
         }
 
+        console.log("Success response data:", responseData);
         setIsLoading(false);
         return responseData;
       } catch (error) {
         setIsLoading(false);
+
+        console.log("Caught error in useHttpClient:", error);
+        console.log("Error name:", error.name);
+        console.log("Error message:", error.message);
+        console.log("Error status:", error.status);
 
         // Network errors (server down, no internet, CORS, etc.)
         if (error.name === "TypeError" && error.message.includes("fetch")) {
