@@ -1,7 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import { check } from "express-validator";
-import { signup, login } from "../controllers/users-controllers.js";
+import {
+  signup,
+  login,
+  getUserDashboard,
+} from "../controllers/users-controllers.js";
 import checkAuth from "../middleware/auth.js";
 
 dotenv.config();
@@ -27,6 +31,9 @@ router.post(
 );
 
 router.post("/login", login);
+
 router.use(checkAuth);
+
+router.get("/dashboard", getUserDashboard);
 
 export default router;
