@@ -8,6 +8,7 @@ export const AuthContext = createContext({
   role: null,
   isLoading: true,
   showUserMenu: false,
+  tokenExpirationDate: null,
   login: () => {},
   logout: () => {},
   toggleUserMenu: () => {},

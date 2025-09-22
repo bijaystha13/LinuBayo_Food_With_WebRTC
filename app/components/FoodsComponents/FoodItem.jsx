@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/app/shared/Context/CartContext"; // Adjust path as needed
 import styles from "./FoodItem.module.css";
 import {
   FaEye,
@@ -13,13 +14,16 @@ import {
   FaMinus,
   FaStar,
   FaStarHalfAlt,
+  FaCheck,
 } from "react-icons/fa";
 
 export default function FoodItem(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [servingCount, setServingCount] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const router = useRouter();
+  const { addToCart, isInCart, getCartItem } = useCart();
 
   const handleViewDetails = async () => {
     setIsLoading(true);
@@ -43,10 +47,42 @@ export default function FoodItem(props) {
   const handleAddToCart = async () => {
     setIsAddingToCart(true);
 
-    setTimeout(() => {
-      console.log("Added to cart:", props.id, "Servings:", servingCount);
-      setIsAddingToCart(false);
-    }, 1000);
+    try {
+      // Create product object with all necessary properties
+      const productData = {
+        id: props.id,
+        name: props.name,
+        description: props.description,
+        price: props.price,
+        image: props.image,
+        restaurant: props.restaurant,
+        cookTime: props.cookTime,
+        rating: props.rating,
+        reviewCount: props.reviewCount,
+      };
+
+      // Add to cart with selected quantity
+      addToCart(productData, servingCount);
+
+      // Show success message
+      setShowSuccessMessage(true);
+
+      // Reset serving count
+      setServingCount(1);
+
+      // Hide success message after 2 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 2000);
+
+      console.log(`Added ${servingCount} serving(s) of ${props.name} to cart`);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    } finally {
+      setTimeout(() => {
+        setIsAddingToCart(false);
+      }, 1000);
+    }
   };
 
   const incrementServing = () => {
@@ -84,10 +120,30 @@ export default function FoodItem(props) {
     return stars;
   };
 
+  // Check if item is already in cart
+  const itemInCart = isInCart(props.id);
+  const cartItem = getCartItem(props.id);
+
   return (
     <li className={styles.productItem}>
       <div className={styles.productItemContent}>
         {props.isSpecial && <div className={styles.specialBadge}>FEATURED</div>}
+
+        {/* Cart Status Indicator */}
+        {itemInCart && (
+          <div className={styles.cartStatusBadge}>
+            <FaCheck className={styles.cartCheckIcon} />
+            In Cart ({cartItem?.quantity})
+          </div>
+        )}
+
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <div className={styles.successMessage}>
+            <FaCheck className={styles.successIcon} />
+            Added to cart!
+          </div>
+        )}
 
         <div className={styles.productItemImage}>
           <div className={styles.imageContainer}>
@@ -163,6 +219,15 @@ export default function FoodItem(props) {
               </button>
             </div>
           </div>
+
+          {/* Show current cart quantity if item is in cart */}
+          {itemInCart && (
+            <div className={styles.cartInfo}>
+              <span className={styles.cartInfoText}>
+                Currently in cart: {cartItem?.quantity} serving(s)
+              </span>
+            </div>
+          )}
         </div>
 
         <div className={styles.productItemButtons}>
@@ -203,15 +268,26 @@ export default function FoodItem(props) {
           <button
             className={`${styles.btn} ${styles.btnAddToCart} ${
               isAddingToCart ? styles.btnLoading : ""
-            }`}
+            } ${showSuccessMessage ? styles.btnSuccess : ""}`}
             onClick={handleAddToCart}
             disabled={isAddingToCart}
             aria-label={`Add ${servingCount} serving${
               servingCount > 1 ? "s" : ""
             } to cart`}
           >
-            {!isAddingToCart && <FaCartPlus />}
-            {isAddingToCart ? "ADDING..." : `ADD TO CART (${servingCount})`}
+            {showSuccessMessage ? (
+              <>
+                <FaCheck />
+                ADDED TO CART!
+              </>
+            ) : isAddingToCart ? (
+              "ADDING..."
+            ) : (
+              <>
+                <FaCartPlus />
+                {itemInCart ? "ADD MORE" : "ADD TO CART"} ({servingCount})
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -23,6 +23,48 @@ const FOOD_CATEGORIES = [
   { value: "italian", label: "Italian", icon: "🍝" },
 ];
 
+// Network detection utilities
+const checkNetworkConnectivity = async () => {
+  try {
+    // Check if navigator.onLine is available (basic check)
+    if (!navigator.onLine) {
+      return false;
+    }
+
+    // Try to fetch a small resource to verify actual connectivity
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch("/favicon.ico", {
+      method: "HEAD",
+      cache: "no-cache",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+};
+
+const isNetworkError = (error) => {
+  // Check for various network error indicators
+  return (
+    !navigator.onLine ||
+    error?.name === "NetworkError" ||
+    error?.code === "NETWORK_ERROR" ||
+    error?.message?.includes("fetch") ||
+    error?.message?.includes("NetworkError") ||
+    error?.message?.includes("Failed to fetch") ||
+    error?.message?.toLowerCase().includes("network") ||
+    error?.message?.toLowerCase().includes("connection") ||
+    error?.cause?.code === "ENOTFOUND" ||
+    error?.cause?.code === "ECONNREFUSED" ||
+    error?.cause?.code === "ETIMEDOUT"
+  );
+};
+
 export default function MenuPage() {
   const { isLoading, sendRequest } = useHttpClient();
   const [loadedFoods, setLoadedFoods] = useState([]);
@@ -35,6 +77,10 @@ export default function MenuPage() {
   // Add initialization tracking
   const [hasInitialized, setHasInitialized] = useState(false);
   const [renderError, setRenderError] = useState(null);
+
+  // Network state tracking
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [networkChecking, setNetworkChecking] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,6 +95,31 @@ export default function MenuPage() {
   });
 
   const API_BASE = "http://localhost:5001";
+
+  // Network event listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      console.log("Network: Online");
+      // Optionally refetch data when coming back online
+      if (hasInitialized) {
+        fetchFoods(currentPage);
+      }
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      console.log("Network: Offline");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [hasInitialized, currentPage]);
 
   // Initialize empty state
   const initializeEmptyState = useCallback(
@@ -70,10 +141,62 @@ export default function MenuPage() {
   // Track if this is the initial load
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+  // Enhanced error handling with network detection
+  const handleFetchError = async (error, targetPage) => {
+    console.error("Fetch error details:", error);
+
+    // First check if it's a network connectivity issue
+    const networkConnected = await checkNetworkConnectivity();
+
+    if (!networkConnected || isNetworkError(error)) {
+      // Create a network-specific error
+      const networkError = new Error(
+        "No internet connection. Please check your network and try again."
+      );
+      networkError.name = "NetworkError";
+      networkError.isNetworkError = true;
+
+      if (isInitialLoad || !hasInitialized) {
+        setRenderError(networkError);
+        return;
+      } else {
+        toast.error(
+          "Network connection lost. Please check your internet connection."
+        );
+        initializeEmptyState(targetPage);
+        return;
+      }
+    }
+
+    // Handle other errors (server down, API errors, etc.)
+    if (isInitialLoad || !hasInitialized) {
+      setRenderError(error);
+      return;
+    }
+
+    // For subsequent requests (filtering, pagination), handle gracefully
+    toast.error("Failed to load menu items");
+    initializeEmptyState(targetPage);
+  };
+
   // Unified fetch function for both "all" and category-specific requests
   const fetchFoods = useCallback(
     async (page = 1, resetPage = false) => {
       try {
+        // Quick network check before making request
+        setNetworkChecking(true);
+        const networkConnected = await checkNetworkConnectivity();
+        setNetworkChecking(false);
+
+        if (!networkConnected) {
+          const networkError = new Error(
+            "No internet connection. Please check your network and try again."
+          );
+          networkError.name = "NetworkError";
+          networkError.isNetworkError = true;
+          throw networkError;
+        }
+
         const targetPage = resetPage ? 1 : page;
         setCurrentPage(targetPage);
 
@@ -236,17 +359,7 @@ export default function MenuPage() {
         setHasInitialized(true);
         setIsInitialLoad(false);
       } catch (err) {
-        console.error("Failed to fetch foods:", err);
-
-        // For initial load, set error to trigger boundary during render
-        if (isInitialLoad || !hasInitialized) {
-          setRenderError(err);
-          return; // Don't continue with error handling
-        }
-
-        // For subsequent requests (filtering, pagination), handle gracefully
-        toast.error("Failed to load menu items");
-        initializeEmptyState(targetPage);
+        await handleFetchError(err, resetPage ? 1 : page);
       }
     },
     [
@@ -258,6 +371,7 @@ export default function MenuPage() {
       sendRequest,
       initializeEmptyState,
       isInitialLoad,
+      hasInitialized,
     ]
   );
 
@@ -340,6 +454,13 @@ export default function MenuPage() {
     async (deletedFoodId) => {
       setIsDeleting(true);
       try {
+        // Check network before attempting delete
+        const networkConnected = await checkNetworkConnectivity();
+        if (!networkConnected) {
+          toast.error("Cannot delete item: No internet connection");
+          return;
+        }
+
         await sendRequest(`${API_BASE}/api/foods/${deletedFoodId}`, "DELETE");
 
         // Refresh the current page after deletion
@@ -348,7 +469,11 @@ export default function MenuPage() {
         toast.success("Food item deleted successfully!");
       } catch (error) {
         console.error("Delete error:", error);
-        toast.error("Failed to delete food item");
+        if (isNetworkError(error)) {
+          toast.error("Delete failed: Network connection lost");
+        } else {
+          toast.error("Failed to delete food item");
+        }
       } finally {
         setIsDeleting(false);
       }
@@ -372,6 +497,15 @@ export default function MenuPage() {
 
   return (
     <div className={styles.menuContainer}>
+      {/* Network Status Indicator */}
+      {!isOnline && (
+        <div className={styles.networkWarning}>
+          <span>
+            ⚠️ No internet connection. Some features may not work properly.
+          </span>
+        </div>
+      )}
+
       <div className={styles.menuHeader}>
         <h1 className={styles.menuTitle}>
           {getCurrentCategory().icon} Our Menu
@@ -399,54 +533,62 @@ export default function MenuPage() {
 
       <div className={styles.menuContent}>
         {/* Results summary */}
-        {!isLoading && !isDeleting && loadedFoods.length > 0 && (
-          <div className={styles.resultsInfo}>
-            <p>
-              {getCurrentCategory().icon} Showing{" "}
-              {(currentPage - 1) * itemsPerPage + 1}-
-              {Math.min(currentPage * itemsPerPage, pagination.totalItems)} of{" "}
-              {pagination.totalItems}{" "}
-              {selectedCategory === "all"
-                ? "items"
-                : getCurrentCategory().label.toLowerCase()}
-              {pagination.totalPages > 1 &&
-                ` (Page ${currentPage} of ${pagination.totalPages})`}
-            </p>
-          </div>
-        )}
+        {!isLoading &&
+          !isDeleting &&
+          !networkChecking &&
+          loadedFoods.length > 0 && (
+            <div className={styles.resultsInfo}>
+              <p>
+                {getCurrentCategory().icon} Showing{" "}
+                {(currentPage - 1) * itemsPerPage + 1}-
+                {Math.min(currentPage * itemsPerPage, pagination.totalItems)} of{" "}
+                {pagination.totalItems}{" "}
+                {selectedCategory === "all"
+                  ? "items"
+                  : getCurrentCategory().label.toLowerCase()}
+                {pagination.totalPages > 1 &&
+                  ` (Page ${currentPage} of ${pagination.totalPages})`}
+              </p>
+            </div>
+          )}
 
-        {(isLoading || isDeleting) && (
+        {(isLoading || isDeleting || networkChecking) && (
           <div className={styles.loadingContainer}>
             <LoadingSpinner />
+            {networkChecking && <p>Checking network connectivity...</p>}
           </div>
-        )}
-
-        {!isLoading && !isDeleting && loadedFoods.length > 0 && (
-          <>
-            <FoodList
-              items={loadedFoods}
-              onDeleteProduct={foodDeletedHandler}
-            />
-
-            {/* Pagination Component */}
-            {pagination.totalPages > 1 && (
-              <div className={styles.paginationContainer}>
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={pagination.totalPages}
-                  onPageChange={handlePageChange}
-                  onPreviousPage={handlePreviousPage}
-                  onNextPage={handleNextPage}
-                  hasNextPage={pagination.hasNextPage}
-                  hasPrevPage={pagination.hasPrevPage}
-                />
-              </div>
-            )}
-          </>
         )}
 
         {!isLoading &&
           !isDeleting &&
+          !networkChecking &&
+          loadedFoods.length > 0 && (
+            <>
+              <FoodList
+                items={loadedFoods}
+                onDeleteProduct={foodDeletedHandler}
+              />
+
+              {/* Pagination Component */}
+              {pagination.totalPages > 1 && (
+                <div className={styles.paginationContainer}>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={pagination.totalPages}
+                    onPageChange={handlePageChange}
+                    onPreviousPage={handlePreviousPage}
+                    onNextPage={handleNextPage}
+                    hasNextPage={pagination.hasNextPage}
+                    hasPrevPage={pagination.hasPrevPage}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+        {!isLoading &&
+          !isDeleting &&
+          !networkChecking &&
           loadedFoods.length === 0 &&
           pagination.totalItems === 0 &&
           (searchQuery || priceRange[0] > 0 || priceRange[1] < 1000) && (
@@ -466,6 +608,7 @@ export default function MenuPage() {
 
         {!isLoading &&
           !isDeleting &&
+          !networkChecking &&
           loadedFoods.length === 0 &&
           pagination.totalItems === 0 &&
           !searchQuery &&

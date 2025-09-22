@@ -4,16 +4,20 @@ import Link from "next/link";
 import "./Navbar.css";
 import NavLink from "./NavLink";
 import { AuthContext } from "@/app/shared/Context/AuthContext";
+import { useCart } from "@/app/shared/Context/CartContext"; // Add cart context
 
 const Navbar = () => {
   const authCtx = useContext(AuthContext);
+  const { getCartItemsCount } = useCart(); // Get cart items count
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [cartCount, setCartCount] = useState(3);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const searchRef = useRef(null);
   const userDropdownRef = useRef(null);
+
+  // Get dynamic cart count from context
+  const cartCount = getCartItemsCount();
 
   // Debug: Log auth context values
   useEffect(() => {
@@ -34,6 +38,11 @@ const Navbar = () => {
       });
     }
   }, [authCtx.isLoggedIn]);
+
+  // Debug: Log cart count changes
+  useEffect(() => {
+    console.log("Cart items count updated:", cartCount);
+  }, [cartCount]);
 
   // Function to get the logo destination URL
   const getLogoDestination = () => {
@@ -307,12 +316,19 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="user-actions">
-                {/* Cart Button - Only show for regular users */}
+                {/* Cart Button - Only show for regular users with dynamic count */}
                 {authCtx.role === "user" && (
                   <Link href="/cart" className="navbar-button cart-button">
                     <span className="cart-icon">🛒</span>
                     {cartCount > 0 && (
-                      <span className="cart-count">{cartCount}</span>
+                      <span
+                        className={`cart-count ${
+                          cartCount > 99 ? "cart-count-large" : ""
+                        }`}
+                        title={`${cartCount} items in cart`}
+                      >
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
                     )}
                   </Link>
                 )}
@@ -340,6 +356,12 @@ const Navbar = () => {
                         {authCtx.userId && (
                           <span className="user-id">ID: {authCtx.userId}</span>
                         )}
+                        {/* Show cart summary for users */}
+                        {authCtx.role === "user" && cartCount > 0 && (
+                          <span className="cart-summary">
+                            Cart: {cartCount} items
+                          </span>
+                        )}
                       </div>
 
                       <Link
@@ -354,6 +376,18 @@ const Navbar = () => {
                         <span className="dropdown-icon">👤</span>
                         Profile
                       </Link>
+
+                      {/* Cart link in dropdown for mobile users */}
+                      {authCtx.role === "user" && (
+                        <Link
+                          href="/cart"
+                          className="user-dropdown-item"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <span className="dropdown-icon">🛒</span>
+                          Cart {cartCount > 0 && `(${cartCount})`}
+                        </Link>
+                      )}
 
                       <Link
                         href="/notifications"

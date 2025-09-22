@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ShoppingCart,
   Plus,
@@ -24,39 +24,17 @@ import styles from "./Cart.module.css";
 // Import the modal component
 import OrderConfirmationModal from "./OrderConfirmationModal";
 
+// Import cart context
+import { useCart } from "@/app/shared/Context/CartContext";
+
 export default function CartCheckout() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Margherita Pizza",
-      description: "Fresh tomatoes, mozzarella, and basil",
-      price: 18.99,
-      quantity: 2,
-      image:
-        "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=200&h=200&fit=crop",
-      restaurant: "Bella Vista",
-    },
-    {
-      id: 2,
-      name: "Chicken Teriyaki Bowl",
-      description: "Grilled chicken with rice and vegetables",
-      price: 15.5,
-      quantity: 1,
-      image:
-        "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=200&h=200&fit=crop",
-      restaurant: "Sakura Sushi",
-    },
-    {
-      id: 3,
-      name: "Caesar Salad",
-      description: "Crisp romaine with parmesan and croutons",
-      price: 12.75,
-      quantity: 1,
-      image:
-        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&h=200&fit=crop",
-      restaurant: "The Garden Bistro",
-    },
-  ]);
+  const {
+    cartItems,
+    updateQuantity,
+    removeFromCart,
+    getCartTotal,
+    getCartItemsCount,
+  } = useCart();
 
   const [deliveryOption, setDeliveryOption] = useState("delivery");
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
@@ -67,6 +45,7 @@ export default function CartCheckout() {
     occasion: "",
   });
   const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [showOrderModal, setShowOrderModal] = useState(false);
 
@@ -130,32 +109,64 @@ export default function CartCheckout() {
     "Family Gathering",
   ];
 
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity === 0) {
-      removeItem(id);
-      return;
+  // Handle quantity update
+  const handleUpdateQuantity = (id, newQuantity) => {
+    updateQuantity(id, newQuantity);
+  };
+
+  // Handle item removal
+  const handleRemoveItem = (id) => {
+    removeFromCart(id);
+  };
+
+  // Apply promo code
+  const applyPromoCode = () => {
+    const validPromoCodes = {
+      SAVE10: 0.1,
+      FIRST15: 0.15,
+      WELCOME20: 0.2,
+      STUDENT5: 0.05,
+    };
+
+    if (validPromoCodes[promoCode.toUpperCase()]) {
+      setAppliedPromo(promoCode.toUpperCase());
+      alert(`Promo code ${promoCode.toUpperCase()} applied successfully!`);
+    } else {
+      alert("Invalid promo code. Please try again.");
     }
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    setPromoCode("");
   };
 
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
+  // Clear applied promo
+  const clearPromo = () => {
+    setAppliedPromo("");
   };
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  // Calculate totals using cart context
+  const subtotal = getCartTotal();
   const deliveryFee = deliveryOption === "delivery" ? 3.99 : 0;
   const tax = subtotal * 0.08;
-  const discount = promoCode === "SAVE10" ? subtotal * 0.1 : 0;
+
+  // Apply discount based on promo code
+  const getDiscountRate = (code) => {
+    const rates = {
+      SAVE10: 0.1,
+      FIRST15: 0.15,
+      WELCOME20: 0.2,
+      STUDENT5: 0.05,
+    };
+    return rates[code] || 0;
+  };
+
+  const discount = appliedPromo ? subtotal * getDiscountRate(appliedPromo) : 0;
   const total = subtotal + deliveryFee + tax - discount;
 
   const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      alert("Your cart is empty. Please add items before checkout.");
+      return;
+    }
+
     if (
       deliveryOption === "dine-in" &&
       (!selectedRestaurant ||
@@ -171,6 +182,17 @@ export default function CartCheckout() {
     setShowOrderModal(true);
   };
 
+  // Auto-select default restaurant if dine-in is selected and no restaurant is chosen
+  useEffect(() => {
+    if (
+      deliveryOption === "dine-in" &&
+      !selectedRestaurant &&
+      restaurants.length > 0
+    ) {
+      setSelectedRestaurant(restaurants[0]);
+    }
+  }, [deliveryOption, selectedRestaurant]);
+
   return (
     <div className={styles.container}>
       <div className={styles.mainGrid}>
@@ -179,62 +201,86 @@ export default function CartCheckout() {
           {/* Cart Items */}
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
-              <ShoppingCart className="text-orange-600" />
-              Your Cart ({cartItems.length} items)
+              <ShoppingCart />
+              Your Cart ({getCartItemsCount()} items)
             </h2>
 
             {cartItems.length === 0 ? (
               <div className={styles.emptyCart}>
                 <ShoppingCart className={styles.emptyCartIcon} />
-                <p className="text-gray-500 text-lg">Your cart is empty</p>
+                <p className={styles.emptyCartText}>Your cart is empty</p>
+                <p className={styles.summaryLabel}>
+                  Add some delicious items from our menu to get started!
+                </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className={styles.cartItemsContainer}>
                 {cartItems.map((item) => (
                   <div key={item.id} className={styles.cartItem}>
                     <img
                       src={item.image}
                       alt={item.name}
                       className={styles.itemImage}
+                      onError={(e) => {
+                        e.target.src = "/placeholder-food.jpg";
+                      }}
                     />
                     <div className={styles.itemInfo}>
                       <h3 className={styles.itemName}>{item.name}</h3>
                       <p className={styles.itemDescription}>
                         {item.description}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className={styles.summaryValue}>
                         From: {item.restaurant}
                       </p>
+                      <div className={styles.itemDetails}>
+                        <Clock size={14} />
+                        <span className={styles.itemDetailText}>
+                          {item.cookTime} mins
+                        </span>
+                        {item.rating && (
+                          <>
+                            <Star size={14} className={styles.starIcon} />
+                            <span className={styles.itemDetailText}>
+                              {item.rating}
+                            </span>
+                          </>
+                        )}
+                      </div>
                       <div className={styles.quantityControls}>
-                        <div
+                        <button
                           className={styles.quantityBtn}
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            handleUpdateQuantity(item.id, item.quantity - 1)
                           }
                         >
                           <Minus size={16} />
-                        </div>
+                        </button>
                         <span className={styles.quantity}>{item.quantity}</span>
-                        <div
+                        <button
                           className={styles.quantityBtn}
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            handleUpdateQuantity(item.id, item.quantity + 1)
                           }
                         >
                           <Plus size={16} />
-                        </div>
+                        </button>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className={styles.itemActions}>
                       <p className={styles.itemPrice}>
                         ${(item.price * item.quantity).toFixed(2)}
                       </p>
-                      <div
+                      <p className={styles.summaryValue}>
+                        ${item.price.toFixed(2)} each
+                      </p>
+                      <button
                         className={styles.removeBtn}
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => handleRemoveItem(item.id)}
+                        title="Remove item"
                       >
                         <Trash2 size={20} />
-                      </div>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -242,290 +288,331 @@ export default function CartCheckout() {
             )}
           </div>
 
-          {/* Delivery Options */}
-          <div className={styles.card}>
-            <h3 className={styles.cardTitle}>
-              <Truck className="text-orange-600" />
-              Delivery Options
-            </h3>
+          {/* Delivery Options - Only show if cart has items */}
+          {cartItems.length > 0 && (
+            <div className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                <Truck />
+                Delivery Options
+              </h3>
 
-            <div className={styles.deliveryOptions}>
-              <div
-                className={`${styles.deliveryOption} ${
-                  deliveryOption === "delivery"
-                    ? styles.deliveryOptionActive
-                    : styles.deliveryOptionInactive
-                }`}
-                onClick={() => setDeliveryOption("delivery")}
-              >
-                <Truck className="text-orange-600" />
-                <div>
-                  <h4 className="font-semibold">Delivery</h4>
-                  <p className="text-sm text-gray-600">30-45 mins • $3.99</p>
+              <div className={styles.deliveryOptions}>
+                <div
+                  className={`${styles.deliveryOption} ${
+                    deliveryOption === "delivery"
+                      ? styles.deliveryOptionActive
+                      : styles.deliveryOptionInactive
+                  }`}
+                  onClick={() => setDeliveryOption("delivery")}
+                >
+                  <Truck />
+                  <div>
+                    <h4 className={styles.deliveryOptionTitle}>Delivery</h4>
+                    <p className={styles.deliveryOptionDesc}>
+                      30-45 mins • $3.99
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={`${styles.deliveryOption} ${
+                    deliveryOption === "pickup"
+                      ? styles.deliveryOptionActive
+                      : styles.deliveryOptionInactive
+                  }`}
+                  onClick={() => setDeliveryOption("pickup")}
+                >
+                  <Store />
+                  <div>
+                    <h4 className={styles.deliveryOptionTitle}>Pickup</h4>
+                    <p className={styles.deliveryOptionDesc}>
+                      15-25 mins • Free
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={`${styles.deliveryOption} ${
+                    deliveryOption === "dine-in"
+                      ? styles.deliveryOptionActive
+                      : styles.deliveryOptionInactive
+                  }`}
+                  onClick={() => setDeliveryOption("dine-in")}
+                >
+                  <Users />
+                  <div>
+                    <h4 className={styles.deliveryOptionTitle}>Dine In</h4>
+                    <p className={styles.deliveryOptionDesc}>
+                      Make a reservation • Free
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div
-                className={`${styles.deliveryOption} ${
-                  deliveryOption === "pickup"
-                    ? styles.deliveryOptionActive
-                    : styles.deliveryOptionInactive
-                }`}
-                onClick={() => setDeliveryOption("pickup")}
-              >
-                <Store className="text-orange-600" />
-                <div>
-                  <h4 className="font-semibold">Pickup</h4>
-                  <p className="text-sm text-gray-600">15-25 mins • Free</p>
-                </div>
-              </div>
+              {/* Restaurant Reservation Section */}
+              {deliveryOption === "dine-in" && (
+                <div className={styles.reservationSection}>
+                  <h4 className={styles.reservationTitle}>
+                    Choose Restaurant & Make Reservation
+                  </h4>
 
-              <div
-                className={`${styles.deliveryOption} ${
-                  deliveryOption === "dine-in"
-                    ? styles.deliveryOptionActive
-                    : styles.deliveryOptionInactive
-                }`}
-                onClick={() => setDeliveryOption("dine-in")}
-              >
-                <Users className="text-orange-600" />
-                <div>
-                  <h4 className="font-semibold">Dine In</h4>
-                  <p className="text-sm text-gray-600">
-                    Make a reservation • Free
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Restaurant Reservation Section */}
-            {deliveryOption === "dine-in" && (
-              <div className={styles.reservationSection}>
-                <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                  Choose Restaurant & Make Reservation
-                </h4>
-
-                <div className={styles.restaurantGrid}>
-                  {restaurants.map((restaurant) => (
-                    <div
-                      key={restaurant.id}
-                      className={`${styles.restaurantCard} ${
-                        selectedRestaurant?.id === restaurant.id
-                          ? styles.restaurantActive
-                          : styles.restaurantInactive
-                      }`}
-                      onClick={() => setSelectedRestaurant(restaurant)}
-                    >
-                      <div className="flex items-center">
-                        <img
-                          src={restaurant.image}
-                          alt={restaurant.name}
-                          className={styles.restaurantImage}
-                        />
-                        <div className={styles.restaurantInfo}>
-                          <h5 className={styles.restaurantName}>
-                            {restaurant.name}
-                          </h5>
-                          <p className={styles.restaurantCuisine}>
-                            {restaurant.cuisine}
-                          </p>
-                          <div className={styles.restaurantRating}>
-                            <Star size={14} fill="currentColor" />
-                            <span>{restaurant.rating}</span>
+                  <div className={styles.restaurantGrid}>
+                    {restaurants.map((restaurant) => (
+                      <div
+                        key={restaurant.id}
+                        className={`${styles.restaurantCard} ${
+                          selectedRestaurant?.id === restaurant.id
+                            ? styles.restaurantActive
+                            : styles.restaurantInactive
+                        }`}
+                        onClick={() => setSelectedRestaurant(restaurant)}
+                      >
+                        <div className={styles.restaurantCardContent}>
+                          <img
+                            src={restaurant.image}
+                            alt={restaurant.name}
+                            className={styles.restaurantImage}
+                          />
+                          <div className={styles.restaurantInfo}>
+                            <h5 className={styles.restaurantName}>
+                              {restaurant.name}
+                            </h5>
+                            <p className={styles.restaurantCuisine}>
+                              {restaurant.cuisine}
+                            </p>
+                            <div className={styles.restaurantRating}>
+                              <Star size={14} fill="currentColor" />
+                              <span>{restaurant.rating}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {selectedRestaurant && (
-                  <div className="bg-orange-50 rounded-lg p-4">
-                    <h5 className="font-semibold mb-3">
-                      Reservation Details for {selectedRestaurant.name}
-                    </h5>
-                    <div className={styles.formGrid}>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Date</label>
-                        <input
-                          type="date"
-                          className={styles.input}
-                          value={reservationData.date}
-                          onChange={(e) =>
-                            setReservationData({
-                              ...reservationData,
-                              date: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Time</label>
-                        <select
-                          className={styles.select}
-                          value={reservationData.time}
-                          onChange={(e) =>
-                            setReservationData({
-                              ...reservationData,
-                              time: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Time</option>
-                          {timeSlots.map((time) => (
-                            <option key={time} value={time}>
-                              {time}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Guests</label>
-                        <select
-                          className={styles.select}
-                          value={reservationData.guests}
-                          onChange={(e) =>
-                            setReservationData({
-                              ...reservationData,
-                              guests: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Guests</option>
-                          {[...Array(12)].map((_, i) => (
-                            <option key={i + 1} value={i + 1}>
-                              {i + 1} Guest{i + 1 > 1 ? "s" : ""}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Occasion</label>
-                        <select
-                          className={styles.select}
-                          value={reservationData.occasion}
-                          onChange={(e) =>
-                            setReservationData({
-                              ...reservationData,
-                              occasion: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Occasion</option>
-                          {occasions.map((occasion) => (
-                            <option key={occasion} value={occasion}>
-                              {occasion}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                )}
-              </div>
-            )}
-          </div>
+
+                  {selectedRestaurant && (
+                    <div className={styles.reservationForm}>
+                      <h5 className={styles.reservationFormTitle}>
+                        Reservation Details for {selectedRestaurant.name}
+                      </h5>
+                      <div className={styles.formGrid}>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Date</label>
+                          <input
+                            type="date"
+                            className={styles.input}
+                            value={reservationData.date}
+                            min={new Date().toISOString().split("T")[0]}
+                            onChange={(e) =>
+                              setReservationData({
+                                ...reservationData,
+                                date: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Time</label>
+                          <select
+                            className={styles.select}
+                            value={reservationData.time}
+                            onChange={(e) =>
+                              setReservationData({
+                                ...reservationData,
+                                time: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Select Time</option>
+                            {timeSlots.map((time) => (
+                              <option key={time} value={time}>
+                                {time}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Guests</label>
+                          <select
+                            className={styles.select}
+                            value={reservationData.guests}
+                            onChange={(e) =>
+                              setReservationData({
+                                ...reservationData,
+                                guests: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Select Guests</option>
+                            {[...Array(12)].map((_, i) => (
+                              <option key={i + 1} value={i + 1}>
+                                {i + 1} Guest{i + 1 > 1 ? "s" : ""}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Occasion</label>
+                          <select
+                            className={styles.select}
+                            value={reservationData.occasion}
+                            onChange={(e) =>
+                              setReservationData({
+                                ...reservationData,
+                                occasion: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Select Occasion</option>
+                            {occasions.map((occasion) => (
+                              <option key={occasion} value={occasion}>
+                                {occasion}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Checkout Section */}
         <div className={styles.checkoutSection}>
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>
-              <CreditCard className="text-orange-600" />
+              <CreditCard />
               Order Summary
             </h3>
 
-            <div className={styles.summary}>
-              <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Subtotal</span>
-                <span className={styles.summaryValue}>
-                  ${subtotal.toFixed(2)}
-                </span>
+            {cartItems.length === 0 ? (
+              <div className={styles.emptyCheckout}>
+                <ShoppingCart size={48} />
+                <h3>Your cart is empty</h3>
+                <p>Add items to see your order summary</p>
               </div>
+            ) : (
+              <>
+                <div className={styles.summary}>
+                  <div className={styles.summaryRow}>
+                    <span className={styles.summaryLabel}>
+                      Subtotal ({getCartItemsCount()} items)
+                    </span>
+                    <span className={styles.summaryValue}>
+                      ${subtotal.toFixed(2)}
+                    </span>
+                  </div>
 
-              {deliveryOption === "delivery" && (
-                <div className={styles.summaryRow}>
-                  <span className={styles.summaryLabel}>Delivery Fee</span>
-                  <span className={styles.summaryValue}>
-                    ${deliveryFee.toFixed(2)}
-                  </span>
+                  {deliveryOption === "delivery" && (
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Delivery Fee</span>
+                      <span className={styles.summaryValue}>
+                        ${deliveryFee.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className={styles.summaryRow}>
+                    <span className={styles.summaryLabel}>Tax (8%)</span>
+                    <span className={styles.summaryValue}>
+                      ${tax.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {discount > 0 && (
+                    <div className={styles.summaryRow}>
+                      <span className={styles.discountLabel}>
+                        Discount ({appliedPromo})
+                        <button
+                          onClick={clearPromo}
+                          className={styles.promoRemove}
+                          title="Remove promo code"
+                        >
+                          ×
+                        </button>
+                      </span>
+                      <span className={styles.discountValue}>
+                        -${discount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className={styles.totalRow}>
+                    <span className={styles.totalLabel}>Total</span>
+                    <span className={styles.totalValue}>
+                      ${total.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Tax</span>
-                <span className={styles.summaryValue}>${tax.toFixed(2)}</span>
-              </div>
+                {/* Promo Code */}
+                {!appliedPromo && (
+                  <div className={styles.promoSection}>
+                    <div className={styles.promoInput}>
+                      <input
+                        type="text"
+                        placeholder="Enter promo code"
+                        className={styles.input}
+                        value={promoCode}
+                        onChange={(e) =>
+                          setPromoCode(e.target.value.toUpperCase())
+                        }
+                      />
+                      <button
+                        className={styles.promoButton}
+                        onClick={applyPromoCode}
+                        disabled={!promoCode.trim()}
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    <div className={styles.summaryValue}>
+                      Try: SAVE10, FIRST15, WELCOME20, STUDENT5
+                    </div>
+                  </div>
+                )}
 
-              {discount > 0 && (
-                <div className={styles.summaryRow}>
-                  <span className={`${styles.summaryLabel} text-green-600`}>
-                    Discount
-                  </span>
-                  <span className="font-semibold text-green-600">
-                    -${discount.toFixed(2)}
-                  </span>
+                {/* Payment Methods */}
+                <div className={styles.paymentSection}>
+                  <h4 className={styles.summaryValue}>Payment Method</h4>
+                  <div className={styles.paymentMethods}>
+                    <div
+                      className={`${styles.paymentMethod} ${
+                        paymentMethod === "card"
+                          ? styles.paymentActive
+                          : styles.paymentInactive
+                      }`}
+                      onClick={() => setPaymentMethod("card")}
+                    >
+                      <CreditCard size={20} />
+                      <span className={styles.paymentMethodText}>Card</span>
+                    </div>
+                    <div
+                      className={`${styles.paymentMethod} ${
+                        paymentMethod === "cash"
+                          ? styles.paymentActive
+                          : styles.paymentInactive
+                      }`}
+                      onClick={() => setPaymentMethod("cash")}
+                    >
+                      <Gift size={20} />
+                      <span className={styles.paymentMethodText}>Cash</span>
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              <div className={styles.totalRow}>
-                <span className={styles.totalLabel}>Total</span>
-                <span className={styles.totalValue}>${total.toFixed(2)}</span>
-              </div>
-            </div>
-
-            {/* Promo Code */}
-            <div className={styles.promoSection}>
-              <div className={styles.promoInput}>
-                <input
-                  type="text"
-                  placeholder="Promo code"
-                  className={styles.input}
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                />
-                <button className={styles.promoButton}>Apply</button>
-              </div>
-            </div>
-
-            {/* Payment Methods */}
-            <div className="mt-6">
-              <h4 className="font-semibold text-gray-800 mb-3">
-                Payment Method
-              </h4>
-              <div className={styles.paymentMethods}>
-                <div
-                  className={`${styles.paymentMethod} ${
-                    paymentMethod === "card"
-                      ? styles.paymentActive
-                      : styles.paymentInactive
-                  }`}
-                  onClick={() => setPaymentMethod("card")}
+                <button
+                  className={styles.checkoutButton}
+                  onClick={handleCheckout}
+                  disabled={cartItems.length === 0}
                 >
-                  <CreditCard size={20} />
-                  <span className="font-medium">Card</span>
-                </div>
-                <div
-                  className={`${styles.paymentMethod} ${
-                    paymentMethod === "cash"
-                      ? styles.paymentActive
-                      : styles.paymentInactive
-                  }`}
-                  onClick={() => setPaymentMethod("cash")}
-                >
-                  <Gift size={20} />
-                  <span className="font-medium">Cash</span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              className={styles.checkoutButton}
-              onClick={handleCheckout}
-              disabled={cartItems.length === 0}
-            >
-              Place Order • ${total.toFixed(2)}
-            </button>
+                  Place Order • ${total.toFixed(2)}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -545,6 +632,7 @@ export default function CartCheckout() {
           discount,
           total,
           paymentMethod,
+          appliedPromo,
         }}
       />
     </div>

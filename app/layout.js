@@ -3,6 +3,7 @@ import { LoadingProvider } from "@/app/shared/Context/LoadingContext";
 import { AuthProvider } from "./shared/Context/AuthProvider";
 import "./globals.css";
 import RouteGuard from "./components/HOC/RouteGuard";
+import { CartProvider } from "./shared/Context/CartContext";
 
 export const metadata = {
   title: "LinuBayo Food",
@@ -14,17 +15,19 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <AuthProvider>
-          <LoadingProvider>
-            <Navbar />
-            <RouteGuard>
-              <main>
-                <div id="modal-hook"></div>
-                <div id="backdrop-hook"></div>
-                <div id="root"></div>
-                {children}
-              </main>
-            </RouteGuard>
-          </LoadingProvider>
+          <CartProvider>
+            <LoadingProvider>
+              <Navbar />
+              <RouteGuard>
+                <main>
+                  <div id="modal-hook"></div>
+                  <div id="backdrop-hook"></div>
+                  <div id="root"></div>
+                  {children}
+                </main>
+              </RouteGuard>
+            </LoadingProvider>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

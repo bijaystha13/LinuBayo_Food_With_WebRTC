@@ -1,6 +1,6 @@
 // app/user-dashboard/page.js
 "use client";
-
+import { useAuth } from "../shared/hooks/auth-hook";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -39,6 +39,7 @@ const UserDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [imageErrors, setImageErrors] = useState(new Set());
+  const { token, isLoggedIn } = useAuth();
 
   const router = useRouter();
   const { isLoading: httpLoading, sendRequest } = useHttpClient();
@@ -189,8 +190,12 @@ const UserDashboard = () => {
         }
 
         // Check authentication
-        const token = localStorage.getItem("token");
-        if (!token) {
+        // const token = localStorage.getItem("token");
+        // if (!token) {
+        //   throw new Error("Authentication required. Please log in again.");
+        // }
+
+        if (!isLoggedIn || !token) {
           throw new Error("Authentication required. Please log in again.");
         }
 
