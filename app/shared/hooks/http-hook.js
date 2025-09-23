@@ -10,18 +10,29 @@ export const useHttpClient = () => {
       setIsLoading(true);
 
       try {
-        const defaultHeaders = {
-          "Content-Type": "application/json",
-          ...headers,
-        };
+        let defaultHeaders = {};
+        let processedBody = body;
+
+        // Only set Content-Type for non-FormData requests
+        if (body && !(body instanceof FormData)) {
+          defaultHeaders["Content-Type"] = "application/json";
+          processedBody = JSON.stringify(body);
+        } else if (body instanceof FormData) {
+          // Don't set Content-Type for FormData - let browser set it with boundary
+          processedBody = body;
+        }
+
+        // Merge with provided headers
+        const finalHeaders = { ...defaultHeaders, ...headers };
 
         console.log("Making request to:", url, "with method:", method);
-        console.log("Request body:", body);
+        console.log("Request body type:", body?.constructor.name);
+        console.log("Final headers:", finalHeaders);
 
         const response = await fetch(url, {
           method,
-          body: body ? JSON.stringify(body) : null,
-          headers: defaultHeaders,
+          body: processedBody,
+          headers: finalHeaders,
         });
 
         console.log("Response status:", response.status);

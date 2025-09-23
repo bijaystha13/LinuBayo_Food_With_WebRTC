@@ -18,13 +18,10 @@ import {
   Percent,
 } from "lucide-react";
 
-// Import your CSS module
 import styles from "./Cart.module.css";
 
-// Import the modal component
 import OrderConfirmationModal from "./OrderConfirmationModal";
 
-// Import cart context
 import { useCart } from "@/app/shared/Context/CartContext";
 
 export default function CartCheckout() {
@@ -109,17 +106,14 @@ export default function CartCheckout() {
     "Family Gathering",
   ];
 
-  // Handle quantity update
   const handleUpdateQuantity = (id, newQuantity) => {
     updateQuantity(id, newQuantity);
   };
 
-  // Handle item removal
   const handleRemoveItem = (id) => {
     removeFromCart(id);
   };
 
-  // Apply promo code
   const applyPromoCode = () => {
     const validPromoCodes = {
       SAVE10: 0.1,
@@ -137,17 +131,14 @@ export default function CartCheckout() {
     setPromoCode("");
   };
 
-  // Clear applied promo
   const clearPromo = () => {
     setAppliedPromo("");
   };
 
-  // Calculate totals using cart context
   const subtotal = getCartTotal();
   const deliveryFee = deliveryOption === "delivery" ? 3.99 : 0;
   const tax = subtotal * 0.08;
 
-  // Apply discount based on promo code
   const getDiscountRate = (code) => {
     const rates = {
       SAVE10: 0.1,
@@ -178,11 +169,9 @@ export default function CartCheckout() {
       return;
     }
 
-    // Show the order confirmation modal
     setShowOrderModal(true);
   };
 
-  // Auto-select default restaurant if dine-in is selected and no restaurant is chosen
   useEffect(() => {
     if (
       deliveryOption === "dine-in" &&
@@ -196,9 +185,7 @@ export default function CartCheckout() {
   return (
     <div className={styles.container}>
       <div className={styles.mainGrid}>
-        {/* Cart Section */}
         <div className={styles.cartSection}>
-          {/* Cart Items */}
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <ShoppingCart />
@@ -288,7 +275,6 @@ export default function CartCheckout() {
             )}
           </div>
 
-          {/* Delivery Options - Only show if cart has items */}
           {cartItems.length > 0 && (
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>
@@ -349,7 +335,6 @@ export default function CartCheckout() {
                 </div>
               </div>
 
-              {/* Restaurant Reservation Section */}
               {deliveryOption === "dine-in" && (
                 <div className={styles.reservationSection}>
                   <h4 className={styles.reservationTitle}>
@@ -480,7 +465,6 @@ export default function CartCheckout() {
           )}
         </div>
 
-        {/* Checkout Section */}
         <div className={styles.checkoutSection}>
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>
@@ -548,7 +532,6 @@ export default function CartCheckout() {
                   </div>
                 </div>
 
-                {/* Promo Code */}
                 {!appliedPromo && (
                   <div className={styles.promoSection}>
                     <div className={styles.promoInput}>
@@ -575,7 +558,6 @@ export default function CartCheckout() {
                   </div>
                 )}
 
-                {/* Payment Methods */}
                 <div className={styles.paymentSection}>
                   <h4 className={styles.summaryValue}>Payment Method</h4>
                   <div className={styles.paymentMethods}>
@@ -617,7 +599,6 @@ export default function CartCheckout() {
         </div>
       </div>
 
-      {/* Order Confirmation Modal */}
       <OrderConfirmationModal
         isOpen={showOrderModal}
         onClose={() => setShowOrderModal(false)}

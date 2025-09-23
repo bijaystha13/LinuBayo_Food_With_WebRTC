@@ -297,8 +297,7 @@ export const createFood = async (req, res, next) => {
       quantity: parseInt(quantity),
       category: category.toLowerCase().trim(),
       image,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      // Remove manual createdAt and updatedAt - timestamps: true handles this
     });
 
     const savedFood = await newFood.save();
@@ -315,6 +314,7 @@ export const createFood = async (req, res, next) => {
         category: savedFood.category,
         image: savedFood.image,
         createdAt: savedFood.createdAt,
+        updatedAt: savedFood.updatedAt,
       },
     });
   } catch (error) {
@@ -372,8 +372,7 @@ export const updateFood = async (req, res, next) => {
       food.image = req.file.path;
     }
 
-    food.updatedAt = new Date();
-
+    // Remove manual updatedAt - timestamps: true handles this automatically
     const updatedFood = await food.save();
 
     res.json({

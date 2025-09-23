@@ -9,6 +9,7 @@ import FilterBar from "../components/FormElements/FilterBar";
 import FoodList from "@/app/components/FoodsComponents/FoodsList";
 import Pagination from "@/app/components/FormElements/Pagination";
 import CustomerChats from "../components/Customer/CustomerChats";
+import GoogleLens from "../components/Google/GoogleLens";
 
 const FOOD_CATEGORIES = [
   { value: "all", label: "All Items", icon: "🍽️" },
@@ -81,6 +82,9 @@ export default function MenuPage() {
   // Network state tracking
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [networkChecking, setNetworkChecking] = useState(false);
+
+  // Google Lens state
+  const [isLensActive, setIsLensActive] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -481,6 +485,20 @@ export default function MenuPage() {
     [sendRequest, fetchFoods, currentPage]
   );
 
+  // Google Lens handlers
+  const handleLensStateChange = useCallback((isActive) => {
+    setIsLensActive(isActive);
+  }, []);
+
+  const handleLensResult = useCallback((result) => {
+    // Handle the lens analysis result
+    if (result && result.category) {
+      // Auto-filter by detected category
+      setSelectedCategory(result.category);
+      toast.success(`Found ${result.name}! Filtering by ${result.category}`);
+    }
+  }, []);
+
   // Get current category info for display
   const getCurrentCategory = () => {
     return (
@@ -496,7 +514,11 @@ export default function MenuPage() {
   }
 
   return (
-    <div className={styles.menuContainer}>
+    <div
+      className={`${styles.menuContainer} ${
+        isLensActive ? styles.lensActive : ""
+      }`}
+    >
       {/* Network Status Indicator */}
       {!isOnline && (
         <div className={styles.networkWarning}>
@@ -632,7 +654,6 @@ export default function MenuPage() {
           )}
       </div>
 
-      {/* Floating Chat Widget */}
       <CustomerChats isFloating={true} />
     </div>
   );

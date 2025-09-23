@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/app/shared/Context/CartContext"; // Adjust path as needed
+import { toast } from "react-toastify";
+import { useCart } from "@/app/shared/Context/CartContext";
+import { AuthContext } from "@/app/shared/Context/AuthContext";
+import { useHttpClient } from "@/app/shared/hooks/http-hook";
 import styles from "./FoodItem.module.css";
 import {
   FaEye,
@@ -22,8 +25,15 @@ export default function FoodItem(props) {
   const [servingCount, setServingCount] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const router = useRouter();
   const { addToCart, isInCart, getCartItem } = useCart();
+  const authCtx = useContext(AuthContext);
+  const { sendRequest } = useHttpClient();
+
+  // Check if user is admin
+  const isAdmin = authCtx.isLoggedIn && authCtx.role === "admin";
 
   const handleViewDetails = async () => {
     setIsLoading(true);
@@ -33,18 +43,62 @@ export default function FoodItem(props) {
   };
 
   const handleUpdate = () => {
-    router.push(`/product/edit/${props.id}`);
+    router.push(`/admin/${props.id}`);
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      if (props.onDeleteProduct) {
-        props.onDeleteProduct(props.id);
+    if (!isAdmin) {
+      toast.error("You don't have permission to delete this item");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${props.name}"? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+
+    try {
+      const responseData = await sendRequest(
+        `http://localhost:5001/api/foods/${props.id}`,
+        "DELETE",
+        null,
+        {
+          Authorization: `Bearer ${authCtx.token}`,
+        }
+      );
+
+      if (responseData.success) {
+        toast.success("Food item deleted successfully!");
+
+        // Call the callback function to update the parent component
+        if (props.onDeleteProduct) {
+          props.onDeleteProduct(props.id);
+        }
       }
+    } catch (error) {
+      console.error("Error deleting food:", error);
+      toast.error(
+        error.message || "Failed to delete food item. Please try again."
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const handleAddToCart = async () => {
+    if (!authCtx.isLoggedIn) {
+      toast.error("Please login to add items to cart");
+      return;
+    }
+
+    if (authCtx.role === "admin") {
+      toast.info("Admins cannot add items to cart");
+      return;
+    }
+
     setIsAddingToCart(true);
 
     try {
@@ -78,6 +132,7 @@ export default function FoodItem(props) {
       console.log(`Added ${servingCount} serving(s) of ${props.name} to cart`);
     } catch (error) {
       console.error("Error adding to cart:", error);
+      toast.error("Failed to add item to cart");
     } finally {
       setTimeout(() => {
         setIsAddingToCart(false);
@@ -129,8 +184,11 @@ export default function FoodItem(props) {
       <div className={styles.productItemContent}>
         {props.isSpecial && <div className={styles.specialBadge}>FEATURED</div>}
 
+        {/* Admin Badge */}
+        {isAdmin && <div className={styles.adminBadge}>ADMIN VIEW</div>}
+
         {/* Cart Status Indicator */}
-        {itemInCart && (
+        {itemInCart && !isAdmin && (
           <div className={styles.cartStatusBadge}>
             <FaCheck className={styles.cartCheckIcon} />
             In Cart ({cartItem?.quantity})
@@ -197,35 +255,59 @@ export default function FoodItem(props) {
             </span>
           </div>
 
-          <div className={styles.servingCounter}>
-            <span className={styles.servingLabel}>Servings:</span>
-            <div className={styles.counterControls}>
-              <button
-                className={styles.counterBtn}
-                onClick={decrementServing}
-                disabled={servingCount <= 1}
-                aria-label="Decrease servings"
-              >
-                <FaMinus /> -
-              </button>
-              <span className={styles.servingCount}>{servingCount}</span>
-              <button
-                className={styles.counterBtn}
-                onClick={incrementServing}
-                disabled={servingCount >= 10}
-                aria-label="Increase servings"
-              >
-                <FaPlus /> +
-              </button>
+          {/* Show serving counter only for non-admin users */}
+          {!isAdmin && (
+            <div className={styles.servingCounter}>
+              <span className={styles.servingLabel}>Servings:</span>
+              <div className={styles.counterControls}>
+                <button
+                  className={styles.counterBtn}
+                  onClick={decrementServing}
+                  disabled={servingCount <= 1}
+                  aria-label="Decrease servings"
+                >
+                  <FaMinus /> -
+                </button>
+                <span className={styles.servingCount}>{servingCount}</span>
+                <button
+                  className={styles.counterBtn}
+                  onClick={incrementServing}
+                  disabled={servingCount >= 10}
+                  aria-label="Increase servings"
+                >
+                  <FaPlus /> +
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Show current cart quantity if item is in cart */}
-          {itemInCart && (
+          {/* Show current cart quantity if item is in cart and user is not admin */}
+          {itemInCart && !isAdmin && (
             <div className={styles.cartInfo}>
               <span className={styles.cartInfoText}>
                 Currently in cart: {cartItem?.quantity} serving(s)
               </span>
+            </div>
+          )}
+
+          {/* Admin Info */}
+          {isAdmin && (
+            <div className={styles.adminInfo}>
+              <div className={styles.adminInfoItem}>
+                <strong>ID:</strong> {props.id}
+              </div>
+              <div className={styles.adminInfoItem}>
+                <strong>Category:</strong> {props.category || "N/A"}
+              </div>
+              <div className={styles.adminInfoItem}>
+                <strong>Quantity:</strong> {props.quantity || 0}
+              </div>
+              <div className={styles.adminInfoItem}>
+                <strong>Created:</strong>{" "}
+                {props.createdAt
+                  ? new Date(props.createdAt).toLocaleDateString()
+                  : "N/A"}
+              </div>
             </div>
           )}
         </div>
@@ -243,52 +325,74 @@ export default function FoodItem(props) {
             {isLoading ? "Loading..." : "VIEW DETAILS"}
           </button>
 
-          {props.canEdit && (
+          {/* Admin-only buttons */}
+          {isAdmin && (
+            <>
+              <button
+                className={`${styles.btn} ${styles.btnUpdate}`}
+                onClick={handleUpdate}
+                aria-label="Edit product"
+              >
+                <FaEdit />
+                EDIT PRODUCT
+              </button>
+
+              <button
+                className={`${styles.btn} ${styles.btnDelete} ${
+                  isDeleting ? styles.btnLoading : ""
+                }`}
+                onClick={handleDelete}
+                disabled={isDeleting}
+                aria-label="Delete product"
+              >
+                <FaTrashAlt />
+                {isDeleting ? "DELETING..." : "DELETE PRODUCT"}
+              </button>
+            </>
+          )}
+
+          {/* Add to Cart - Only for regular users */}
+          {!isAdmin && authCtx.isLoggedIn && (
             <button
-              className={`${styles.btn} ${styles.btnUpdate}`}
-              onClick={handleUpdate}
-              aria-label="Edit product"
+              className={`${styles.btn} ${styles.btnAddToCart} ${
+                isAddingToCart ? styles.btnLoading : ""
+              } ${showSuccessMessage ? styles.btnSuccess : ""}`}
+              onClick={handleAddToCart}
+              disabled={isAddingToCart}
+              aria-label={`Add ${servingCount} serving${
+                servingCount > 1 ? "s" : ""
+              } to cart`}
             >
-              <FaEdit />
-              UPDATE
+              {showSuccessMessage ? (
+                <>
+                  <FaCheck />
+                  ADDED TO CART!
+                </>
+              ) : isAddingToCart ? (
+                "ADDING..."
+              ) : (
+                <>
+                  <FaCartPlus />
+                  {itemInCart ? "ADD MORE" : "ADD TO CART"} ({servingCount})
+                </>
+              )}
             </button>
           )}
 
-          {props.canDelete && (
+          {/* Login prompt for non-authenticated users */}
+          {!authCtx.isLoggedIn && (
             <button
-              className={`${styles.btn} ${styles.btnDelete}`}
-              onClick={handleDelete}
-              aria-label="Delete product"
+              className={`${styles.btn} ${styles.btnAddToCart}`}
+              onClick={() => {
+                toast.info("Please login to add items to cart");
+                router.push("/auth");
+              }}
+              aria-label="Login to add to cart"
             >
-              <FaTrashAlt />
-              DELETE
+              <FaCartPlus />
+              LOGIN TO ADD TO CART
             </button>
           )}
-
-          <button
-            className={`${styles.btn} ${styles.btnAddToCart} ${
-              isAddingToCart ? styles.btnLoading : ""
-            } ${showSuccessMessage ? styles.btnSuccess : ""}`}
-            onClick={handleAddToCart}
-            disabled={isAddingToCart}
-            aria-label={`Add ${servingCount} serving${
-              servingCount > 1 ? "s" : ""
-            } to cart`}
-          >
-            {showSuccessMessage ? (
-              <>
-                <FaCheck />
-                ADDED TO CART!
-              </>
-            ) : isAddingToCart ? (
-              "ADDING..."
-            ) : (
-              <>
-                <FaCartPlus />
-                {itemInCart ? "ADD MORE" : "ADD TO CART"} ({servingCount})
-              </>
-            )}
-          </button>
         </div>
       </div>
     </li>

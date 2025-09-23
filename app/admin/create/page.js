@@ -75,6 +75,7 @@ const AdminCreateFoodPage = () => {
                         src={`http://localhost:5001/${food.image}`}
                         alt={food.name}
                         className={styles.foodImage}
+                        width={fill}
                       />
                     </div>
                     <div className={styles.cardContent}>

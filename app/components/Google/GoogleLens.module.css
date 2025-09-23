@@ -1,0 +1,1090 @@
+.addToCartButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.addToCartButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.addToCartButton:hover::before {
+  left: 100%;
+}
+
+.addToCartButton:hover {
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Related Items Section */
+.relatedSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.relatedSection h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+.relatedItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.relatedItem {
+  background: rgba(102, 126, 234, 0.05);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.relatedItem:hover {
+  background: rgba(102, 126, 234, 0.08);
+  border-color: rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.relatedItemInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.relatedItemName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.relatedItemPrice {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.relatedItemCategory {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: capitalize;
+  background: rgba(107, 114, 128, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Detected Items for Screen Capture */
+.detectedItems {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.detectedItems h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.itemTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.itemTag {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.actionButtons button {
+  flex: 1;
+  min-height: 44px;
+}
+
+.viewMenuButton {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewMenuButton:hover {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+} /* GoogleLens.module.css - Enhanced with Screen Capture */
+
+/* Google Lens Button */
+.lensButton {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #fff;
+  border: 2px solid #dadce0;
+  border-radius: 50px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 16px rgba(60, 64, 67, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3c4043;
+  z-index: 1000;
+  user-select: none;
+}
+
+.lensButton:hover {
+  box-shadow: 0 4px 20px rgba(60, 64, 67, 0.2);
+  transform: translateY(-2px);
+  border-color: #1a73e8;
+}
+
+.lensButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 12px rgba(60, 64, 67, 0.15);
+}
+
+/* Lens Icon */
+.lensIcon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lensOuter {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #4285f4;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lensOuter::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 2px;
+  background: #4285f4;
+  border-radius: 2px;
+  top: 12px;
+  right: -4px;
+  transform: rotate(45deg);
+}
+
+.lensInner {
+  width: 6px;
+  height: 6px;
+  background: #4285f4;
+  border-radius: 50%;
+}
+
+.lensText {
+  color: #3c4043;
+  font-weight: 500;
+}
+
+/* Modal Overlay */
+.lensModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Lens Container */
+.lensContainer {
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  background: #000;
+  border-radius: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Header */
+.lensHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.closeButton,
+.uploadButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover,
+.uploadButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.lensTitle {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+}
+
+/* Capture Mode Selector */
+.captureModeSelector {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 80px 2rem 2rem 2rem;
+  background: linear-gradient(135deg, #0d1823 0%, #234566 100%);
+}
+
+.modeButtons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modeButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  min-width: 120px;
+}
+
+.modeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+}
+
+.modeButton.active {
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.3),
+    rgba(118, 75, 162, 0.3)
+  );
+  border-color: rgba(102, 126, 234, 0.6);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.modeIcon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.modeButton span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Action Area */
+.actionArea {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screenCaptureArea,
+.cameraInitArea {
+  text-align: center;
+  color: #fff;
+  max-width: 400px;
+}
+
+.captureIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.screenCaptureArea h3,
+.cameraInitArea h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.screenCaptureArea p,
+.cameraInitArea p {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.primaryActionButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.primaryActionButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.primaryActionButton:hover::before {
+  left: 100%;
+}
+
+.primaryActionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+}
+
+.primaryActionButton:active {
+  transform: translateY(0);
+}
+
+/* Camera View */
+.cameraView {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+/* Viewfinder */
+.viewfinder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.viewfinderCorner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #fff;
+  border-radius: 4px;
+}
+
+.viewfinderCorner:nth-child(1) {
+  border-right: none;
+  border-bottom: none;
+}
+
+.viewfinderCorner:nth-child(2) {
+  border-left: none;
+  border-bottom: none;
+}
+
+.viewfinderCorner:nth-child(3) {
+  border-right: none;
+  border-top: none;
+}
+
+.viewfinderCorner:nth-child(4) {
+  border-left: none;
+  border-top: none;
+}
+
+/* Camera Controls */
+.cameraControls {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+}
+
+.captureButton {
+  width: 80px;
+  height: 80px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.captureButton:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.captureButton:active {
+  transform: scale(0.95);
+}
+
+.captureInner {
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.captureButton:active .captureInner {
+  width: 50px;
+  height: 50px;
+}
+
+/* Instruction Text */
+.instructionText {
+  position: absolute;
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 12px 24px;
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  z-index: 1001;
+}
+
+/* Permission Error */
+.permissionError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  color: #fff;
+}
+
+.errorIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.permissionError h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.permissionError p {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 2rem;
+}
+
+/* Captured Image View */
+.capturedView {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.imageContainer {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capturedImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Analysis Overlay */
+.analysisOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  z-index: 1002;
+}
+
+.analysisSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #4285f4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Results Panel */
+.resultsPanel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 2rem;
+  border-radius: 20px 20px 0 0;
+  z-index: 1002;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.errorResult {
+  text-align: center;
+  color: #ea4335;
+  font-size: 16px;
+}
+
+.foodResult {
+  color: #3c4043;
+}
+
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.resultHeader h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1a73e8;
+}
+
+.confidence {
+  background: #e8f0fe;
+  color: #1a73e8;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.resultDetails {
+  margin-bottom: 1.5rem;
+}
+
+.price {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #137333;
+  margin: 0.5rem 0;
+}
+
+.category {
+  font-size: 0.9rem;
+  color: #5f6368;
+  margin: 0.25rem 0;
+  text-transform: capitalize;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #5f6368;
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+.addToCartButton {
+  background: #4285f4;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.addToCartButton:hover {
+  background: #3367d6;
+  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+}
+
+/* Image Controls */
+.imageControls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: flex;
+  gap: 1rem;
+}
+
+.retakeButton {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dadce0;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  color: #3c4043;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.retakeButton:hover {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .lensButton {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .lensIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .lensOuter {
+    width: 14px;
+    height: 14px;
+  }
+
+  .lensHeader {
+    padding: 1rem;
+  }
+
+  .lensTitle {
+    font-size: 16px;
+  }
+
+  .captureModeSelector {
+    padding: 60px 1rem 1rem 1rem;
+  }
+
+  .modeButtons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .modeButton {
+    min-width: 200px;
+    padding: 1rem;
+  }
+
+  .captureIcon {
+    font-size: 3rem;
+  }
+
+  .screenCaptureArea h3,
+  .cameraInitArea h3 {
+    font-size: 1.25rem;
+  }
+
+  .primaryActionButton {
+    padding: 14px 28px;
+    font-size: 14px;
+  }
+
+  .viewfinder {
+    width: 240px;
+    height: 240px;
+  }
+
+  .viewfinderCorner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .captureButton {
+    width: 70px;
+    height: 70px;
+  }
+
+  .captureInner {
+    width: 50px;
+    height: 50px;
+  }
+
+  .instructionText {
+    font-size: 14px;
+    padding: 10px 20px;
+    bottom: 180px;
+  }
+
+  .resultsPanel {
+    padding: 1.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .resultHeader h3 {
+    font-size: 1.25rem;
+  }
+
+  .cameraControls {
+    bottom: 80px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .relatedItems {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .itemTags {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .lensButton {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .captureModeSelector {
+    padding: 60px 0.5rem 0.5rem 0.5rem;
+  }
+
+  .modeButton {
+    min-width: 150px;
+    padding: 0.8rem;
+  }
+
+  .modeIcon {
+    font-size: 1.5rem;
+  }
+
+  .modeButton span {
+    font-size: 0.8rem;
+  }
+
+  .captureIcon {
+    font-size: 2.5rem;
+  }
+
+  .screenCaptureArea h3,
+  .cameraInitArea h3 {
+    font-size: 1.1rem;
+  }
+
+  .primaryActionButton {
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+
+  .viewfinder {
+    width: 200px;
+    height: 200px;
+  }
+
+  .captureButton {
+    width: 60px;
+    height: 60px;
+  }
+
+  .captureInner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .instructionText {
+    font-size: 13px;
+    bottom: 160px;
+  }
+
+  .resultsPanel {
+    padding: 1rem;
+    max-height: 65vh;
+  }
+
+  .resultHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .confidence {
+    align-self: flex-end;
+  }
+
+  .detectedItems {
+    padding: 0.75rem;
+  }
+
+  .itemTags {
+    gap: 0.25rem;
+  }
+
+  .itemTag {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+  }
+
+  .relatedSection h4 {
+    font-size: 0.9rem;
+  }
+
+  .relatedItem {
+    padding: 0.5rem;
+  }
+
+  .relatedItemInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .relatedItemName,
+  .relatedItemPrice {
+    font-size: 0.85rem;
+  }
+
+  .relatedItemCategory {
+    font-size: 0.7rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .analysisSpinner {
+    animation: none;
+  }
+
+  .fadeIn,
+  .slideUp {
+    animation: none;
+  }
+
+  .lensButton:hover {
+    transform: none;
+  }
+
+  .primaryActionButton:hover {
+    transform: none;
+  }
+
+  .modeButton:hover {
+    transform: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .lensButton {
+    background: #202124;
+    border-color: #5f6368;
+    color: #e8eaed;
+  }
+
+  .lensButton:hover {
+    border-color: #8ab4f8;
+  }
+
+  .resultsPanel {
+    background: rgba(32, 33, 36, 0.95);
+    color: #e8eaed;
+  }
+
+  .foodResult {
+    color: #e8eaed;
+  }
+
+  .resultHeader h3 {
+    color: #8ab4f8;
+  }
+
+  .category,
+  .description {
+    color: #9aa0a6;
+  }
+
+  .retakeButton {
+    background: rgba(32, 33, 36, 0.9);
+    border-color: #5f6368;
+    color: #e8eaed;
+  }
+
+  .retakeButton:hover {
+    background: #202124;
+  }
+}
