@@ -1,431 +1,239 @@
 "use client";
-
 import { useState } from "react";
 import {
   User,
   MapPin,
   Phone,
   Mail,
-  Calendar,
-  Users,
+  Heart,
+  ShoppingBag,
   Clock,
-  Star,
+  Settings,
+  ChevronRight,
   Camera,
-  Edit3,
-  Save,
-  X,
+  Star,
 } from "lucide-react";
-
-// Mock CSS module import (in real Next.js, this would be: import styles from './UserProfile.module.css')
 import styles from "./UserProfile.module.css";
 
-export default function UserProfile() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [bookingData, setBookingData] = useState({
-    date: "",
-    time: "",
-    guests: "",
-    occasion: "",
-  });
+const ProfilePage = () => {
+  const [activeTab, setActiveTab] = useState("orders");
 
-  const [userInfo, setUserInfo] = useState({
-    name: "Sarah Johnson",
-    title: "Food Enthusiast",
-    email: "sarah.johnson@email.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, NY",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108755-2616b612b300?w=300&h=300&fit=crop&crop=face",
-  });
+  const stats = [
+    { icon: ShoppingBag, label: "Total Orders", value: "47", color: "#FF6B6B" },
+    { icon: Heart, label: "Favorites", value: "23", color: "#4ECDC4" },
+    { icon: Star, label: "Points", value: "1,250", color: "#FFD93D" },
+  ];
 
-  const restaurants = [
+  const recentOrders = [
     {
       id: 1,
-      name: "Bella Vista",
-      cuisine: "Italian Fine Dining",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop",
-      priceRange: "$$$",
+      name: "Chicken Biryani Bowl",
+      date: "Oct 5, 2025",
+      price: "$12.99",
+      status: "Delivered",
+      image: "🍛",
     },
     {
       id: 2,
-      name: "Sakura Sushi",
-      cuisine: "Japanese Authentic",
-      rating: 4.9,
-      image:
-        "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop",
-      priceRange: "$$$$",
+      name: "Margherita Pizza",
+      date: "Oct 3, 2025",
+      price: "$15.49",
+      status: "Delivered",
+      image: "🍕",
     },
     {
       id: 3,
-      name: "The Garden Bistro",
-      cuisine: "Mediterranean",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
-      priceRange: "$$",
+      name: "Caesar Salad",
+      date: "Sep 30, 2025",
+      price: "$8.99",
+      status: "Delivered",
+      image: "🥗",
+    },
+  ];
+
+  const addresses = [
+    {
+      id: 1,
+      type: "Home",
+      address: "123 Main St, Toronto, ON M5V 3A8",
+      default: true,
     },
     {
-      id: 4,
-      name: "Spice Route",
-      cuisine: "Indian Fusion",
-      rating: 4.6,
-      image:
-        "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=300&fit=crop",
-      priceRange: "$$",
-    },
-    {
-      id: 5,
-      name: "Le Petit Chef",
-      cuisine: "French Cuisine",
-      rating: 4.9,
-      image:
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop",
-      priceRange: "$$$$",
-    },
-    {
-      id: 6,
-      name: "Taco Libre",
-      cuisine: "Mexican Street Food",
-      rating: 4.5,
-      image:
-        "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop",
-      priceRange: "$",
+      id: 2,
+      type: "Work",
+      address: "456 Bay St, Toronto, ON M5G 2C8",
+      default: false,
     },
   ];
-
-  const userStats = [
-    { number: "47", label: "Orders" },
-    { number: "23", label: "Reviews" },
-    { number: "12", label: "Favorites" },
-    { number: "4.9", label: "Rating" },
-  ];
-
-  const timeSlots = [
-    "11:00 AM",
-    "11:30 AM",
-    "12:00 PM",
-    "12:30 PM",
-    "1:00 PM",
-    "1:30 PM",
-    "2:00 PM",
-    "6:00 PM",
-    "6:30 PM",
-    "7:00 PM",
-    "7:30 PM",
-    "8:00 PM",
-    "8:30 PM",
-    "9:00 PM",
-    "9:30 PM",
-  ];
-
-  const occasions = [
-    "Casual Dining",
-    "Birthday Celebration",
-    "Anniversary",
-    "Business Meeting",
-    "Date Night",
-    "Family Gathering",
-    "Special Occasion",
-  ];
-
-  const handleBookingSubmit = () => {
-    if (
-      selectedRestaurant &&
-      bookingData.date &&
-      bookingData.time &&
-      bookingData.guests
-    ) {
-      alert(
-        `Booking confirmed at ${selectedRestaurant.name} for ${bookingData.guests} guests on ${bookingData.date} at ${bookingData.time}`
-      );
-    } else {
-      alert("Please fill in all booking details and select a restaurant");
-    }
-  };
-
-  const handleSave = () => {
-    setIsEditing(false);
-  };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.profileCard}>
-        {/* Header Section */}
-        <div className={styles.header}>
-          <div className={styles.headerOverlay}></div>
-
-          <div
-            className={styles.editButton}
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {isEditing ? <Save size={20} /> : <Edit3 size={20} />}
-          </div>
-
-          <img
-            src={userInfo.avatar}
-            alt="Profile"
-            className={styles.profileImage}
-          />
-
-          <div className={styles.profileInfo}>
-            {isEditing ? (
-              <div className="space-y-3">
-                <input
-                  className={styles.input_edit}
-                  value={userInfo.name}
-                  onChange={(e) =>
-                    setUserInfo({ ...userInfo, name: e.target.value })
-                  }
-                  placeholder="Your Name"
-                />
-                <input
-                  className={styles.input_edit}
-                  value={userInfo.title}
-                  onChange={(e) =>
-                    setUserInfo({ ...userInfo, title: e.target.value })
-                  }
-                  placeholder="Your Title"
-                />
-              </div>
-            ) : (
-              <>
-                <h1 className={styles.profileName}>{userInfo.name}</h1>
-                <p className={styles.profileTitle}>{userInfo.title}</p>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.content}>
-          {/* User Stats */}
-          <div className={styles.section}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {userStats.map((stat, index) => (
-                <div
-                  key={index}
-                  className={`${styles.infoCard} ${styles.statsCard}`}
-                >
-                  <div className={styles.statsNumber}>{stat.number}</div>
-                  <div className={styles.statsLabel}>{stat.label}</div>
-                </div>
-              ))}
+    <div className={styles.profileContainer}>
+      {/* Header Section */}
+      <div className={styles.profileHeader}>
+        <div className={styles.headerBg}></div>
+        <div className={styles.profileInfo}>
+          <div className={styles.avatarContainer}>
+            <div className={styles.avatar}>
+              <User size={48} />
             </div>
+            <button className={styles.cameraBtn}>
+              <Camera size={16} />
+            </button>
           </div>
-
-          {/* Personal Information */}
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <User className="text-orange-600" />
-              Personal Information
-            </h2>
-
-            <div className={styles.infoGrid}>
-              <div className={styles.infoCard}>
-                <div className={styles.infoLabel}>
-                  <Mail size={16} />
-                  Email
-                </div>
-                {isEditing ? (
-                  <input
-                    className={styles.input}
-                    value={userInfo.email}
-                    onChange={(e) =>
-                      setUserInfo({ ...userInfo, email: e.target.value })
-                    }
-                  />
-                ) : (
-                  <div className={styles.infoValue}>{userInfo.email}</div>
-                )}
-              </div>
-
-              <div className={styles.infoCard}>
-                <div className={styles.infoLabel}>
-                  <Phone size={16} />
-                  Phone
-                </div>
-                {isEditing ? (
-                  <input
-                    className={styles.input}
-                    value={userInfo.phone}
-                    onChange={(e) =>
-                      setUserInfo({ ...userInfo, phone: e.target.value })
-                    }
-                  />
-                ) : (
-                  <div className={styles.infoValue}>{userInfo.phone}</div>
-                )}
-              </div>
-
-              <div className={styles.infoCard}>
-                <div className={styles.infoLabel}>
-                  <MapPin size={16} />
-                  Location
-                </div>
-                {isEditing ? (
-                  <input
-                    className={styles.input}
-                    value={userInfo.location}
-                    onChange={(e) =>
-                      setUserInfo({ ...userInfo, location: e.target.value })
-                    }
-                  />
-                ) : (
-                  <div className={styles.infoValue}>{userInfo.location}</div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Restaurant Booking Section */}
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <Calendar className="text-orange-600" />
-              Make a Reservation
-            </h2>
-
-            <div className={styles.bookingSection}>
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                Choose Your Restaurant
-              </h3>
-
-              <div className={styles.restaurantGrid}>
-                {restaurants.map((restaurant) => (
-                  <div
-                    key={restaurant.id}
-                    className={`${styles.restaurantCard} ${
-                      selectedRestaurant?.id === restaurant.id
-                        ? styles.selectedRestaurant
-                        : ""
-                    }`}
-                    onClick={() => setSelectedRestaurant(restaurant)}
-                  >
-                    <img
-                      src={restaurant.image}
-                      alt={restaurant.name}
-                      className={styles.restaurantImage}
-                    />
-                    <div className={styles.restaurantInfo}>
-                      <h4 className={styles.restaurantName}>
-                        {restaurant.name}
-                      </h4>
-                      <p className={styles.restaurantCuisine}>
-                        {restaurant.cuisine}
-                      </p>
-                      <div className={styles.restaurantRating}>
-                        <Star size={16} fill="currentColor" />
-                        <span className="text-gray-700 ml-1">
-                          {restaurant.rating}
-                        </span>
-                        <span className="text-gray-500 ml-2">
-                          {restaurant.priceRange}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {selectedRestaurant && (
-                <div className={styles.bookingForm}>
-                  <h4 className="text-lg font-semibold mb-4 text-gray-800">
-                    Booking Details for {selectedRestaurant.name}
-                  </h4>
-
-                  <div className={styles.formGrid}>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Date</label>
-                      <input
-                        type="date"
-                        className={styles.input}
-                        value={bookingData.date}
-                        onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
-                            date: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Time</label>
-                      <select
-                        className={styles.select}
-                        value={bookingData.time}
-                        onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
-                            time: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Time</option>
-                        {timeSlots.map((time) => (
-                          <option key={time} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Number of Guests</label>
-                      <select
-                        className={styles.select}
-                        value={bookingData.guests}
-                        onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
-                            guests: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Guests</option>
-                        {[...Array(12)].map((_, i) => (
-                          <option key={i + 1} value={i + 1}>
-                            {i + 1} {i + 1 === 1 ? "Guest" : "Guests"}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Occasion</label>
-                      <select
-                        className={styles.select}
-                        value={bookingData.occasion}
-                        onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
-                            occasion: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Occasion</option>
-                        {occasions.map((occasion) => (
-                          <option key={occasion} value={occasion}>
-                            {occasion}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <button
-                    className={styles.bookButton}
-                    onClick={handleBookingSubmit}
-                  >
-                    Confirm Reservation
-                  </button>
-                </div>
-              )}
+          <div className={styles.userDetails}>
+            <h1>John Anderson</h1>
+            <p className={styles.memberSince}>Member since March 2024</p>
+            <div className={styles.contactInfo}>
+              <span>
+                <Mail size={14} /> john.anderson@email.com
+              </span>
+              <span>
+                <Phone size={14} /> +1 (416) 555-0123
+              </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Stats Section */}
+      <div className={styles.statsGrid}>
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className={styles.statCard}
+            style={{ "--stat-color": stat.color }}
+          >
+            <div className={styles.statIcon}>
+              <stat.icon size={24} />
+            </div>
+            <div className={styles.statContent}>
+              <h3>{stat.value}</h3>
+              <p>{stat.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs Navigation */}
+      <div className={styles.tabsContainer}>
+        <button
+          className={`${styles.tabBtn} ${
+            activeTab === "orders" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("orders")}
+        >
+          Recent Orders
+        </button>
+        <button
+          className={`${styles.tabBtn} ${
+            activeTab === "addresses" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("addresses")}
+        >
+          Addresses
+        </button>
+        <button
+          className={`${styles.tabBtn} ${
+            activeTab === "settings" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("settings")}
+        >
+          Settings
+        </button>
+      </div>
+
+      {/* Content Section */}
+      <div className={styles.contentSection}>
+        {activeTab === "orders" && (
+          <div className={styles.ordersList}>
+            {recentOrders.map((order) => (
+              <div key={order.id} className={styles.orderCard}>
+                <div className={styles.orderEmoji}>{order.image}</div>
+                <div className={styles.orderDetails}>
+                  <h3>{order.name}</h3>
+                  <div className={styles.orderMeta}>
+                    <span className={styles.orderDate}>
+                      <Clock size={14} /> {order.date}
+                    </span>
+                    <span className={styles.orderStatus}>{order.status}</span>
+                  </div>
+                </div>
+                <div className={styles.orderPrice}>
+                  <span>{order.price}</span>
+                  <button className={styles.reorderBtn}>
+                    Reorder <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === "addresses" && (
+          <div className={styles.addressesList}>
+            {addresses.map((addr) => (
+              <div key={addr.id} className={styles.addressCard}>
+                <div className={styles.addressHeader}>
+                  <div className={styles.addressType}>
+                    <MapPin size={20} />
+                    <h3>{addr.type}</h3>
+                  </div>
+                  {addr.default && (
+                    <span className={styles.defaultBadge}>Default</span>
+                  )}
+                </div>
+                <p className={styles.addressText}>{addr.address}</p>
+                <div className={styles.addressActions}>
+                  <button className={`${styles.actionBtn} ${styles.edit}`}>
+                    Edit
+                  </button>
+                  <button className={`${styles.actionBtn} ${styles.delete}`}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button className={styles.addAddressBtn}>+ Add New Address</button>
+          </div>
+        )}
+
+        {activeTab === "settings" && (
+          <div className={styles.settingsList}>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <Settings size={20} />
+                <div>
+                  <h3>Account Settings</h3>
+                  <p>Update your email, password and preferences</p>
+                </div>
+              </div>
+              <ChevronRight size={20} />
+            </div>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <User size={20} />
+                <div>
+                  <h3>Personal Information</h3>
+                  <p>Edit your name, phone and profile picture</p>
+                </div>
+              </div>
+              <ChevronRight size={20} />
+            </div>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <Heart size={20} />
+                <div>
+                  <h3>Dietary Preferences</h3>
+                  <p>Set your food preferences and allergies</p>
+                </div>
+              </div>
+              <ChevronRight size={20} />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default ProfilePage;

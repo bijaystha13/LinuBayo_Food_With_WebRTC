@@ -192,7 +192,7 @@ export default function ProductList(props) {
             </p>
             <button
               className={styles.addNewItemBtn}
-              onClick={() => (window.location.href = "/admin/foods/create")}
+              onClick={() => (window.location.href = "/admin/create")}
             >
               <span className={styles.btnIcon}>➕</span>
               Add New Item

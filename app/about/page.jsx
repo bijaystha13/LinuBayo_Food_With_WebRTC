@@ -11,7 +11,6 @@ import {
   Mail,
 } from "lucide-react";
 import styles from "./about.module.css";
-import CustomerChat from "../components/Customer/Customer";
 
 const AboutPage = () => {
   const stats = [

@@ -1,4 +1,4 @@
-// app/user-dashboard/page.js
+// Save this as: app/user-dashboard/page.js
 "use client";
 import { useAuth } from "../shared/hooks/auth-hook";
 import React, { useState, useEffect, useCallback } from "react";
@@ -21,7 +21,6 @@ import {
   ChevronRight,
   Loader,
   RefreshCw,
-  Wifi,
   WifiOff,
   CheckCircle,
   XCircle,
@@ -29,7 +28,6 @@ import {
 import { useHttpClient } from "../shared/hooks/http-hook";
 import styles from "./HomePage.module.css";
 
-// SafeImage component and helper functions
 const fallbackImage =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='0.3em' font-family='sans-serif' font-size='14' fill='%236b7280'%3ENo Image%3C/text%3E%3C/svg%3E";
 
@@ -39,207 +37,100 @@ const UserDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [imageErrors, setImageErrors] = useState(new Set());
+  const [removingFavoriteId, setRemovingFavoriteId] = useState(null);
   const { token, isLoggedIn } = useAuth();
-
   const router = useRouter();
-  const { isLoading: httpLoading, sendRequest } = useHttpClient();
+  const { sendRequest } = useHttpClient();
 
-  // Handle image error with tracking to prevent infinite loops
   const handleImageError = useCallback(
-    (imageUrl, fallbackUrl) => {
-      return (e) => {
-        const currentSrc = e.target.src;
-
-        // If we haven't tried the fallback yet, try it
-        if (currentSrc !== fallbackUrl && !imageErrors.has(imageUrl)) {
-          setImageErrors((prev) => new Set(prev).add(imageUrl));
-          e.target.src = fallbackUrl;
-        } else {
-          // Use data URL as final fallback
-          e.target.src = fallbackImage;
-        }
-      };
+    (imageUrl) => (e) => {
+      if (!imageErrors.has(imageUrl)) {
+        setImageErrors((prev) => new Set(prev).add(imageUrl));
+        e.target.src = fallbackImage;
+      }
     },
     [imageErrors]
   );
 
-  // Check online status
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     setIsOnline(navigator.onLine);
-
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
-  // Enhanced error detection and handling
-  const handleError = (error, context = "") => {
-    console.error(`Dashboard error ${context}:`, error);
-
-    let errorMessage = "Something went wrong while loading your dashboard.";
-    let errorType = "general";
-
-    // Handle network/connection errors
-    if (!navigator.onLine) {
-      errorMessage =
-        "No internet connection. Please check your connection and try again.";
-      errorType = "network";
-    }
-    // Handle fetch/network errors
-    else if (error.name === "TypeError" && error.message.includes("fetch")) {
-      errorMessage =
-        "Network error: Unable to connect to server. Please check if the backend server is running on http://localhost:5001";
-      errorType = "network";
-    } else if (
-      error.message.includes("Failed to fetch") ||
-      error.message.includes("NetworkError")
-    ) {
-      errorMessage =
-        "Backend server is unreachable. Please ensure the server is running on http://localhost:5001 and try again.";
-      errorType = "network";
-    }
-    // Handle server errors
-    else if (
-      error.message.includes("Server error") ||
-      error.message.includes("500") ||
-      error.message.includes("Internal Server Error")
-    ) {
-      errorMessage =
-        "Server error: Backend server is experiencing issues. Please try again later.";
-      errorType = "server";
-    }
-    // Handle authentication errors
-    else if (
-      error.message.includes("Unauthorized") ||
-      error.message.includes("401") ||
-      error.message.includes("Authentication")
-    ) {
-      errorMessage =
-        "Your session has expired. Please log in again to continue.";
-      errorType = "auth";
-    }
-    // Handle configuration/endpoint errors
-    else if (
-      error.message.includes("API endpoint not found") ||
-      error.message.includes("404") ||
-      error.message.includes("Not Found")
-    ) {
-      errorMessage =
-        "API endpoint not found. Please check your server configuration.";
-      errorType = "config";
-    }
-    // Handle timeout errors
-    else if (
-      error.message.includes("timeout") ||
-      error.message.includes("AbortError")
-    ) {
-      errorMessage =
-        "Request timed out. Please check your connection and try again.";
-      errorType = "network";
-    }
-    // Use custom error message if available
-    else if (error.message && error.message.length > 0) {
-      errorMessage = error.message;
-      // Try to determine type from message
-      const msg = error.message.toLowerCase();
-      if (
-        msg.includes("network") ||
-        msg.includes("connection") ||
-        msg.includes("fetch")
-      ) {
-        errorType = "network";
-      } else if (msg.includes("server") || msg.includes("backend")) {
-        errorType = "server";
-      } else if (
-        msg.includes("auth") ||
-        msg.includes("token") ||
-        msg.includes("unauthorized")
-      ) {
-        errorType = "auth";
-      }
-    }
-
-    // Create a custom error with the type information and throw it
-    const customError = new Error(errorMessage);
-    customError.errorType = errorType;
-    customError.dashboardError = true;
-
-    // Throw the error to be caught by the error boundary
-    throw customError;
-  };
-
-  // Fetch dashboard data from backend with enhanced error handling
   const fetchDashboardData = useCallback(
     async (showRefresh = false) => {
       try {
-        if (showRefresh) {
-          setRefreshing(true);
-        } else {
-          setIsLoading(true);
-        }
-
-        // Check online status first
-        if (!navigator.onLine) {
-          throw new Error("No internet connection detected.");
-        }
-
-        // Check authentication
-        // const token = localStorage.getItem("token");
-        // if (!token) {
-        //   throw new Error("Authentication required. Please log in again.");
-        // }
+        showRefresh ? setRefreshing(true) : setIsLoading(true);
 
         if (!isLoggedIn || !token) {
-          throw new Error("Authentication required. Please log in again.");
+          router.push("/auth?mode=login");
+          return;
         }
 
-        // Make the API request
         const response = await sendRequest(
           "http://localhost:5001/api/users/dashboard",
           "GET",
           null,
-          {
-            Authorization: `Bearer ${token}`,
-          }
+          { Authorization: `Bearer ${token}` }
         );
 
-        if (response && response.success) {
+        if (response?.success) {
           setDashboardData(response.data);
-          // Reset image errors on successful data fetch
           setImageErrors(new Set());
-        } else {
-          const errorMsg =
-            response?.message || "Failed to fetch dashboard data from server";
-          throw new Error(errorMsg);
         }
       } catch (err) {
-        handleError(err, "while fetching dashboard data");
+        console.error("Dashboard error:", err);
       } finally {
         setIsLoading(false);
         setRefreshing(false);
       }
     },
-    [sendRequest, router]
+    [sendRequest, router, isLoggedIn, token]
   );
 
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Auto-retry when coming back online
-  useEffect(() => {
-    if (isOnline && !dashboardData && !isLoading) {
-      fetchDashboardData();
-    }
-  }, [isOnline, dashboardData, isLoading, fetchDashboardData]);
+  // Handle removing favorite
+  const handleRemoveFavorite = async (itemId) => {
+    try {
+      setRemovingFavoriteId(itemId);
 
-  // Helper functions
+      const response = await sendRequest(
+        `http://localhost:5001/api/users/favorites/${itemId}`,
+        "DELETE",
+        null,
+        { Authorization: `Bearer ${token}` }
+      );
+
+      if (response?.success) {
+        // Update the dashboard data to remove the item
+        setDashboardData((prevData) => ({
+          ...prevData,
+          favoriteItems: prevData.favoriteItems.filter(
+            (item) => item.id !== itemId
+          ),
+          stats: {
+            ...prevData.stats,
+            favoriteItems: (prevData.stats.favoriteItems || 1) - 1,
+          },
+        }));
+      }
+    } catch (err) {
+      console.error("Error removing favorite:", err);
+    } finally {
+      setRemovingFavoriteId(null);
+    }
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       delivered: "#10B981",
@@ -282,34 +173,24 @@ const UserDashboard = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Custom Image component to handle errors better
-  const SafeImage = ({
-    src,
-    alt,
-    className,
-    fallback = fallbackImage,
-    ...props
-  }) => {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className={className}
-        onError={handleImageError(src, fallback)}
-        {...props}
-      />
-    );
-  };
+  const SafeImage = ({ src, alt, className, ...props }) => (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={handleImageError(src)}
+      {...props}
+    />
+  );
 
-  // Loading state
   if (isLoading && !dashboardData) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingContent}>
-          <Loader className={styles.loadingSpinner} />
+          <Loader className={styles.spinner} />
           <p>Loading your dashboard...</p>
           {!isOnline && (
-            <div className={styles.offlineIndicator}>
+            <div className={styles.offlineMsg}>
               <WifiOff size={20} />
               <span>You're currently offline</span>
             </div>
@@ -319,15 +200,7 @@ const UserDashboard = () => {
     );
   }
 
-  // If we reach here and have no data, something went wrong
-  // This should not happen if error handling is working correctly
-  if (!dashboardData) {
-    handleError(
-      new Error("No dashboard data available after loading"),
-      "data check"
-    );
-    return null;
-  }
+  if (!dashboardData) return null;
 
   const { user, stats, recentOrders, favoriteItems, notifications } =
     dashboardData;
@@ -335,50 +208,58 @@ const UserDashboard = () => {
   return (
     <div className={styles.dashboard}>
       <div className={styles.container}>
-        {/* Connection status indicator */}
         {!isOnline && (
-          <div className={styles.connectionBanner}>
+          <div className={styles.offlineBanner}>
             <WifiOff size={20} />
-            <span>You're offline. Some features may not work properly.</span>
+            <span>You're offline. Some features may not work.</span>
           </div>
         )}
 
-        {/* Welcome Header */}
-        <div className={styles.welcomeSection}>
+        {/* Welcome Section */}
+        <div className={styles.welcome}>
           <div className={styles.welcomeContent}>
             <div className={styles.userInfo}>
-              <div className={styles.userAvatar}>
+              <div className={styles.avatar}>
                 <SafeImage
                   src={user?.profileImage}
                   alt={user?.name || "User"}
                 />
-                <div className={styles.statusIndicator}></div>
+                <div className={styles.statusDot}></div>
               </div>
-              <div className={styles.userDetails}>
+              <div>
                 <h1 className={styles.welcomeTitle}>
                   Welcome back, {user?.name || "Guest"}!
                 </h1>
-                <p className={styles.welcomeSubtitle}>
+                <p className={styles.welcomeText}>
                   Member since {user?.joinDate} • {stats?.totalOrders || 0}{" "}
-                  orders completed
+                  orders
                 </p>
               </div>
             </div>
 
-            <div className={styles.quickActions}>
+            <div className={styles.actions}>
               <button
                 onClick={() => fetchDashboardData(true)}
-                disabled={refreshing || httpLoading}
-                className={styles.actionButton}
+                disabled={refreshing}
+                className={styles.btn}
               >
-                <RefreshCw className={refreshing ? styles.spinning : ""} />
+                <RefreshCw className={refreshing ? styles.spin : ""} />
                 {refreshing ? "Refreshing..." : "Refresh"}
               </button>
-              <button className={styles.actionButton}>
+              <button
+                onClick={() => router.push("/menu")}
+                className={styles.btn}
+              >
                 <Utensils />
                 Order Now
               </button>
-              <button className={styles.actionButton}>
+              <button
+                onClick={() =>
+                  recentOrders?.[0] &&
+                  router.push(`/orders/${recentOrders[0].id}`)
+                }
+                className={styles.btn}
+              >
                 <Clock />
                 Reorder
               </button>
@@ -386,85 +267,85 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className={styles.statsGrid}>
+        {/* Stats Grid */}
+        <div className={styles.stats}>
           {[
             {
               icon: ShoppingBag,
               label: "Total Orders",
               value: stats?.totalOrders || 0,
-              iconClass: styles.iconBlue,
+              color: "#3B82F6",
               growth: stats?.growth?.orders || 0,
             },
             {
               icon: CreditCard,
               label: "Total Spent",
-              value: `${stats?.totalSpent || 0}`,
-              iconClass: styles.iconGreen,
+              value: `$${stats?.totalSpent || 0}`,
+              color: "#10B981",
               growth: stats?.growth?.spent || 0,
             },
             {
               icon: Heart,
               label: "Favorite Items",
               value: stats?.favoriteItems || 0,
-              iconClass: styles.iconPink,
+              color: "#EC4899",
               growth: stats?.growth?.favorites || 0,
             },
             {
               icon: Gift,
               label: "Reward Points",
               value: stats?.rewardPoints || 0,
-              iconClass: styles.iconPurple,
+              color: "#8B5CF6",
               growth: stats?.growth?.points || 0,
             },
           ].map((stat, index) => (
             <div key={index} className={styles.statCard}>
-              <div className={`${styles.statIcon} ${stat.iconClass}`}>
+              <div className={styles.statIcon} style={{ color: stat.color }}>
                 <stat.icon />
               </div>
-              <div className={styles.statNumber}>{stat.value}</div>
+              <div className={styles.statValue}>{stat.value}</div>
               <div className={styles.statLabel}>{stat.label}</div>
-              <div className={styles.statTrend}>
-                <TrendingUp />+{stat.growth}% this month
+              <div className={styles.statGrowth}>
+                <TrendingUp size={14} />+{stat.growth}%
               </div>
             </div>
           ))}
         </div>
 
         {/* Main Content */}
-        <div className={styles.mainContent}>
+        <div className={styles.grid}>
           {/* Recent Orders */}
-          <div className={styles.contentCard}>
+          <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
                 <Package />
                 Recent Orders
               </h2>
-              <button className={styles.viewAllButton}>
-                View All
-                <ChevronRight />
+              <button
+                onClick={() => router.push("/orders")}
+                className={styles.viewAll}
+              >
+                View All <ChevronRight size={16} />
               </button>
             </div>
 
-            <div className={styles.ordersList}>
+            <div className={styles.list}>
               {recentOrders?.length > 0 ? (
                 recentOrders.map((order) => (
                   <div key={order.id} className={styles.orderItem}>
-                    <div className={styles.orderImageContainer}>
-                      <SafeImage
-                        src={order.image}
-                        alt="Order"
-                        className={styles.orderImage}
-                      />
-                    </div>
+                    <SafeImage
+                      src={order.image}
+                      alt="Order"
+                      className={styles.orderImg}
+                    />
 
-                    <div className={styles.orderDetails}>
-                      <div className={styles.orderHeader}>
+                    <div className={styles.orderInfo}>
+                      <div className={styles.orderTop}>
                         <span className={styles.orderId}>
                           #{order.orderNumber || order.id}
                         </span>
                         <div
-                          className={styles.orderStatus}
+                          className={styles.status}
                           style={{
                             backgroundColor: getStatusColor(order.status),
                           }}
@@ -480,82 +361,102 @@ const UserDashboard = () => {
                           : "Order items"}
                       </p>
 
-                      <div className={styles.orderMeta}>
-                        <span className={styles.orderDate}>
-                          <Calendar />
+                      <div className={styles.orderBottom}>
+                        <span className={styles.date}>
+                          <Calendar size={14} />
                           {formatDate(order.date)}
                         </span>
-                        <span className={styles.orderTotal}>
-                          ${order.total}
-                        </span>
+                        <span className={styles.total}>${order.total}</span>
                       </div>
                     </div>
 
-                    <button className={styles.reorderButton}>
-                      <Clock />
+                    <button
+                      onClick={() => router.push(`/orders/${order.id}`)}
+                      className={styles.btnSmall}
+                    >
+                      <Clock size={16} />
                       Reorder
                     </button>
                   </div>
                 ))
               ) : (
-                <div className={styles.emptyState}>
-                  <Package className={styles.emptyIcon} />
+                <div className={styles.empty}>
+                  <Package size={48} />
                   <p>No orders yet</p>
-                  <p className={styles.emptySubtext}>
-                    Your order history will appear here
-                  </p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Favorite Items */}
-          <div className={styles.contentCard}>
+          <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
                 <Heart />
                 Your Favorites
               </h2>
-              <button className={styles.viewAllButton}>
-                View All
-                <ChevronRight />
+              <button
+                onClick={() => router.push("/favorites")}
+                className={styles.viewAll}
+              >
+                View All <ChevronRight size={16} />
               </button>
             </div>
 
-            <div className={styles.favoritesList}>
+            <div className={styles.list}>
               {favoriteItems?.length > 0 ? (
                 favoriteItems.map((item) => (
-                  <div key={item.id} className={styles.favoriteItem}>
-                    <div className={styles.favoriteImageContainer}>
+                  <div key={item.id} className={styles.favItem}>
+                    <div className={styles.favImgWrap}>
                       <SafeImage
                         src={item.image}
                         alt={item.name}
-                        className={styles.favoriteImage}
+                        className={styles.favImg}
                       />
-                      <div className={styles.favoriteRating}>
-                        <Star />
+                      <div className={styles.rating}>
+                        <Star size={12} />
                         {item.rating}
                       </div>
                     </div>
 
-                    <div className={styles.favoriteDetails}>
-                      <h4 className={styles.favoriteName}>{item.name}</h4>
-                      <p className={styles.favoritePrice}>${item.price}</p>
-                      <p className={styles.favoriteCount}>
+                    <div className={styles.favInfo}>
+                      <h4>{item.name}</h4>
+                      <p className={styles.price}>${item.price}</p>
+                      <p className={styles.count}>
                         Ordered {item.orderCount} times
                       </p>
                     </div>
 
-                    <button className={styles.addToCartButton}>
-                      <ShoppingBag />
-                    </button>
+                    <div className={styles.favActions}>
+                      <button
+                        onClick={() => handleRemoveFavorite(item.id)}
+                        disabled={removingFavoriteId === item.id}
+                        className={styles.heartBtn}
+                        title="Remove from favorites"
+                      >
+                        <Heart
+                          size={20}
+                          fill="#ff6b35"
+                          className={
+                            removingFavoriteId === item.id
+                              ? styles.removing
+                              : ""
+                          }
+                        />
+                      </button>
+                      <button
+                        onClick={() => router.push(`/menu/${item.id}`)}
+                        className={styles.iconBtn}
+                      >
+                        <ShoppingBag size={20} />
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
-                <div className={styles.emptyState}>
-                  <Heart className={styles.emptyIcon} />
+                <div className={styles.empty}>
+                  <Heart size={48} />
                   <p>No favorites yet</p>
-                  <p className={styles.emptySubtext}>Heart items you love!</p>
                 </div>
               )}
             </div>
@@ -563,73 +464,68 @@ const UserDashboard = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className={styles.bottomSection}>
+        <div className={styles.bottom}>
           {/* Notifications */}
-          <div className={styles.contentCard}>
+          <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
                 <Bell />
                 Notifications
               </h2>
-              <button className={styles.markAllButton}>Mark all read</button>
+              <button className={styles.textBtn}>Mark all read</button>
             </div>
 
-            <div className={styles.notificationsList}>
+            <div className={styles.list}>
               {notifications?.length > 0 ? (
-                notifications.map((notification) => (
+                notifications.map((notif) => (
                   <div
-                    key={notification.id}
-                    className={`${styles.notificationItem} ${
-                      notification.unread ? styles.unread : ""
+                    key={notif.id}
+                    className={`${styles.notif} ${
+                      notif.unread ? styles.unread : ""
                     }`}
                   >
-                    <div className={styles.notificationIcon}>
-                      {notification.type === "order" && <Package />}
-                      {notification.type === "promotion" && <Gift />}
-                      {notification.type === "reward" && <Star />}
+                    <div className={styles.notifIcon}>
+                      {notif.type === "order" && <Package size={20} />}
+                      {notif.type === "promotion" && <Gift size={20} />}
+                      {notif.type === "reward" && <Star size={20} />}
                     </div>
-
-                    <div className={styles.notificationContent}>
-                      <p className={styles.notificationMessage}>
-                        {notification.message}
-                      </p>
-                      <span className={styles.notificationTime}>
-                        {notification.time}
-                      </span>
+                    <div className={styles.notifContent}>
+                      <p>{notif.message}</p>
+                      <span className={styles.time}>{notif.time}</span>
                     </div>
-
-                    {notification.unread && (
-                      <div className={styles.unreadDot}></div>
-                    )}
+                    {notif.unread && <div className={styles.dot}></div>}
                   </div>
                 ))
               ) : (
-                <div className={styles.emptyState}>
-                  <Bell className={styles.emptyIcon} />
+                <div className={styles.empty}>
+                  <Bell size={48} />
                   <p>No notifications</p>
-                  <p className={styles.emptySubtext}>You're all caught up!</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className={styles.contentCard}>
+          <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>Quick Actions</h2>
             </div>
 
-            <div className={styles.quickLinksGrid}>
+            <div className={styles.quickGrid}>
               {[
-                { icon: User, label: "Profile Settings" },
-                { icon: MapPin, label: "Manage Addresses" },
-                { icon: CreditCard, label: "Payment Methods" },
-                { icon: Gift, label: "Rewards Program" },
-                { icon: Calendar, label: "Schedule Orders" },
-                { icon: Settings, label: "Preferences" },
+                { icon: User, label: "Profile", path: "/profile" },
+                { icon: MapPin, label: "Addresses", path: "/addresses" },
+                { icon: CreditCard, label: "Payments", path: "/payments" },
+                { icon: Gift, label: "Rewards", path: "/rewards" },
+                { icon: Calendar, label: "Schedule", path: "/schedule" },
+                { icon: Settings, label: "Settings", path: "/settings" },
               ].map((action, index) => (
-                <button key={index} className={styles.quickLinkItem}>
-                  <action.icon />
+                <button
+                  key={index}
+                  onClick={() => router.push(action.path)}
+                  className={styles.quickBtn}
+                >
+                  <action.icon size={20} />
                   <span>{action.label}</span>
                 </button>
               ))}

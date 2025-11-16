@@ -1,9 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import {
   Search,
-  ShoppingCart,
   Star,
   Clock,
   Truck,
@@ -14,14 +13,18 @@ import {
   Phone,
   Video,
   Users,
-  Calendar,
-  Play,
   Award,
   BookOpen,
+  Zap,
+  Gift,
+  TrendingUp,
 } from "lucide-react";
 import styles from "./page.module.css";
+import ChatBot from "./components/ChatBOT/ChatBot";
+import { AuthContext } from "@/app/shared/Context/AuthContext";
 
 const Homepage = () => {
+  const authCtx = useContext(AuthContext);
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
 
@@ -73,48 +76,30 @@ const Homepage = () => {
       id: 1,
       title: "Master Italian Pasta Making",
       chef: "Chef Maria Rodriguez",
-      date: "Today",
-      time: "2:00 PM",
       duration: "90 min",
       participants: 24,
-      price: 45.0,
       rating: 4.9,
-      category: "Italian",
       level: "Intermediate",
-      isLive: false,
-      isUpcoming: true,
       image: "🍝",
     },
     {
       id: 2,
       title: "Mexican Street Tacos Live",
       chef: "Chef Carlos Mendez",
-      date: "Live Now",
-      time: "Live",
       duration: "60 min",
       participants: 45,
-      price: 35.0,
       rating: 4.7,
-      category: "Mexican",
       level: "Beginner",
-      isLive: true,
-      isUpcoming: false,
       image: "🌮",
     },
     {
       id: 3,
       title: "French Pastry Fundamentals",
       chef: "Chef Sophie Laurent",
-      date: "Tomorrow",
-      time: "10:00 AM",
       duration: "120 min",
       participants: 31,
-      price: 55.0,
       rating: 4.8,
-      category: "Pastry",
       level: "Beginner",
-      isLive: false,
-      isUpcoming: true,
       image: "🥐",
     },
   ];
@@ -173,21 +158,11 @@ const Homepage = () => {
             }`}
           >
             <div className={styles.floatingFood}>
-              <div className={styles.foodItem} style={{ "--delay": "0s" }}>
-                🍕
-              </div>
-              <div className={styles.foodItem} style={{ "--delay": "0.5s" }}>
-                🍔
-              </div>
-              <div className={styles.foodItem} style={{ "--delay": "1s" }}>
-                🍣
-              </div>
-              <div className={styles.foodItem} style={{ "--delay": "1.5s" }}>
-                🍝
-              </div>
-              <div className={styles.foodItem} style={{ "--delay": "0.1s" }}>
-                🥗
-              </div>
+              <div className={styles.foodItem}>🍕</div>
+              <div className={styles.foodItem}>🍔</div>
+              <div className={styles.foodItem}>🍣</div>
+              <div className={styles.foodItem}>🍝</div>
+              <div className={styles.foodItem}>🥗</div>
             </div>
           </div>
         </div>
@@ -216,118 +191,80 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className={styles.onlineSessions}>
-        <div className={styles.sectionHeader}>
-          <h2>
-            <Video className={styles.sectionIcon} />
-            We Also Provide Online Cooking Sessions
-          </h2>
-          <p>
-            Master culinary arts from the comfort of your home with our expert
-            chefs
-          </p>
-        </div>
-
-        <div className={styles.sessionsHighlight}>
-          <div className={styles.highlightContent}>
-            <div className={styles.highlightText}>
-              <h3>Learn From Professional Chefs</h3>
-              <p className={styles.highlightDescription}>
-                Join our interactive online cooking sessions and elevate your
-                culinary skills. Our experienced chefs will guide you through
-                each step, ensuring you master every technique.
-              </p>
-              <ul className={styles.highlightFeatures}>
-                <li>
-                  <Video className={styles.featureIconSmall} />
-                  Interactive live cooking sessions
-                </li>
-                <li>
-                  <Users className={styles.featureIconSmall} />
-                  Small class sizes for personalized attention
-                </li>
-                <li>
-                  <Award className={styles.featureIconSmall} />
-                  Learn from certified professional chefs
-                </li>
-                <li>
-                  <BookOpen className={styles.featureIconSmall} />
-                  Recipe guides and video recordings included
-                </li>
-              </ul>
-            </div>
-            <div className={styles.highlightVisual}>
-              <div className={styles.sessionPreview}>
-                <div className={styles.previewHeader}>
-                  <ChefHat className={styles.previewIcon} />
-                  <div className={styles.previewText}>
-                    <h4>Interactive Cooking</h4>
-                    <p>Learn. Cook. Master.</p>
+      {/* App Promotion Section - For non-authenticated users */}
+      {!authCtx.isLoggedIn && (
+        <section className={styles.appPromotion}>
+          <div className={styles.promoWrapper}>
+            <div className={styles.promoCard}>
+              <div className={styles.promoLeft}>
+                <div className={styles.promoBadge}>🎉 LIMITED TIME OFFER</div>
+                <h2 className={styles.promoTitle}>
+                  Get <span className={styles.promoHighlight}>50% OFF</span>
+                  <br />
+                  Your First Order!
+                </h2>
+                <p className={styles.promoDescription}>
+                  Join thousands of food lovers. Download our app for exclusive
+                  deals, faster ordering, and real-time tracking.
+                </p>
+                <div className={styles.promoFeatures}>
+                  <div className={styles.promoFeature}>
+                    <Zap className={styles.promoFeatureIcon} />
+                    <span>Lightning-fast ordering</span>
                   </div>
+                  <div className={styles.promoFeature}>
+                    <Gift className={styles.promoFeatureIcon} />
+                    <span>Exclusive app deals</span>
+                  </div>
+                  <div className={styles.promoFeature}>
+                    <TrendingUp className={styles.promoFeatureIcon} />
+                    <span>Earn rewards</span>
+                  </div>
+                </div>
+                <div className={styles.promoCTA}>
+                  <Link href="/auth?mode=signup" className={styles.promoBtn}>
+                    Sign Up Now
+                    <ArrowRight className={styles.promoBtnIcon} />
+                  </Link>
+                  <Link href="/auth?mode=login" className={styles.promoLink}>
+                    Already have an account?
+                  </Link>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.sessionShowcase}>
-          <h3 className={styles.showcaseTitle}>Featured Cooking Sessions</h3>
-          <div className={styles.sessionCards}>
-            {onlineSessions.map((session) => (
-              <div key={session.id} className={styles.sessionCard}>
-                <div className={styles.sessionImage}>
-                  <span className={styles.sessionEmoji}>{session.image}</span>
-                  <div className={styles.sessionBadge}>
-                    <span className={styles.badgeLevel}>{session.level}</span>
-                  </div>
-                </div>
-
-                <div className={styles.sessionContent}>
-                  <div className={styles.sessionHeader}>
-                    <h4 className={styles.sessionTitle}>{session.title}</h4>
-                    <div className={styles.sessionMeta}>
-                      <span className={styles.sessionChef}>
-                        by {session.chef}
-                      </span>
-                      <div className={styles.sessionRating}>
-                        <Star className={styles.starIconSmall} />
-                        <span>{session.rating}</span>
+              <div className={styles.promoRight}>
+                <div className={styles.phoneWrapper}>
+                  <div className={styles.phoneDevice}>
+                    <div className={styles.phoneNotch}></div>
+                    <div className={styles.phoneContent}>
+                      <div className={styles.appDisplay}>
+                        <div className={styles.appHeader}>
+                          <span className={styles.appLogo}>🍔</span>
+                          <div className={styles.appInfo}>
+                            <h4>LinuBayo Food</h4>
+                            <p>Order in seconds</p>
+                          </div>
+                        </div>
+                        <div className={styles.appStats}>
+                          <div className={styles.appStat}>
+                            <span className={styles.appStatNumber}>4.9★</span>
+                            <span className={styles.appStatLabel}>Rating</span>
+                          </div>
+                          <div className={styles.appStat}>
+                            <span className={styles.appStatNumber}>10K+</span>
+                            <span className={styles.appStatLabel}>Orders</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  <p className={styles.sessionDescription}>
-                    {session.description}
-                  </p>
-
-                  <div className={styles.sessionStats}>
-                    <div className={styles.sessionStat}>
-                      <Clock className={styles.statIcon} />
-                      <span>{session.duration}</span>
-                    </div>
-                    <div className={styles.sessionStat}>
-                      <Users className={styles.statIcon} />
-                      <span>{session.participants} enrolled</span>
-                    </div>
-                  </div>
+                  <div className={styles.floatingDiscount}>50% OFF</div>
+                  <div className={styles.floatingDelivery}>Free Delivery</div>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-
-          <div className={styles.sessionsCTA}>
-            <h3>Ready to Start Your Culinary Journey?</h3>
-            <p>
-              Register now for our online cooking sessions and learn from the
-              best chefs in the industry.
-            </p>
-            <Link href="/sessions" className={styles.registerBtn}>
-              <Video className={styles.btnIcon} />
-              Register for Online Cooking Sessions
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className={styles.features}>
@@ -406,6 +343,65 @@ const Homepage = () => {
         </div>
       </section>
 
+      {/* Online Sessions - Only for authenticated users */}
+      {authCtx.isLoggedIn && (
+        <section className={styles.onlineSessions}>
+          <div className={styles.sectionHeader}>
+            <h2>
+              <Video className={styles.sectionIcon} />
+              Online Cooking Sessions
+            </h2>
+            <p>Master culinary arts from the comfort of your home</p>
+          </div>
+
+          <div className={styles.sessionCards}>
+            {onlineSessions.map((session) => (
+              <div key={session.id} className={styles.sessionCard}>
+                <div className={styles.sessionImage}>
+                  <span className={styles.sessionEmoji}>{session.image}</span>
+                  <div className={styles.sessionBadge}>
+                    <span className={styles.badgeLevel}>{session.level}</span>
+                  </div>
+                </div>
+
+                <div className={styles.sessionContent}>
+                  <h4 className={styles.sessionTitle}>{session.title}</h4>
+                  <div className={styles.sessionMeta}>
+                    <span className={styles.sessionChef}>
+                      by {session.chef}
+                    </span>
+                    <div className={styles.sessionRating}>
+                      <Star className={styles.starIconSmall} />
+                      <span>{session.rating}</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.sessionStats}>
+                    <div className={styles.sessionStat}>
+                      <Clock className={styles.statIcon} />
+                      <span>{session.duration}</span>
+                    </div>
+                    <div className={styles.sessionStat}>
+                      <Users className={styles.statIcon} />
+                      <span>{session.participants} enrolled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.sessionsCTA}>
+            <h3>Ready to Start Your Culinary Journey?</h3>
+            <p>Register now and learn from the best chefs in the industry.</p>
+            <Link href="/sessions" className={styles.registerBtn}>
+              <Video className={styles.btnIcon} />
+              Register for Cooking Sessions
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* Call to Action */}
       <section className={styles.cta}>
         <div className={styles.ctaContent}>
@@ -419,8 +415,9 @@ const Homepage = () => {
             <Link href="/menu">Order Now</Link>
           </button>
         </div>
-        <div className={styles.ctaBackground}></div>
       </section>
+
+      <ChatBot />
     </div>
   );
 };
