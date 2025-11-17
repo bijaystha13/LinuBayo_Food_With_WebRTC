@@ -9,15 +9,26 @@ const RouteGuard = ({ children }) => {
   const pathname = usePathname();
   const [authorized, setAuthorized] = useState(false);
 
+  // useEffect(() => {
+  //   authCheck(pathname);
+  // }, [pathname, authCtx.isLoading, authCtx.isLoggedIn, authCtx.role]);
+
   useEffect(() => {
     authCheck(pathname);
-  }, [pathname, authCtx.isLoading, authCtx.isLoggedIn, authCtx.role]);
+  }, [
+    pathname,
+    authCtx.isLoading,
+    authCtx.isLoggedIn,
+    authCtx.role,
+    authCtx.token,
+    authCtx.tokenExpirationDate,
+  ]);
 
   const authCheck = (url) => {
     // Define route protection rules
     const routeRules = {
       // Public routes - always accessible
-      public: ["/", "/menu", "/about", "/contact", "/auth", "/unauthorized"],
+      public: ["/", "/about", "/contact", "/auth", "/unauthorized"],
 
       // Admin only routes
       adminOnly: [
@@ -33,7 +44,7 @@ const RouteGuard = ({ children }) => {
       ],
 
       // User only routes
-      userOnly: ["/users/orders", "/cart"],
+      userOnly: ["/users/orders", "/cart", "/menu"],
 
       // Both admin and user routes
       authenticated: [

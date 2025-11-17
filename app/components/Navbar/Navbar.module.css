@@ -63,7 +63,9 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  z-index: 1001;
+  z-index: 1002;
+  padding: 0;
+  position: relative;
 }
 
 .mobileMenuToggle span {
@@ -73,6 +75,7 @@
   border-radius: 2px;
   transition: all 0.3s ease;
   transform-origin: center;
+  display: block;
 }
 
 .mobileMenuToggle.active span:nth-child(1) {
@@ -81,10 +84,11 @@
 
 .mobileMenuToggle.active span:nth-child(2) {
   opacity: 0;
+  transform: translateX(-20px);
 }
 
 .mobileMenuToggle.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
+  transform: rotate(-45deg) translate(8px, -8px);
 }
 
 /* Navigation Menu */
@@ -131,6 +135,33 @@
 
 .navbarLink:hover::before {
   width: 80%;
+}
+
+/* Mobile Menu Close Button */
+.mobileMenuClose {
+  display: none;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.5rem;
+  line-height: 1;
+  z-index: 1002;
+}
+
+.mobileMenuClose:hover {
+  background: rgba(255, 107, 53, 0.2);
+  border-color: #ff6b35;
+  transform: rotate(90deg);
 }
 
 /* Actions Container */
@@ -552,7 +583,15 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.mobileMenuOverlay.active {
+  opacity: 1;
+  pointer-events: all;
 }
 
 /* Responsive Design */
@@ -560,40 +599,73 @@
   .navbarContainer {
     max-width: 100%;
   }
+
+  .mobileMenuToggle {
+    display: flex;
+    order: 2;
+  }
+
+  .navbarLogo {
+    order: 1;
+  }
+
+  .navbarActions {
+    order: 3;
+  }
+
+  .navbarMenu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100vh;
+    background: rgba(13, 24, 35, 0.98);
+    backdrop-filter: blur(30px);
+    flex-direction: column;
+    padding: 6rem 2rem 2rem;
+    gap: 0.5rem;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+    z-index: 1001;
+  }
+
+  .navbarMenu.mobileActive {
+    left: 0;
+  }
+
+  .navbarItem {
+    width: 100%;
+  }
+
+  .navbarLink {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .mobileMenuOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobileMenuOverlay.active {
+    display: block;
+    opacity: 1;
+  }
 }
 
 @media (max-width: 768px) {
   .navbar {
     padding: 0.75rem 1rem;
-  }
-
-  .mobileMenuToggle {
-    display: flex;
-  }
-
-  .navbarMenu {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background: rgba(13, 24, 35, 0.98);
-    backdrop-filter: blur(30px);
-    flex-direction: column;
-    padding: 2rem;
-    gap: 0.5rem;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    max-height: calc(100vh - 70px);
-    overflow-y: auto;
-  }
-
-  .navbarMenu.mobileActive {
-    transform: translateX(0);
-  }
-
-  .mobileMenuOverlay {
-    display: block;
   }
 
   .navbarActions {
@@ -622,6 +694,10 @@
   .logoIcon {
     font-size: 1.5rem;
   }
+
+  .navbarMenu {
+    width: 260px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -649,18 +725,30 @@
   .navbarActions {
     gap: 0.4rem;
   }
+
+  .navbarMenu {
+    width: 240px;
+  }
 }
 
 /* Tablet view - show text on buttons for wider screens */
-@media (min-width: 640px) {
+@media (min-width: 640px) and (max-width: 968px) {
   .buttonText {
     display: block;
   }
 }
 
-/* Ensure proper spacing for non-auth navbar */
-@media (min-width: 769px) {
+/* Desktop - show full menu */
+@media (min-width: 969px) {
+  .buttonText {
+    display: block;
+  }
+
   .navbarButton {
     padding: 0.75rem 1.5rem;
+  }
+
+  .mobileMenuOverlay {
+    display: none !important;
   }
 }

@@ -1,10 +1,14 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
+
 import { AuthContext } from "./AuthContext";
 
 let logoutTimer = null;
 
 export const AuthProvider = ({ children }) => {
+  const router = useRouter();
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
@@ -42,36 +46,31 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     console.log("Logging out user - clearing all data");
 
-    // Clear the logout timer
     if (logoutTimer) {
       clearTimeout(logoutTimer);
       logoutTimer = null;
     }
 
-    try {
-      if (typeof window !== "undefined") {
-        // Use the same storage keys as the hook
-        localStorage.removeItem("userData");
-        // Also clear individual items for safety
-        localStorage.removeItem("token");
-        localStorage.removeItem("userId");
-        localStorage.removeItem("role");
-      }
-
-      if (mountedRef.current) {
-        setToken(null);
-        setUserId(null);
-        setRole(null);
-        setIsLoggedIn(false);
-        setShowUserMenu(false);
-        setTokenExpirationDate(null);
-      }
-
-      console.log("✅ Logout successful");
-    } catch (error) {
-      console.error("Error during logout:", error);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("userData");
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("role");
     }
-  }, []);
+
+    if (mountedRef.current) {
+      setToken(null);
+      setUserId(null);
+      setRole(null);
+      setIsLoggedIn(false);
+      setShowUserMenu(false);
+      setTokenExpirationDate(null);
+    }
+
+    console.log("✅ Logout successful");
+
+    router.push("/auth?mode=login");
+  }, [router]);
 
   // Setup auto-logout timer
   const setupAutoLogout = useCallback(
