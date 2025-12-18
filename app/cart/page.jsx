@@ -6,22 +6,17 @@ import {
   Plus,
   Minus,
   Trash2,
-  MapPin,
   Clock,
-  Users,
-  Calendar,
   CreditCard,
   Truck,
   Store,
   Star,
   Gift,
-  Percent,
+  Users,
 } from "lucide-react";
 
 import styles from "./Cart.module.css";
-
 import OrderConfirmationModal from "./OrderConfirmationModal";
-
 import { useCart } from "@/app/shared/Context/CartContext";
 
 export default function CartCheckout() {
@@ -45,6 +40,21 @@ export default function CartCheckout() {
   const [appliedPromo, setAppliedPromo] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [cardDetails, setCardDetails] = useState({
+    cardNumber: "",
+    cardName: "",
+    expiryDate: "",
+    cvv: "",
+  });
+  const [savedCard, setSavedCard] = useState(null);
+
+  // Load saved card from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("savedCardDetails");
+    if (stored) {
+      setSavedCard(JSON.parse(stored));
+    }
+  }, []);
 
   const restaurants = [
     {
@@ -71,90 +81,102 @@ export default function CartCheckout() {
       image:
         "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=100&h=100&fit=crop",
     },
-    {
-      id: 4,
-      name: "Spice Route",
-      cuisine: "Indian",
-      rating: 4.6,
-      image:
-        "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=100&h=100&fit=crop",
-    },
   ];
 
   const timeSlots = [
     "11:00 AM",
-    "11:30 AM",
     "12:00 PM",
-    "12:30 PM",
     "1:00 PM",
-    "1:30 PM",
     "6:00 PM",
-    "6:30 PM",
     "7:00 PM",
-    "7:30 PM",
     "8:00 PM",
-    "8:30 PM",
-    "9:00 PM",
   ];
+  const occasions = ["Casual Dining", "Birthday", "Anniversary", "Date Night"];
 
-  const occasions = [
-    "Casual Dining",
-    "Birthday",
-    "Anniversary",
-    "Business Meeting",
-    "Date Night",
-    "Family Gathering",
-  ];
-
-  const handleUpdateQuantity = (id, newQuantity) => {
-    updateQuantity(id, newQuantity);
+  const formatCardNumber = (value) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    const parts = [];
+    for (let i = 0; i < v.length && i < 16; i += 4) {
+      parts.push(v.substring(i, i + 4));
+    }
+    return parts.join(" ");
   };
 
-  const handleRemoveItem = (id) => {
-    removeFromCart(id);
+  const formatExpiryDate = (value) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    if (v.length >= 2) {
+      return `${v.substring(0, 2)}/${v.substring(2, 4)}`;
+    }
+    return v;
+  };
+
+  const handleCardNumberChange = (e) => {
+    const formatted = formatCardNumber(e.target.value);
+    setCardDetails({ ...cardDetails, cardNumber: formatted });
+  };
+
+  const handleExpiryChange = (e) => {
+    const formatted = formatExpiryDate(e.target.value);
+    setCardDetails({ ...cardDetails, expiryDate: formatted });
+  };
+
+  const handleCvvChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/gi, "");
+    if (value.length <= 4) {
+      setCardDetails({ ...cardDetails, cvv: value });
+    }
+  };
+
+  const saveCardDetails = () => {
+    const cardToSave = {
+      cardNumber: cardDetails.cardNumber,
+      cardName: cardDetails.cardName,
+      expiryDate: cardDetails.expiryDate,
+      lastFour: cardDetails.cardNumber.slice(-4),
+    };
+    localStorage.setItem("savedCardDetails", JSON.stringify(cardToSave));
+    setSavedCard(cardToSave);
+    alert("Card saved successfully!");
+  };
+
+  const removeSavedCard = () => {
+    localStorage.removeItem("savedCardDetails");
+    setSavedCard(null);
+    setCardDetails({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" });
+  };
+
+  const useSavedCard = () => {
+    if (savedCard) {
+      setCardDetails({
+        cardNumber: savedCard.cardNumber,
+        cardName: savedCard.cardName,
+        expiryDate: savedCard.expiryDate,
+        cvv: "",
+      });
+    }
   };
 
   const applyPromoCode = () => {
-    const validPromoCodes = {
-      SAVE10: 0.1,
-      FIRST15: 0.15,
-      WELCOME20: 0.2,
-      STUDENT5: 0.05,
-    };
-
+    const validPromoCodes = { SAVE10: 0.1, FIRST15: 0.15, WELCOME20: 0.2 };
     if (validPromoCodes[promoCode.toUpperCase()]) {
       setAppliedPromo(promoCode.toUpperCase());
-      alert(`Promo code ${promoCode.toUpperCase()} applied successfully!`);
     } else {
-      alert("Invalid promo code. Please try again.");
+      alert("Invalid promo code");
     }
     setPromoCode("");
-  };
-
-  const clearPromo = () => {
-    setAppliedPromo("");
   };
 
   const subtotal = getCartTotal();
   const deliveryFee = deliveryOption === "delivery" ? 3.99 : 0;
   const tax = subtotal * 0.08;
-
-  const getDiscountRate = (code) => {
-    const rates = {
-      SAVE10: 0.1,
-      FIRST15: 0.15,
-      WELCOME20: 0.2,
-      STUDENT5: 0.05,
-    };
-    return rates[code] || 0;
-  };
-
-  const discount = appliedPromo ? subtotal * getDiscountRate(appliedPromo) : 0;
+  const discount = appliedPromo
+    ? subtotal * { SAVE10: 0.1, FIRST15: 0.15, WELCOME20: 0.2 }[appliedPromo]
+    : 0;
   const total = subtotal + deliveryFee + tax - discount;
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      alert("Your cart is empty. Please add items before checkout.");
+      alert("Your cart is empty");
       return;
     }
 
@@ -165,8 +187,28 @@ export default function CartCheckout() {
         !reservationData.time ||
         !reservationData.guests)
     ) {
-      alert("Please complete your reservation details for dine-in");
+      alert("Please complete reservation details");
       return;
+    }
+
+    if (paymentMethod === "card") {
+      if (
+        !cardDetails.cardNumber ||
+        !cardDetails.cardName ||
+        !cardDetails.expiryDate ||
+        !cardDetails.cvv
+      ) {
+        alert("Please complete all card details");
+        return;
+      }
+      if (cardDetails.cardNumber.replace(/\s/g, "").length !== 16) {
+        alert("Please enter a valid 16-digit card number");
+        return;
+      }
+      if (cardDetails.cvv.length < 3) {
+        alert("Please enter a valid CVV");
+        return;
+      }
     }
 
     setShowOrderModal(true);
@@ -180,422 +222,347 @@ export default function CartCheckout() {
     ) {
       setSelectedRestaurant(restaurants[0]);
     }
-  }, [deliveryOption, selectedRestaurant]);
+  }, [deliveryOption]);
 
   return (
     <div className={styles.container}>
-      <div className={styles.mainGrid}>
-        <div className={styles.cartSection}>
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>
-              <ShoppingCart />
-              Your Cart ({getCartItemsCount()} items)
-            </h2>
+      <div className={styles.grid}>
+        {/* Cart Items */}
+        <div className={styles.card}>
+          <h2 className={styles.title}>
+            <ShoppingCart size={24} />
+            Cart ({getCartItemsCount()})
+          </h2>
 
-            {cartItems.length === 0 ? (
-              <div className={styles.emptyCart}>
-                <ShoppingCart className={styles.emptyCartIcon} />
-                <p className={styles.emptyCartText}>Your cart is empty</p>
-                <p className={styles.summaryLabel}>
-                  Add some delicious items from our menu to get started!
-                </p>
-              </div>
-            ) : (
-              <div className={styles.cartItemsContainer}>
-                {cartItems.map((item) => (
-                  <div key={item.id} className={styles.cartItem}>
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className={styles.itemImage}
-                      onError={(e) => {
-                        e.target.src = "/placeholder-food.jpg";
-                      }}
-                    />
-                    <div className={styles.itemInfo}>
-                      <h3 className={styles.itemName}>{item.name}</h3>
-                      <p className={styles.itemDescription}>
-                        {item.description}
-                      </p>
-                      <p className={styles.summaryValue}>
-                        From: {item.restaurant}
-                      </p>
-                      <div className={styles.itemDetails}>
-                        <Clock size={14} />
-                        <span className={styles.itemDetailText}>
-                          {item.cookTime} mins
-                        </span>
-                        {item.rating && (
-                          <>
-                            <Star size={14} className={styles.starIcon} />
-                            <span className={styles.itemDetailText}>
-                              {item.rating}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                      <div className={styles.quantityControls}>
-                        <button
-                          className={styles.quantityBtn}
-                          onClick={() =>
-                            handleUpdateQuantity(item.id, item.quantity - 1)
-                          }
-                        >
-                          <Minus size={16} />
-                        </button>
-                        <span className={styles.quantity}>{item.quantity}</span>
-                        <button
-                          className={styles.quantityBtn}
-                          onClick={() =>
-                            handleUpdateQuantity(item.id, item.quantity + 1)
-                          }
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
+          {cartItems.length === 0 ? (
+            <div className={styles.empty}>
+              <ShoppingCart size={64} />
+              <p>Your cart is empty</p>
+            </div>
+          ) : (
+            <div className={styles.items}>
+              {cartItems.map((item) => (
+                <div key={item.id} className={styles.item}>
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className={styles.itemImg}
+                  />
+                  <div className={styles.itemInfo}>
+                    <h3>{item.name}</h3>
+                    <p>{item.restaurant}</p>
+                    <div className={styles.itemMeta}>
+                      <Clock size={12} />
+                      <span>{item.cookTime}m</span>
+                      {item.rating && (
+                        <>
+                          <Star size={12} />
+                          <span>{item.rating}</span>
+                        </>
+                      )}
                     </div>
-                    <div className={styles.itemActions}>
-                      <p className={styles.itemPrice}>
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </p>
-                      <p className={styles.summaryValue}>
-                        ${item.price.toFixed(2)} each
-                      </p>
+                  </div>
+                  <div className={styles.itemActions}>
+                    <p className={styles.price}>
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </p>
+                    <div className={styles.qty}>
                       <button
-                        className={styles.removeBtn}
-                        onClick={() => handleRemoveItem(item.id)}
-                        title="Remove item"
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity - 1)
+                        }
                       >
-                        <Trash2 size={20} />
+                        <Minus size={14} />
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }
+                      >
+                        <Plus size={14} />
                       </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {cartItems.length > 0 && (
-            <div className={styles.card}>
-              <h3 className={styles.cardTitle}>
-                <Truck />
-                Delivery Options
-              </h3>
-
-              <div className={styles.deliveryOptions}>
-                <div
-                  className={`${styles.deliveryOption} ${
-                    deliveryOption === "delivery"
-                      ? styles.deliveryOptionActive
-                      : styles.deliveryOptionInactive
-                  }`}
-                  onClick={() => setDeliveryOption("delivery")}
-                >
-                  <Truck />
-                  <div>
-                    <h4 className={styles.deliveryOptionTitle}>Delivery</h4>
-                    <p className={styles.deliveryOptionDesc}>
-                      30-45 mins • $3.99
-                    </p>
+                    <button
+                      className={styles.remove}
+                      onClick={() => removeFromCart(item.id)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
-
-                <div
-                  className={`${styles.deliveryOption} ${
-                    deliveryOption === "pickup"
-                      ? styles.deliveryOptionActive
-                      : styles.deliveryOptionInactive
-                  }`}
-                  onClick={() => setDeliveryOption("pickup")}
-                >
-                  <Store />
-                  <div>
-                    <h4 className={styles.deliveryOptionTitle}>Pickup</h4>
-                    <p className={styles.deliveryOptionDesc}>
-                      15-25 mins • Free
-                    </p>
-                  </div>
-                </div>
-
-                <div
-                  className={`${styles.deliveryOption} ${
-                    deliveryOption === "dine-in"
-                      ? styles.deliveryOptionActive
-                      : styles.deliveryOptionInactive
-                  }`}
-                  onClick={() => setDeliveryOption("dine-in")}
-                >
-                  <Users />
-                  <div>
-                    <h4 className={styles.deliveryOptionTitle}>Dine In</h4>
-                    <p className={styles.deliveryOptionDesc}>
-                      Make a reservation • Free
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {deliveryOption === "dine-in" && (
-                <div className={styles.reservationSection}>
-                  <h4 className={styles.reservationTitle}>
-                    Choose Restaurant & Make Reservation
-                  </h4>
-
-                  <div className={styles.restaurantGrid}>
-                    {restaurants.map((restaurant) => (
-                      <div
-                        key={restaurant.id}
-                        className={`${styles.restaurantCard} ${
-                          selectedRestaurant?.id === restaurant.id
-                            ? styles.restaurantActive
-                            : styles.restaurantInactive
-                        }`}
-                        onClick={() => setSelectedRestaurant(restaurant)}
-                      >
-                        <div className={styles.restaurantCardContent}>
-                          <img
-                            src={restaurant.image}
-                            alt={restaurant.name}
-                            className={styles.restaurantImage}
-                          />
-                          <div className={styles.restaurantInfo}>
-                            <h5 className={styles.restaurantName}>
-                              {restaurant.name}
-                            </h5>
-                            <p className={styles.restaurantCuisine}>
-                              {restaurant.cuisine}
-                            </p>
-                            <div className={styles.restaurantRating}>
-                              <Star size={14} fill="currentColor" />
-                              <span>{restaurant.rating}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {selectedRestaurant && (
-                    <div className={styles.reservationForm}>
-                      <h5 className={styles.reservationFormTitle}>
-                        Reservation Details for {selectedRestaurant.name}
-                      </h5>
-                      <div className={styles.formGrid}>
-                        <div className={styles.formGroup}>
-                          <label className={styles.label}>Date</label>
-                          <input
-                            type="date"
-                            className={styles.input}
-                            value={reservationData.date}
-                            min={new Date().toISOString().split("T")[0]}
-                            onChange={(e) =>
-                              setReservationData({
-                                ...reservationData,
-                                date: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className={styles.formGroup}>
-                          <label className={styles.label}>Time</label>
-                          <select
-                            className={styles.select}
-                            value={reservationData.time}
-                            onChange={(e) =>
-                              setReservationData({
-                                ...reservationData,
-                                time: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Select Time</option>
-                            {timeSlots.map((time) => (
-                              <option key={time} value={time}>
-                                {time}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className={styles.formGroup}>
-                          <label className={styles.label}>Guests</label>
-                          <select
-                            className={styles.select}
-                            value={reservationData.guests}
-                            onChange={(e) =>
-                              setReservationData({
-                                ...reservationData,
-                                guests: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Select Guests</option>
-                            {[...Array(12)].map((_, i) => (
-                              <option key={i + 1} value={i + 1}>
-                                {i + 1} Guest{i + 1 > 1 ? "s" : ""}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className={styles.formGroup}>
-                          <label className={styles.label}>Occasion</label>
-                          <select
-                            className={styles.select}
-                            value={reservationData.occasion}
-                            onChange={(e) =>
-                              setReservationData({
-                                ...reservationData,
-                                occasion: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Select Occasion</option>
-                            {occasions.map((occasion) => (
-                              <option key={occasion} value={occasion}>
-                                {occasion}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              ))}
             </div>
           )}
         </div>
 
-        <div className={styles.checkoutSection}>
-          <div className={styles.card}>
-            <h3 className={styles.cardTitle}>
-              <CreditCard />
-              Order Summary
-            </h3>
+        {/* Delivery & Checkout */}
+        <div>
+          {cartItems.length > 0 && (
+            <>
+              <div className={styles.card}>
+                <h3 className={styles.title}>
+                  <Truck size={20} />
+                  Delivery
+                </h3>
+                <div className={styles.options}>
+                  {[
+                    {
+                      type: "delivery",
+                      icon: Truck,
+                      label: "Delivery",
+                      desc: "30-45m • $3.99",
+                    },
+                    {
+                      type: "pickup",
+                      icon: Store,
+                      label: "Pickup",
+                      desc: "15-25m • Free",
+                    },
+                    {
+                      type: "dine-in",
+                      icon: Users,
+                      label: "Dine In",
+                      desc: "Reserve • Free",
+                    },
+                  ].map(({ type, icon: Icon, label, desc }) => (
+                    <div
+                      key={type}
+                      className={`${styles.option} ${
+                        deliveryOption === type ? styles.active : ""
+                      }`}
+                      onClick={() => setDeliveryOption(type)}
+                    >
+                      <Icon size={20} />
+                      <div>
+                        <h4>{label}</h4>
+                        <p>{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-            {cartItems.length === 0 ? (
-              <div className={styles.emptyCheckout}>
-                <ShoppingCart size={48} />
-                <h3>Your cart is empty</h3>
-                <p>Add items to see your order summary</p>
-              </div>
-            ) : (
-              <>
-                <div className={styles.summary}>
-                  <div className={styles.summaryRow}>
-                    <span className={styles.summaryLabel}>
-                      Subtotal ({getCartItemsCount()} items)
-                    </span>
-                    <span className={styles.summaryValue}>
-                      ${subtotal.toFixed(2)}
-                    </span>
+                {deliveryOption === "dine-in" && (
+                  <div className={styles.reservation}>
+                    <div className={styles.restaurants}>
+                      {restaurants.map((r) => (
+                        <div
+                          key={r.id}
+                          className={`${styles.restaurant} ${
+                            selectedRestaurant?.id === r.id ? styles.active : ""
+                          }`}
+                          onClick={() => setSelectedRestaurant(r)}
+                        >
+                          <img src={r.image} alt={r.name} />
+                          <div>
+                            <h5>{r.name}</h5>
+                            <p>{r.cuisine}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedRestaurant && (
+                      <div className={styles.form}>
+                        <input
+                          type="date"
+                          value={reservationData.date}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) =>
+                            setReservationData({
+                              ...reservationData,
+                              date: e.target.value,
+                            })
+                          }
+                        />
+                        <select
+                          value={reservationData.time}
+                          onChange={(e) =>
+                            setReservationData({
+                              ...reservationData,
+                              time: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Time</option>
+                          {timeSlots.map((t) => (
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={reservationData.guests}
+                          onChange={(e) =>
+                            setReservationData({
+                              ...reservationData,
+                              guests: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Guests</option>
+                          {[...Array(8)].map((_, i) => (
+                            <option key={i + 1} value={i + 1}>
+                              {i + 1}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                   </div>
+                )}
+              </div>
 
-                  {deliveryOption === "delivery" && (
-                    <div className={styles.summaryRow}>
-                      <span className={styles.summaryLabel}>Delivery Fee</span>
-                      <span className={styles.summaryValue}>
-                        ${deliveryFee.toFixed(2)}
-                      </span>
+              <div className={styles.card}>
+                <h3 className={styles.title}>
+                  <CreditCard size={20} />
+                  Summary
+                </h3>
+
+                <div className={styles.summary}>
+                  <div className={styles.row}>
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  {deliveryFee > 0 && (
+                    <div className={styles.row}>
+                      <span>Delivery</span>
+                      <span>${deliveryFee.toFixed(2)}</span>
                     </div>
                   )}
-
-                  <div className={styles.summaryRow}>
-                    <span className={styles.summaryLabel}>Tax (8%)</span>
-                    <span className={styles.summaryValue}>
-                      ${tax.toFixed(2)}
-                    </span>
+                  <div className={styles.row}>
+                    <span>Tax</span>
+                    <span>${tax.toFixed(2)}</span>
                   </div>
-
                   {discount > 0 && (
-                    <div className={styles.summaryRow}>
-                      <span className={styles.discountLabel}>
-                        Discount ({appliedPromo})
-                        <button
-                          onClick={clearPromo}
-                          className={styles.promoRemove}
-                          title="Remove promo code"
-                        >
-                          ×
-                        </button>
-                      </span>
-                      <span className={styles.discountValue}>
+                    <div className={styles.row}>
+                      <span>Discount ({appliedPromo})</span>
+                      <span className={styles.discount}>
                         -${discount.toFixed(2)}
                       </span>
                     </div>
                   )}
-
-                  <div className={styles.totalRow}>
-                    <span className={styles.totalLabel}>Total</span>
-                    <span className={styles.totalValue}>
-                      ${total.toFixed(2)}
-                    </span>
+                  <div className={styles.total}>
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
                   </div>
                 </div>
 
                 {!appliedPromo && (
-                  <div className={styles.promoSection}>
-                    <div className={styles.promoInput}>
-                      <input
-                        type="text"
-                        placeholder="Enter promo code"
-                        className={styles.input}
-                        value={promoCode}
-                        onChange={(e) =>
-                          setPromoCode(e.target.value.toUpperCase())
-                        }
-                      />
-                      <button
-                        className={styles.promoButton}
-                        onClick={applyPromoCode}
-                        disabled={!promoCode.trim()}
-                      >
-                        Apply
-                      </button>
-                    </div>
-                    <div className={styles.summaryValue}>
-                      Try: SAVE10, FIRST15, WELCOME20, STUDENT5
-                    </div>
+                  <div className={styles.promo}>
+                    <input
+                      type="text"
+                      placeholder="Promo code"
+                      value={promoCode}
+                      onChange={(e) =>
+                        setPromoCode(e.target.value.toUpperCase())
+                      }
+                    />
+                    <button
+                      onClick={applyPromoCode}
+                      disabled={!promoCode.trim()}
+                    >
+                      Apply
+                    </button>
                   </div>
                 )}
 
-                <div className={styles.paymentSection}>
-                  <h4 className={styles.summaryValue}>Payment Method</h4>
-                  <div className={styles.paymentMethods}>
+                <div className={styles.payment}>
+                  <h4>Payment</h4>
+                  <div className={styles.methods}>
                     <div
-                      className={`${styles.paymentMethod} ${
-                        paymentMethod === "card"
-                          ? styles.paymentActive
-                          : styles.paymentInactive
+                      className={`${styles.method} ${
+                        paymentMethod === "card" ? styles.active : ""
                       }`}
                       onClick={() => setPaymentMethod("card")}
                     >
-                      <CreditCard size={20} />
-                      <span className={styles.paymentMethodText}>Card</span>
+                      <CreditCard size={18} />
+                      <span>Card</span>
                     </div>
                     <div
-                      className={`${styles.paymentMethod} ${
-                        paymentMethod === "cash"
-                          ? styles.paymentActive
-                          : styles.paymentInactive
+                      className={`${styles.method} ${
+                        paymentMethod === "cash" ? styles.active : ""
                       }`}
                       onClick={() => setPaymentMethod("cash")}
                     >
-                      <Gift size={20} />
-                      <span className={styles.paymentMethodText}>Cash</span>
+                      <Gift size={18} />
+                      <span>Cash</span>
                     </div>
                   </div>
+
+                  {paymentMethod === "card" && (
+                    <div className={styles.cardForm}>
+                      {savedCard && (
+                        <div className={styles.savedCard}>
+                          <div>
+                            <p>💳 •••• {savedCard.lastFour}</p>
+                            <span>{savedCard.cardName}</span>
+                          </div>
+                          <div className={styles.savedActions}>
+                            <button onClick={useSavedCard}>Use</button>
+                            <button
+                              onClick={removeSavedCard}
+                              className={styles.removeCard}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <input
+                        type="text"
+                        placeholder="Card Number"
+                        value={cardDetails.cardNumber}
+                        onChange={handleCardNumberChange}
+                        maxLength="19"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Cardholder Name"
+                        value={cardDetails.cardName}
+                        onChange={(e) =>
+                          setCardDetails({
+                            ...cardDetails,
+                            cardName: e.target.value,
+                          })
+                        }
+                      />
+                      <div className={styles.cardRow}>
+                        <input
+                          type="text"
+                          placeholder="MM/YY"
+                          value={cardDetails.expiryDate}
+                          onChange={handleExpiryChange}
+                          maxLength="5"
+                        />
+                        <input
+                          type="text"
+                          placeholder="CVV"
+                          value={cardDetails.cvv}
+                          onChange={handleCvvChange}
+                          maxLength="4"
+                        />
+                      </div>
+                      {!savedCard &&
+                        cardDetails.cardNumber &&
+                        cardDetails.cardName && (
+                          <button
+                            className={styles.saveCard}
+                            onClick={saveCardDetails}
+                          >
+                            Save Card
+                          </button>
+                        )}
+                    </div>
+                  )}
                 </div>
 
-                <button
-                  className={styles.checkoutButton}
-                  onClick={handleCheckout}
-                  disabled={cartItems.length === 0}
-                >
+                <button className={styles.checkout} onClick={handleCheckout}>
                   Place Order • ${total.toFixed(2)}
                 </button>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

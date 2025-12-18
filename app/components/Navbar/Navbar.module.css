@@ -1,4 +1,4 @@
-/* Navbar.module.css */
+/* Navbar.module.css - Mobile Fixed */
 
 .navbar {
   position: fixed;
@@ -22,6 +22,7 @@
   position: relative;
 }
 
+/* Logo */
 .navbarLogo {
   display: flex;
   align-items: center;
@@ -31,7 +32,6 @@
   color: #fff;
   text-decoration: none;
   transition: transform 0.3s ease;
-  z-index: 1001;
 }
 
 .navbarLogo:hover {
@@ -53,19 +53,29 @@
   }
 }
 
-/* Mobile Menu Toggle */
+/* Logo Text - Show full on desktop, short on mobile */
+.logoTextFull {
+  display: inline;
+}
+
+.logoTextShort {
+  display: none;
+}
+
+/* Mobile Menu Toggle - LEFT SIDE */
 .mobileMenuToggle {
   display: none;
   flex-direction: column;
   justify-content: space-between;
-  width: 30px;
-  height: 24px;
+  width: 28px;
+  height: 22px;
   background: transparent;
   border: none;
   cursor: pointer;
   z-index: 1002;
   padding: 0;
   position: relative;
+  order: -1; /* Place on left side */
 }
 
 .mobileMenuToggle span {
@@ -79,7 +89,7 @@
 }
 
 .mobileMenuToggle.active span:nth-child(1) {
-  transform: rotate(45deg) translate(8px, 8px);
+  transform: rotate(45deg) translate(7px, 7px);
 }
 
 .mobileMenuToggle.active span:nth-child(2) {
@@ -88,7 +98,7 @@
 }
 
 .mobileMenuToggle.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(8px, -8px);
+  transform: rotate(-45deg) translate(7px, -7px);
 }
 
 /* Navigation Menu */
@@ -135,33 +145,6 @@
 
 .navbarLink:hover::before {
   width: 80%;
-}
-
-/* Mobile Menu Close Button */
-.mobileMenuClose {
-  display: none;
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1.5rem;
-  line-height: 1;
-  z-index: 1002;
-}
-
-.mobileMenuClose:hover {
-  background: rgba(255, 107, 53, 0.2);
-  border-color: #ff6b35;
-  transform: rotate(90deg);
 }
 
 /* Actions Container */
@@ -582,7 +565,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -600,17 +583,27 @@
     max-width: 100%;
   }
 
+  /* Show mobile toggle on left */
   .mobileMenuToggle {
     display: flex;
-    order: 2;
   }
 
+  /* Center logo on mobile */
   .navbarLogo {
-    order: 1;
+    position: absolute;
+    /* left: 50%; */
+    left: 21%;
+    /* transform: translateX(-50%); */
+    transform: translateX(-21%);
   }
 
-  .navbarActions {
-    order: 3;
+  /* Show short logo text on mobile */
+  .logoTextFull {
+    display: none;
+  }
+
+  .logoTextShort {
+    display: inline;
   }
 
   .navbarMenu {
@@ -645,21 +638,7 @@
   }
 
   .mobileMenuOverlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .mobileMenuOverlay.active {
     display: block;
-    opacity: 1;
   }
 }
 
@@ -729,12 +708,14 @@
   .navbarMenu {
     width: 240px;
   }
-}
 
-/* Tablet view - show text on buttons for wider screens */
-@media (min-width: 640px) and (max-width: 968px) {
-  .buttonText {
-    display: block;
+  .searchToggle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .logoTextShort {
+    font-size: 0.95rem;
   }
 }
 
@@ -750,5 +731,13 @@
 
   .mobileMenuOverlay {
     display: none !important;
+  }
+
+  .logoTextFull {
+    display: inline;
+  }
+
+  .logoTextShort {
+    display: none;
   }
 }
